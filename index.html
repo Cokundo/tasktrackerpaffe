@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>育てるパフェ｜7項目 成長グラフ</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍨</text></svg>">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-icon">🍨</span>
+      <div>
+        <h1>育てるパフェ</h1>
+        <p class="tagline">筋トレ・VBA・簿記・マナー・英語・脱毛・家事 ─ 7つの成長が、一つのパフェになる</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="hstat"><span class="hstat-num" id="totalLevel">0</span><span class="hstat-label">総レベル</span></div>
+      <div class="hstat"><span class="hstat-num" id="streakNum">0</span><span class="hstat-label">連続日数</span></div>
+      <div class="hstat"><span class="hstat-num" id="harmonyNum">0</span><span class="hstat-label">調和度</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ============ パフェ ============ -->
+  <section class="card parfait-card">
+    <h2 class="card-title">あなたのパフェ</h2>
+    <div class="parfait-stage">
+      <canvas id="parfaitCanvas"></canvas>
+    </div>
+    <p class="parfait-name" id="parfaitName">まだ名もなきパフェ</p>
+    <p class="parfait-sub" id="parfaitSub">今日の達成をチェックすると、ここに姿が現れます。</p>
+    <ul class="parts-list" id="partsList"></ul>
+    <div class="row-btns">
+      <button class="btn ghost" id="saveImgBtn">画像として保存</button>
+    </div>
+  </section>
+
+  <!-- ============ 今日のチェック ============ -->
+  <section class="card today-card">
+    <div class="card-head">
+      <h2 class="card-title">今日の達成</h2>
+      <span class="date-badge" id="todayLabel"></span>
+    </div>
+    <p class="hint">やった項目をタップ。1項目 +<span id="baseXpLabel">10</span> XP、連続日数でボーナス。</p>
+    <ul class="check-list" id="checkList"></ul>
+
+    <div class="gain-box">
+      <span>今日の獲得</span>
+      <strong id="todayGain">0 XP</strong>
+      <span class="bonus" id="bonusLabel"></span>
+    </div>
+
+    <label class="note-label" for="noteInput">今日のひとこと</label>
+    <input id="noteInput" class="note-input" type="text" maxlength="60" placeholder="例：スクワット30回・仕訳5問">
+  </section>
+
+  <!-- ============ 成長グラフ ============ -->
+  <section class="card graph-card">
+    <h2 class="card-title">成長グラフ</h2>
+    <div class="radar-stage">
+      <canvas id="radarCanvas"></canvas>
+    </div>
+    <p class="hint center">外側ほどレベルが高い（最大 Lv.20）</p>
+  </section>
+
+  <!-- ============ ステータス ============ -->
+  <section class="card status-card">
+    <h2 class="card-title">ステータスと特徴</h2>
+    <div class="status-grid" id="statusGrid"></div>
+  </section>
+
+  <!-- ============ 記録 ============ -->
+  <section class="card history-card">
+    <div class="card-head">
+      <h2 class="card-title">この30日の記録</h2>
+      <span class="legend"><i class="lg lg0"></i><i class="lg lg1"></i><i class="lg lg2"></i><i class="lg lg3"></i><i class="lg lg4"></i> 少 → 多</span>
+    </div>
+    <div class="heatmap" id="heatmap"></div>
+    <div class="mini-stats" id="miniStats"></div>
+    <div class="row-btns">
+      <button class="btn ghost" id="exportBtn">データ書き出し</button>
+      <button class="btn ghost" id="importBtn">読み込み</button>
+      <button class="btn danger" id="resetBtn">全消去</button>
+      <input type="file" id="importFile" accept="application/json" hidden>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/radar.js"></script>
+<script src="js/parfait.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
