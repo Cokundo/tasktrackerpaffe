@@ -18,6 +18,7 @@ const Parfait = {
   ctx: null,
   levels: {},
   shown: {},
+  milestones: {},
   t: 0,
   running: false,
 
@@ -59,6 +60,10 @@ const Parfait = {
 
   setLevels(levels) {
     STATS.forEach(s => (this.levels[s.key] = levels[s.key] || 0));
+  },
+
+  setMilestones(ms) {
+    this.milestones = ms || {};
   },
 
   lv(key) {
@@ -136,6 +141,9 @@ const Parfait = {
     ctx.clip();
     drawTop();
     ctx.restore();
+
+    // --- スペシャル実績のどデカトッピング ---
+    this.drawSpecials(peakY);
 
     this.drawSparkles(peakY, manner, house, hair);
 
@@ -632,6 +640,370 @@ const Parfait = {
       ctx.arc(x, y, 0.9 + (i % 2) * 0.5, 0, Math.PI * 2);
       ctx.fill();
     }
+  },
+
+  /* ---------- スペシャル実績のどデカトッピング ---------- */
+
+  /**
+   * 4つの大勝負（VBAベーシック／簿記3級／TOEIC更新／Unity1画面）は、
+   * 日々の積み上げとは別格の大きさでパフェに載る。
+   */
+  drawSpecials(peakY) {
+    const ms = this.milestones;
+    if (!ms || Object.keys(ms).length === 0) return;
+
+    // クリームの頂点に載せる。高く育ちすぎても画面から出ないよう抑える
+    const aY = Math.max(84, Math.min(peakY, 168));
+
+    if (ms.boki3) this.drawBookCake(242, Math.min(aY + 152, 278), 0.26);
+    if (ms.toeic) this.drawGlobeMacaron(108, aY + 40, 33, ms.toeic);
+    if (ms.vba_basic) this.drawGearCookie(236, aY + 36, 38);
+    if (ms.unity) this.drawChocoMintIce(172, aY + 16, 35);
+  },
+
+  /** VBAベーシック：ゆっくり回る巨大な歯車クッキー */
+  drawGearCookie(cx, cy, R) {
+    const ctx = this.ctx;
+    const teeth = 9;
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // 影
+    ctx.beginPath();
+    ctx.ellipse(2, R * 0.9, R * 0.8, R * 0.22, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(160,120,90,0.25)';
+    ctx.fill();
+
+    ctx.rotate(this.t * 0.22);
+
+    ctx.beginPath();
+    for (let i = 0; i < teeth * 2; i++) {
+      const a = (Math.PI * i) / teeth;
+      const r = i % 2 ? R * 0.74 : R;
+      const x = Math.cos(a) * r, y = Math.sin(a) * r;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    const g = ctx.createLinearGradient(-R, -R, R, R);
+    g.addColorStop(0, '#e0b071');
+    g.addColorStop(0.45, '#c98f4e');
+    g.addColorStop(1, '#a56c31');
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(110,70,26,0.8)';
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+
+    // 中心の穴
+    ctx.beginPath();
+    ctx.arc(0, 0, R * 0.26, 0, Math.PI * 2);
+    ctx.fillStyle = '#8a5a25';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,236,200,0.55)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // ロジックの目（格子）
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0, 0, R * 0.68, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.strokeStyle = 'rgba(110,70,26,0.35)';
+    ctx.lineWidth = 1;
+    for (let i = -3; i <= 3; i++) {
+      const p = (i * R) / 4;
+      ctx.beginPath(); ctx.moveTo(p, -R); ctx.lineTo(p, R); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-R, p); ctx.lineTo(R, p); ctx.stroke();
+    }
+    ctx.restore();
+
+    // 金の縁取り（合格の証）
+    ctx.beginPath();
+    ctx.arc(0, 0, R * 0.86, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(226,190,90,0.9)';
+    ctx.lineWidth = 2.2;
+    ctx.stroke();
+
+    ctx.restore();
+  },
+
+  /** 簿記3級：グラスに立てかけた特大の帳簿ブックケーキ */
+  drawBookCake(cx, cy, rot) {
+    const ctx = this.ctx;
+    const w = 84, h = 58;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rot || 0);
+
+    // 影
+    ctx.beginPath();
+    ctx.ellipse(4, h / 2 + 6, w * 0.45, 7, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(150,110,80,0.25)';
+    ctx.fill();
+
+    // ページ（白いスポンジ）
+    const round = (x, y, ww, hh, r) => {
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, y, ww, hh, r);
+      else ctx.rect(x, y, ww, hh);
+    };
+    round(-w / 2 + 5, -h / 2 + 4, w - 6, h - 6, 4);
+    ctx.fillStyle = '#fdf6e6';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(160,130,90,0.5)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // ページの線＝帳簿の罫線
+    ctx.strokeStyle = 'rgba(150,120,80,0.4)';
+    for (let i = 1; i < 7; i++) {
+      const y = -h / 2 + 4 + ((h - 6) * i) / 7;
+      ctx.beginPath();
+      ctx.moveTo(-w / 2 + 8, y);
+      ctx.lineTo(w / 2 - 4, y);
+      ctx.stroke();
+    }
+
+    // 表紙
+    round(-w / 2, -h / 2, w - 10, h, 5);
+    const g = ctx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
+    g.addColorStop(0, '#8c5a26');
+    g.addColorStop(0.5, '#b07d3a');
+    g.addColorStop(1, '#7a4a1e');
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(70,42,14,0.8)';
+    ctx.stroke();
+
+    // 背表紙
+    round(-w / 2, -h / 2, 11, h, 5);
+    ctx.fillStyle = 'rgba(60,36,12,0.55)';
+    ctx.fill();
+
+    // 金の枠と題字
+    round(-w / 2 + 17, -h / 2 + 8, w - 36, h - 16, 3);
+    ctx.strokeStyle = 'rgba(230,196,120,0.95)';
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+
+    ctx.fillStyle = '#f1dda2';
+    ctx.font = 'bold 19px "Hiragino Sans", "Yu Gothic", serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('簿', -w / 2 + (w - 10) / 2 + 3, 1);
+
+    // しおり
+    ctx.beginPath();
+    ctx.moveTo(w / 2 - 22, h / 2 - 2);
+    ctx.lineTo(w / 2 - 12, h / 2 - 2);
+    ctx.lineTo(w / 2 - 12, h / 2 + 16);
+    ctx.lineTo(w / 2 - 17, h / 2 + 10);
+    ctx.lineTo(w / 2 - 22, h / 2 + 16);
+    ctx.closePath();
+    ctx.fillStyle = '#d1452f';
+    ctx.fill();
+
+    ctx.restore();
+  },
+
+  /** TOEIC：地球儀マカロン。更新するほど星が増える */
+  drawGlobeMacaron(cx, cy, R, rec) {
+    const ctx = this.ctx;
+    const count = Math.max(1, (rec && rec.count) || 1);
+    const score = rec && rec.score;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // 影
+    ctx.beginPath();
+    ctx.ellipse(0, R + 6, R * 0.8, R * 0.2, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(150,120,100,0.25)';
+    ctx.fill();
+
+    // 球体（マカロンの殻）
+    const g = ctx.createRadialGradient(-R * 0.35, -R * 0.4, R * 0.2, 0, 0, R);
+    g.addColorStop(0, '#8fc0f5');
+    g.addColorStop(0.6, '#3d6fd1');
+    g.addColorStop(1, '#26478f');
+    ctx.beginPath();
+    ctx.arc(0, 0, R, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+
+    // 大陸
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0, 0, R, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.fillStyle = '#5fb36a';
+    const lands = [
+      [-0.35, -0.30, 0.34, 0.22, 0.3],
+      [0.28, -0.10, 0.30, 0.30, -0.4],
+      [-0.10, 0.42, 0.30, 0.20, 0.1],
+      [0.42, 0.40, 0.20, 0.14, 0.5]
+    ];
+    lands.forEach(([x, y, rw, rh, rot]) => {
+      ctx.beginPath();
+      ctx.ellipse(x * R, y * R, rw * R, rh * R, rot, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // マカロンの中身（クリームの帯）
+    ctx.fillStyle = 'rgba(255,247,232,0.95)';
+    ctx.fillRect(-R, -R * 0.16, R * 2, R * 0.32);
+    ctx.strokeStyle = 'rgba(200,170,130,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-R, -R * 0.16); ctx.lineTo(R, -R * 0.16);
+    ctx.moveTo(-R, R * 0.16); ctx.lineTo(R, R * 0.16);
+    ctx.stroke();
+
+    // 経線
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    for (let i = 1; i <= 2; i++) {
+      ctx.beginPath();
+      ctx.ellipse(0, 0, R * (i / 3), R, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // つや
+    ctx.beginPath();
+    ctx.ellipse(-R * 0.34, -R * 0.42, R * 0.26, R * 0.16, -0.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.fill();
+
+    // 金のリング（地球儀の枠）
+    ctx.beginPath();
+    ctx.ellipse(0, 0, R * 1.12, R * 0.42, -0.5, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(226,190,90,0.95)';
+    ctx.lineWidth = 2.4;
+    ctx.stroke();
+
+    // 更新回数ぶんの星
+    const stars = Math.min(8, count);
+    for (let i = 0; i < stars; i++) {
+      const a = -Math.PI / 2 + (Math.PI * 2 * i) / Math.max(4, stars) + this.t * 0.15;
+      this.star(Math.cos(a) * (R + 15), Math.sin(a) * (R + 15), 5.5, '#f5c542');
+    }
+
+    // スコアの帯
+    if (score) {
+      const label = `TOEIC ${score}`;
+      ctx.font = 'bold 11px "Hiragino Sans", "Yu Gothic", sans-serif';
+      const w = ctx.measureText(label).width + 14;
+      const y = R + 14;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(-w / 2, y, w, 17, 8);
+      else ctx.rect(-w / 2, y, w, 17);
+      ctx.fillStyle = '#26478f';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(226,190,90,0.9)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, 0, y + 9);
+    }
+
+    ctx.restore();
+  },
+
+  /** Unity1画面完成：ダブルスクープのチョコミントアイス */
+  drawChocoMintIce(cx, baseY, R) {
+    const ctx = this.ctx;
+
+    // 下段・上段
+    this.mintScoop(cx, baseY - R * 0.72, R, 0);
+    this.mintScoop(cx - 4, baseY - R * 1.78, R * 0.72, 3);
+
+    // てっぺんのドット星（1画面完成のしるし）
+    this.star(cx - 4, baseY - R * 2.55, 7, '#ffe9a8');
+
+    // ミントの葉
+    ctx.save();
+    ctx.translate(cx + R * 0.62, baseY - R * 2.05);
+    ctx.rotate(0.5);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 11, 5.5, 0, 0, Math.PI * 2);
+    const g = ctx.createLinearGradient(-11, 0, 11, 0);
+    g.addColorStop(0, '#2f7a44');
+    g.addColorStop(1, '#68c47a');
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.restore();
+  },
+
+  /** チョコミントのひとすくい */
+  mintScoop(x, y, r, seed) {
+    const ctx = this.ctx;
+    const lobes = 11;
+
+    ctx.beginPath();
+    for (let i = 0; i <= 64; i++) {
+      const a = (Math.PI * 2 * i) / 64;
+      const wob = 1 + Math.sin(a * lobes + seed) * 0.055;
+      const px = x + Math.cos(a) * r * wob;
+      const py = y + Math.sin(a) * r * wob * 0.94;
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.2, x, y, r);
+    g.addColorStop(0, '#dffaef');
+    g.addColorStop(0.55, '#9ce3c8');
+    g.addColorStop(1, '#5fbfa2');
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(70,150,125,0.5)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // チョコチップ
+    for (let i = 0; i < 9; i++) {
+      const a = (i * 2.399 + seed) % (Math.PI * 2);
+      const d = r * (0.22 + ((i * 7) % 5) * 0.13);
+      const px = x + Math.cos(a) * d;
+      const py = y + Math.sin(a) * d * 0.9;
+      const s = r * (0.10 + (i % 3) * 0.028);
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(a);
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(-s, -s * 0.7, s * 2, s * 1.4, s * 0.5);
+      else ctx.rect(-s, -s * 0.7, s * 2, s * 1.4);
+      ctx.fillStyle = '#3b2a1e';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // つや
+    ctx.beginPath();
+    ctx.ellipse(x - r * 0.36, y - r * 0.44, r * 0.26, r * 0.14, -0.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.fill();
+  },
+
+  /** 小さな星 */
+  star(x, y, r, color) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + (Math.PI * i) / 5;
+      const rr = i % 2 ? r * 0.45 : r;
+      const px = Math.cos(a) * rr, py = Math.sin(a) * rr;
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.restore();
   },
 
   /** きらめき（マナー・家事・脱毛が高いほど輝く） */

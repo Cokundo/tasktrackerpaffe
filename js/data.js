@@ -100,6 +100,59 @@ const STATS = [
   }
 ];
 
+/**
+ * スペシャル実績。達成すると、パフェに「どデカトッピング」が載る。
+ * 日々のチェックとは別枠の、一度きり（TOEICは何度でも）の大勝負。
+ * stat/xp … 達成時にその項目へまとめて加算されるボーナスXP
+ */
+const MILESTONES = [
+  {
+    key: 'vba_basic',
+    name: 'VBAベーシック取得',
+    detail: 'VBAエキスパート ベーシック合格',
+    topping: '巨大ロジック歯車クッキー',
+    note: 'ゆっくり回る金の歯車がパフェに刺さる',
+    stat: 'vba',
+    xp: 200,
+    color: '#3f8f6b',
+    emoji: '⚙️'
+  },
+  {
+    key: 'boki3',
+    name: '簿記3級取得',
+    detail: '日商簿記3級 合格',
+    topping: '特大 帳簿ブックケーキ',
+    note: '金箔押しの帳簿がグラスに立てかけられる',
+    stat: 'bookkeeping',
+    xp: 200,
+    color: '#b07d3a',
+    emoji: '📒'
+  },
+  {
+    key: 'toeic',
+    name: 'TOEIC点数更新',
+    detail: 'ベストスコア更新（何度でも）',
+    topping: '地球儀マカロン',
+    note: '更新するたび、まわりの星が増える',
+    stat: 'english',
+    xp: 150,
+    color: '#3d6fd1',
+    emoji: '🌏',
+    repeatable: true
+  },
+  {
+    key: 'unity',
+    name: 'Unityゲーム 1画面完成',
+    detail: 'チョコミントアイスクリーム',
+    topping: 'ダブルスクープのチョコミントアイス',
+    note: 'パフェのてっぺんに丸ごと載る',
+    stat: 'vba',
+    xp: 200,
+    color: '#4aa3a3',
+    emoji: '🍦'
+  }
+];
+
 const MAX_LEVEL = 20;
 const BASE_XP = 10;      // 1日達成あたりの基礎XP
 const STREAK_BONUS_CAP = 10; // 連続日数ボーナスの上限XP
@@ -158,14 +211,18 @@ const SUFFIX = {
 
 /**
  * 上位2ステータスから固有のパフェ名を作る。
+ * スペシャル実績があれば「◯冠」が付く。
  * 何も育っていないときは「まだ名もなきパフェ」。
  */
-function parfaitName(levels) {
+function parfaitName(levels, milestones) {
+  const crowns = milestones ? Object.keys(milestones).length : 0;
+  const suffix = crowns > 0 ? `〈${crowns}冠〉` : '';
+
   const ranked = STATS
     .map(s => ({ key: s.key, lv: levels[s.key] || 0 }))
     .sort((a, b) => b.lv - a.lv);
 
-  if (ranked[0].lv === 0) return 'まだ名もなきパフェ';
+  if (ranked[0].lv === 0) return (crowns ? suffix + ' ' : '') + 'まだ名もなきパフェ';
 
   const first = CROWN[ranked[0].key];
   const second = ranked[1].lv > 0 ? SUFFIX[ranked[1].key] : null;
@@ -177,7 +234,7 @@ function parfaitName(levels) {
   else if (total >= 45) grade = '特製';
   else if (total >= 20) grade = '育ちゆく';
 
-  const head = `${grade}${first}パフェ`;
+  const head = `${suffix}${grade}${first}パフェ`;
   return second ? `${head} 〜${second}〜` : head;
 }
 

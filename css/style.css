@@ -123,12 +123,13 @@ body {
 .parfait-card { grid-column: span 4; }
 .today-card   { grid-column: span 4; }
 .graph-card   { grid-column: span 4; }
+.special-card { grid-column: span 12; }
 .status-card  { grid-column: span 7; }
 .history-card { grid-column: span 5; }
 
 @media (max-width: 980px) {
   .parfait-card, .today-card, .graph-card { grid-column: span 6; }
-  .status-card, .history-card { grid-column: span 12; }
+  .special-card, .status-card, .history-card { grid-column: span 12; }
 }
 
 @media (max-width: 640px) {
@@ -394,6 +395,90 @@ body {
 }
 
 .xp-text { font-size: 10px; color: var(--ink-soft); margin-top: 4px; text-align: right; }
+
+/* ---------- スペシャル実績 ---------- */
+
+.special-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
+  gap: 12px;
+}
+
+.sp-tile {
+  position: relative;
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 13px 14px;
+  border-radius: 15px;
+  border: 2px dashed var(--line);
+  background: #fff;
+  transition: transform .14s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.sp-tile:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(150,110,90,0.14); }
+
+.sp-tile .sp-emoji {
+  font-size: 27px;
+  line-height: 1;
+  filter: grayscale(1);
+  opacity: .45;
+  transition: filter .3s ease, opacity .3s ease, transform .3s ease;
+}
+
+.sp-tile .sp-body { flex: 1; min-width: 0; padding-right: 16px; }
+.sp-tile .sp-name { display: block; font-size: 13.5px; font-weight: 700; }
+.sp-tile .sp-detail { display: block; font-size: 10.5px; color: var(--ink-soft); margin-top: 2px; }
+
+.sp-tile .sp-topping {
+  display: block;
+  font-size: 11px;
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  opacity: .85;
+}
+
+.sp-tile .sp-state {
+  display: inline-block;
+  margin-top: 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: var(--bg2);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+
+.sp-tile.on {
+  border-style: solid;
+  border-color: var(--tone);
+  background: linear-gradient(140deg, #fff, var(--tint));
+  box-shadow: 0 6px 18px rgba(150,110,90,0.16);
+}
+
+.sp-tile.on .sp-emoji { filter: none; opacity: 1; transform: scale(1.12); }
+.sp-tile.on .sp-state { color: #fff; background: var(--tone); }
+
+.sp-tile .sp-clear {
+  position: absolute;
+  top: 6px; right: 8px;
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 3px 5px;
+  border-radius: 7px;
+}
+
+.sp-tile .sp-clear:hover { background: var(--bg2); color: var(--ink); }
 
 /* ---------- 履歴 ---------- */
 

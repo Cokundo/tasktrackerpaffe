@@ -33,7 +33,7 @@ function todayKey() {
 /* ---------- 状態 ---------- */
 
 const Store = {
-  state: { version: 1, log: {}, notes: {} },
+  state: { version: 1, log: {}, notes: {}, milestones: {} },
 
   load() {
     try {
@@ -43,12 +43,13 @@ const Store = {
         this.state = {
           version: 1,
           log: parsed.log && typeof parsed.log === 'object' ? parsed.log : {},
-          notes: parsed.notes && typeof parsed.notes === 'object' ? parsed.notes : {}
+          notes: parsed.notes && typeof parsed.notes === 'object' ? parsed.notes : {},
+          milestones: parsed.milestones && typeof parsed.milestones === 'object' ? parsed.milestones : {}
         };
       }
     } catch (e) {
       console.warn('保存データを読めませんでした。新規に開始します。', e);
-      this.state = { version: 1, log: {}, notes: {} };
+      this.state = { version: 1, log: {}, notes: {}, milestones: {} };
     }
     return this.state;
   },
@@ -94,8 +95,30 @@ const Store = {
     return this.state.notes[key] || '';
   },
 
+  /* --- スペシャル実績 --- */
+
+  getMilestone(key) {
+    return this.state.milestones[key] || null;
+  },
+
+  /** 達成を記録。TOEICなど繰り返し可のものは回数を積む */
+  achieve(key, extra) {
+    const prev = this.state.milestones[key];
+    const rec = Object.assign({ date: todayKey(), count: 0 }, prev, extra || {});
+    rec.count = (prev ? prev.count || 1 : 0) + 1;
+    rec.date = todayKey();
+    this.state.milestones[key] = rec;
+    this.save();
+    return rec;
+  },
+
+  clearMilestone(key) {
+    delete this.state.milestones[key];
+    this.save();
+  },
+
   clearAll() {
-    this.state = { version: 1, log: {}, notes: {} };
+    this.state = { version: 1, log: {}, notes: {}, milestones: {} };
     this.save();
   },
 
@@ -107,7 +130,8 @@ const Store = {
     this.state = {
       version: 1,
       log: parsed.log || {},
-      notes: parsed.notes || {}
+      notes: parsed.notes || {},
+      milestones: parsed.milestones || {}
     };
     this.save();
   },
@@ -163,8 +187,9 @@ function bestStreak(log) {
 /**
  * logから各ステータスの累計XPを再計算する。
  * その日の連続日数に応じたボーナスが、その日達成した各項目に加算される。
+ * スペシャル実績のボーナスXPもここで足し込む。
  */
-function computeXp(log) {
+function computeXp(log, milestones) {
   const xp = {};
   STATS.forEach(s => (xp[s.key] = 0));
 
@@ -182,6 +207,15 @@ function computeXp(log) {
       if (xp[statKey] !== undefined) xp[statKey] += gain;
     });
   });
+
+  if (milestones) {
+    MILESTONES.forEach(m => {
+      const rec = milestones[m.key];
+      if (rec && xp[m.stat] !== undefined) {
+        xp[m.stat] += m.xp * (m.repeatable ? Math.max(1, rec.count || 1) : 1);
+      }
+    });
+  }
 
   return xp;
 }

@@ -15,6 +15,7 @@ const App = {
     document.getElementById('baseXpLabel').textContent = BASE_XP;
 
     this.buildCheckList();
+    this.buildSpecialGrid();
     this.buildStatusGrid();
     this.bindEvents();
     this.render(true);
@@ -59,6 +60,63 @@ const App = {
       li.appendChild(btn);
       ul.appendChild(li);
     });
+  },
+
+  buildSpecialGrid() {
+    const grid = document.getElementById('specialGrid');
+    grid.innerHTML = '';
+    MILESTONES.forEach(m => {
+      const tile = document.createElement('button');
+      tile.className = 'sp-tile';
+      tile.dataset.key = m.key;
+      tile.style.setProperty('--tone', m.color);
+      tile.style.setProperty('--tint', m.color + '1f');
+      tile.innerHTML = `
+        <span class="sp-emoji">${m.emoji}</span>
+        <span class="sp-body">
+          <span class="sp-name">${m.name}</span>
+          <span class="sp-detail">${m.detail}</span>
+          <span class="sp-topping">🍨 ${m.topping}<br><span style="opacity:.7">${m.note}／${STATS.find(s => s.key === m.stat).name}に +${m.xp} XP</span></span>
+          <span class="sp-state" data-state="${m.key}">未達成</span>
+        </span>
+        <button class="sp-clear" data-clear="${m.key}" title="記録を取り消す" hidden>×</button>`;
+      tile.addEventListener('click', e => {
+        if (e.target.dataset.clear) return;
+        this.onSpecial(m);
+      });
+      tile.querySelector('.sp-clear').addEventListener('click', e => {
+        e.stopPropagation();
+        if (!confirm(`「${m.name}」の記録を取り消しますか？`)) return;
+        Store.clearMilestone(m.key);
+        this.render();
+        this.toast(`${m.name} の記録を取り消しました`);
+      });
+      grid.appendChild(tile);
+    });
+  },
+
+  /** スペシャル実績の達成／更新 */
+  onSpecial(m) {
+    const prev = Store.getMilestone(m.key);
+
+    if (m.repeatable) {
+      const input = prompt(
+        prev ? `新しいスコアは？（現在のベスト ${prev.score || '—'}）` : '達成したスコアを入力（例：730）',
+        prev && prev.score ? String(prev.score) : ''
+      );
+      if (input === null) return;
+      const score = parseInt(input, 10);
+      if (isNaN(score) || score < 0) { this.toast('数字で入力してください'); return; }
+      const rec = Store.achieve(m.key, { score: Math.max(score, prev ? prev.score || 0 : 0) });
+      this.render();
+      this.toast(`🌏 ${m.name}！ ${rec.score}点・${rec.count}回目 — 地球儀マカロンに星が増えた`);
+      return;
+    }
+
+    if (prev) { this.toast(`${m.name} は達成済み（${prev.date}）`); return; }
+    Store.achieve(m.key);
+    this.render();
+    this.toast(`🏆 ${m.name} 達成！ ${m.topping}がパフェに載った`);
   },
 
   buildStatusGrid() {
@@ -199,12 +257,14 @@ const App = {
 
   render() {
     const log = Store.state.log;
-    const xp = computeXp(log);
+    const milestones = Store.state.milestones;
+    const xp = computeXp(log, milestones);
     const levels = computeLevels(xp);
     this.levels = levels;
 
     Radar.setLevels(levels);
     Parfait.setLevels(levels);
+    Parfait.setMilestones(milestones);
 
     const total = STATS.reduce((a, s) => a + levels[s.key], 0);
     const streak = currentStreak(log);
@@ -213,12 +273,27 @@ const App = {
     document.getElementById('harmonyNum').textContent = harmonyOf(levels);
 
     // パフェ名と構成
-    document.getElementById('parfaitName').textContent = parfaitName(levels);
+    document.getElementById('parfaitName').textContent = parfaitName(levels, milestones);
     const done = Store.dayList(this.today);
+    const crowns = Object.keys(milestones).length;
     document.getElementById('parfaitSub').textContent =
-      total === 0
+      total === 0 && crowns === 0
         ? '今日の達成をチェックすると、ここに姿が現れます。'
-        : `${STATS.filter(s => levels[s.key] > 0).length}種のパーツで構成／今日は ${done.length}/7 項目`;
+        : `${STATS.filter(s => levels[s.key] > 0).length}種のパーツで構成／今日は ${done.length}/7 項目`
+          + (crowns ? `／スペシャル ${crowns}種` : '');
+
+    // スペシャル実績
+    document.getElementById('specialCount').textContent = `${crowns} / ${MILESTONES.length}`;
+    MILESTONES.forEach(m => {
+      const rec = milestones[m.key];
+      const tile = document.querySelector(`.sp-tile[data-key="${m.key}"]`);
+      tile.classList.toggle('on', !!rec);
+      tile.querySelector('.sp-clear').hidden = !rec;
+      const state = tile.querySelector(`[data-state="${m.key}"]`);
+      if (!rec) state.textContent = '未達成';
+      else if (m.repeatable) state.textContent = `ベスト ${rec.score || '—'}点・${rec.count}回更新（${rec.date}）`;
+      else state.textContent = `達成 ${rec.date}`;
+    });
 
     const parts = document.getElementById('partsList');
     parts.innerHTML = '';
@@ -229,6 +304,15 @@ const App = {
       li.style.borderColor = s.color;
       li.style.color = s.color;
       li.textContent = `${s.kanji} ${s.parfait}`;
+      parts.appendChild(li);
+    });
+    MILESTONES.forEach(m => {
+      if (!milestones[m.key]) return;
+      const li = document.createElement('li');
+      li.style.borderColor = m.color;
+      li.style.color = '#fff';
+      li.style.background = m.color;
+      li.textContent = `${m.emoji} ${m.topping}`;
       parts.appendChild(li);
     });
 
