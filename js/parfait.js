@@ -497,22 +497,29 @@ const Parfait = {
     const kinds = Math.min(5, 1 + Math.floor(lv / 4));
     const count = Math.min(9, 1 + Math.floor(lv / 2));
     const spots = [
-      [170, peakY + 4], [149, peakY + 24], [192, peakY + 22],
-      [134, peakY + 46], [206, peakY + 44], [163, peakY + 40],
-      [181, peakY + 56], [145, peakY + 68], [197, peakY + 70]
+      [170, peakY + 2], [140, peakY + 30], [200, peakY + 28],
+      [163, peakY + 56], [190, peakY + 72], [130, peakY + 66],
+      [210, peakY + 98], [146, peakY + 96], [176, peakY + 110]
     ];
 
     for (let i = 0; i < count; i++) {
       const [x, y0] = spots[i];
       const y = y0 + Math.sin(this.t * 1.2 + i) * 0.6;
       const kind = i % kinds;
-      const r = i === 0 ? 13 : 9;
+      const r = i === 0 ? 21 : 15;
+
+      // クリームに載っている影
+      ctx.beginPath();
+      ctx.ellipse(x, y + r * 0.62, r * 0.78, r * 0.26, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(184,142,106,0.28)';
+      ctx.fill();
+
       switch (kind) {
         case 0: this.fruitStrawberry(x, y, r); break;
-        case 1: this.fruitBerry(x, y, r * 0.75, '#4a63c8', '#8fa3ee'); break;
+        case 1: this.fruitBerry(x, y, r * 0.8, '#4a63c8', '#8fa3ee'); break;
         case 2: this.fruitKiwi(x, y, r * 0.95); break;
-        case 3: this.fruitBerry(x, y, r * 0.8, '#e88a2a', '#ffc47a'); break;
-        default: this.fruitBerry(x, y, r * 0.8, '#7a3fa0', '#c396e0'); break;
+        case 3: this.fruitBerry(x, y, r * 0.85, '#e88a2a', '#ffc47a'); break;
+        default: this.fruitBerry(x, y, r * 0.85, '#7a3fa0', '#c396e0'); break;
       }
     }
   },
