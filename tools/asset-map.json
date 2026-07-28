@@ -1,0 +1,132 @@
+[
+  {
+    "file": "file_000000000a408211a77ac699f82df544.png",
+    "name": "pineapple_chunks"
+  },
+  {
+    "file": "file_000000000b0082119e4ef63a93e9b71a.png",
+    "name": "lemon_star"
+  },
+  {
+    "file": "file_0000000012b8820bad4435eb32f09892.png",
+    "name": "icing_cookies"
+  },
+  {
+    "file": "file_000000003560820b89af701594602683.png",
+    "name": "flower_jelly",
+    "near": 22,
+    "far": 50,
+    "erode": 2
+  },
+  {
+    "file": "file_000000005774820b97613791b0c70b40.png",
+    "name": "brownie",
+    "near": 18,
+    "far": 38,
+    "erode": 1
+  },
+  {
+    "file": "file_00000000643c81f8a985bb09ef0f1744.png",
+    "name": "choco_twist",
+    "erode": 3
+  },
+  {
+    "file": "file_000000006f84820bba96a17da90348e6.png",
+    "name": "shaved_ice",
+    "erode": 2
+  },
+  {
+    "file": "file_0000000075c88209919eb7fe43bacae8.png",
+    "name": "choco_flakes",
+    "near": 26,
+    "far": 58
+  },
+  {
+    "file": "file_000000007c4481f88e3e83c288211a7d.png",
+    "name": "purple_crystal",
+    "near": 20,
+    "far": 44,
+    "erode": 2
+  },
+  {
+    "file": "file_000000007d148211a29d37311569f364.png",
+    "name": "chocomint_scoops",
+    "erode": 1
+  },
+  {
+    "file": "file_000000007edc820b907cb9028b6f512e.png",
+    "name": "whip_small"
+  },
+  {
+    "file": "file_0000000086a4820bb6fb967e7259ac31.png",
+    "name": "glass",
+    "maxSide": 640,
+    "colorkey": [
+      255,
+      255,
+      255
+    ],
+    "near": 26,
+    "far": 64
+  },
+  {
+    "file": "file_000000008da881f880478df71eeeaba4.png",
+    "name": "pineapple_slice"
+  },
+  {
+    "file": "file_0000000096f0820b82b90acf0ef4e76d.png",
+    "name": "melon_pistachio",
+    "erode": 2
+  },
+  {
+    "file": "file_000000009a44820b8dedee09ac78bff8.png",
+    "name": "wafer_stick",
+    "erode": 2
+  },
+  {
+    "file": "file_000000009f208211a9465e78ce17f835.png",
+    "name": "table_doily",
+    "keepBg": true,
+    "maxSide": 1024
+  },
+  {
+    "file": "file_000000009f5081f8b520cf4054cc30f3.png",
+    "name": "blueberry",
+    "near": 18,
+    "far": 42,
+    "erode": 6
+  },
+  {
+    "file": "file_00000000a448820bb35395f0d7270a6e.png",
+    "name": "pretzel_sticks",
+    "near": 30,
+    "far": 82,
+    "erode": 2
+  },
+  {
+    "file": "file_00000000a4ac820b9d8704999d1ecc99.png",
+    "name": "strawberry_half"
+  },
+  {
+    "file": "file_00000000c3348209a5b562f6be8a6349.png",
+    "name": "dango",
+    "erode": 3
+  },
+  {
+    "file": "file_00000000c4b4820b9ab17c1a64265425.png",
+    "name": "strawberry"
+  },
+  {
+    "file": "file_00000000d294821187e28e991ec1d428.png",
+    "name": "whip_cherry"
+  },
+  {
+    "file": "file_00000000decc8211ae0f7586508284e1.png",
+    "name": "orange_segment"
+  },
+  {
+    "file": "file_00000000ec90820bb4b116972e2cd094.png",
+    "name": "wafer_board",
+    "erode": 2
+  }
+]

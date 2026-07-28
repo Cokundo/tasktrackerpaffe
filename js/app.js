@@ -8,6 +8,7 @@ const App = {
 
   init() {
     Store.load();
+    Assets.load();
     Parfait.init(document.getElementById('parfaitCanvas'));
     Radar.init(document.getElementById('radarCanvas'));
 
@@ -246,8 +247,16 @@ const App = {
       W / 2, H - 22
     );
 
+    let url;
+    try {
+      url = out.toDataURL('image/png');
+    } catch (e) {
+      // file:// で開くと素材画像のせいで書き出しが止められる
+      this.toast('画像保存はローカルサーバー経由でお使いください（python3 -m http.server）');
+      return;
+    }
     const a = document.createElement('a');
-    a.href = out.toDataURL('image/png');
+    a.href = url;
     a.download = `parfait-${this.today}.png`;
     a.click();
     this.toast('画像を保存しました');

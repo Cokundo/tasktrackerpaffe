@@ -1,17 +1,28 @@
 /* =========================================================
    parfait.js — ステータスに応じて姿を変える固有のパフェ
-   すべてCanvasで手描き。各ステータスが担当パーツを持つ。
+   ドット絵素材（assets/parts/）を積み上げて組み立てる。
 
-     筋トレ   → クリームの高さ・渦
-     VBA      → 格子ウエハーの本数
-     簿記     → グラノーラ地層の厚みと縞
-     マナー   → 器（脚・金縁・ドイリー）
-     英語     → 果実の種類と数
-     脱毛     → ジュレの透明感と気泡
-     家事     → ホワイトソース・粉雪・ミント
+     筋トレ   → てっぺんの生クリーム（レベルで大きさ・さくらんぼ付きに）
+     VBA      → ウエハース／ロールクッキー／プレッツェル（本数が増える）
+     簿記     → チョコフレークの地層＋ブラウニー（厚みが増す）
+     マナー   → 器とレースの席（きれいに整い、金縁が付く）
+     英語     → 世界のフルーツ（種類が増える）
+     脱毛     → クリスタル・花ゼリー・かき氷（澄んでいく）
+     家事     → アイシングクッキー・団子・チョコツイスト（仕上げ）
+
+   スペシャル実績のどデカトッピングは別枠（歯車・帳簿・地球儀・チョコミント）。
    ========================================================= */
 
-const VW = 340, VH = 520; // 仮想座標系
+const VW = 340, VH = 520;                 // 仮想座標系
+
+/* グラスの配置と、中身を入れられる内側の範囲 */
+const GLASS = { cx: 170, w: 200, bottom: 430 };
+const GLASS_H = GLASS.w * 640 / 354;      // 素材の縦横比
+const GLASS_TOP = GLASS.bottom - GLASS_H;
+const INNER_TOP = GLASS_TOP + GLASS_H * 0.062;
+const INNER_BOT = GLASS_TOP + GLASS_H * 0.800;
+const INNER_HW_TOP = GLASS.w * 0.400;     // 口の内側の半幅
+const INNER_HW_BOT = GLASS.w * 0.125;     // 底の内側の半幅
 
 const Parfait = {
   canvas: null,
@@ -70,576 +81,229 @@ const Parfait = {
     return this.shown[key] || 0;
   },
 
-  /* ------------------------------------------------------ */
+  /* ---------- 描画の下ごしらえ ---------- */
+
+  /** 高さ y における器の内側の半幅 */
+  halfWAt(y) {
+    const t = Math.max(0, Math.min(1, (y - INNER_TOP) / (INNER_BOT - INNER_TOP)));
+    return INNER_HW_TOP + (INNER_HW_BOT - INNER_HW_TOP) * t;
+  },
+
+  /** 器の内側（中身を描ける範囲） */
+  innerPath(ctx) {
+    ctx.beginPath();
+    ctx.moveTo(GLASS.cx - INNER_HW_TOP, INNER_TOP);
+    ctx.lineTo(GLASS.cx + INNER_HW_TOP, INNER_TOP);
+    ctx.lineTo(GLASS.cx + INNER_HW_BOT, INNER_BOT);
+    ctx.quadraticCurveTo(GLASS.cx, INNER_BOT + 10, GLASS.cx - INNER_HW_BOT, INNER_BOT);
+    ctx.closePath();
+  },
+
+  /**
+   * 素材を1枚描く。cx を中心に、bottomY を下端として幅 w で配置する。
+   * 戻り値は描いた高さ（積み上げに使う）。
+   */
+  put(name, cx, bottomY, w, opt) {
+    const im = Assets.get(name);
+    if (!im) return 0;
+    const o = opt || {};
+    const h = (w * im.naturalHeight) / im.naturalWidth;
+    const ctx = this.ctx;
+    ctx.save();
+    if (o.alpha !== undefined) ctx.globalAlpha = o.alpha;
+    if (o.rot) {
+      ctx.translate(cx, bottomY - h / 2);
+      ctx.rotate(o.rot);
+      ctx.drawImage(im, -w / 2, -h / 2, w, h);
+    } else {
+      ctx.drawImage(im, cx - w / 2, bottomY - h, w, h);
+    }
+    ctx.restore();
+    return h;
+  },
+
+  /* ---------- 本体 ---------- */
 
   draw() {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, VW, VH);
 
-    const muscle = this.lv('muscle');
-    const vba = this.lv('vba');
-    const book = this.lv('bookkeeping');
     const manner = this.lv('manner');
-    const eng = this.lv('english');
+
+    this.drawTable(manner);
+
+    if (!Assets.ready) {
+      ctx.fillStyle = 'rgba(140,115,100,0.7)';
+      ctx.font = '13px "Hiragino Sans", "Yu Gothic", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('素材を読み込み中…', VW / 2, VH / 2);
+      return;
+    }
+
+    // 中身（器の内側だけに描く）
+    ctx.save();
+    this.innerPath(ctx);
+    ctx.clip();
+    const contentTop = this.drawContents();
+    const peakInside = this.drawTop(contentTop);
+    ctx.restore();
+
+    // 器（線と艶が中身の上に重なり、ガラス越しに見える）
+    this.put('glass', GLASS.cx, GLASS.bottom, GLASS.w);
+    if (manner >= 8) this.drawGoldRim(manner);
+
+    // 器の口より上（あふれた部分は器の手前に）
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, VW, INNER_TOP + 2);
+    ctx.clip();
+    this.drawTop(contentTop);
+    ctx.restore();
+
+    this.drawSpecials(peakInside);
+    this.drawSparkles(peakInside, manner, this.lv('housework'), this.lv('hairremoval'));
+
+    const total = STATS.reduce((a, s) => a + this.lv(s.key), 0);
+    if (total < 0.2 && Object.keys(this.milestones).length === 0) {
+      ctx.fillStyle = 'rgba(120,95,80,0.85)';
+      ctx.font = 'bold 14px "Hiragino Sans", "Yu Gothic", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('からっぽのグラス', VW / 2, 52);
+      ctx.font = '12px "Hiragino Sans", "Yu Gothic", sans-serif';
+      ctx.fillText('今日の達成をチェックしよう', VW / 2, 72);
+    }
+  },
+
+  /** マナー：席（テーブルとレース）。磨くほど場が整う */
+  drawTable(manner) {
+    const im = Assets.get('table_doily');
+    const ctx = this.ctx;
+    if (!im) return;
+    const scale = Math.max(VW / im.naturalWidth, VH / im.naturalHeight);
+    const w = im.naturalWidth * scale, h = im.naturalHeight * scale;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, 0.45 + manner * 0.028);
+    ctx.drawImage(im, (VW - w) / 2, VH - h + 40, w, h);
+    ctx.restore();
+  },
+
+  /**
+   * 器の中身を下から積む。
+   * 簿記・脱毛・家事の合計が上がるほど器が満ちていき、
+   * レベルの解禁に応じて層の種類が増える。戻り値は中身の上端y。
+   */
+  drawContents() {
+    const book = this.lv('bookkeeping');
     const hair = this.lv('hairremoval');
     const house = this.lv('housework');
 
-    this.drawDoily(manner, house);
-    this.drawGlassBack(manner);
+    const layers = [];
+    if (book > 0) layers.push({ name: 'choco_flakes', weight: 1 + book * 0.05 });
+    if (book >= 10) layers.push({ name: 'brownie', weight: 0.8 });
+    if (hair > 0) layers.push({ name: 'purple_crystal', weight: 1 + hair * 0.04 });
+    if (hair >= 7) layers.push({ name: 'flower_jelly', weight: 1.1 });
+    if (hair >= 14) layers.push({ name: 'shaved_ice', weight: 1.0 });
+    if (house >= 2) layers.push({ name: 'icing_cookies', weight: 0.7 + house * 0.02 });
+    if (!layers.length) return INNER_BOT;
 
-    // --- 中身（グラスの内側にクリップ） ---
-    ctx.save();
-    this.bowlPath(ctx);
-    ctx.clip();
+    // 満ち具合（0.1 〜 1.0）
+    const fill = Math.min(0.95, 0.10 + ((book + hair + house) / (3 * MAX_LEVEL)) * 1.0);
+    const total = (INNER_BOT - INNER_TOP) * fill;
+    const sum = layers.reduce((a, l) => a + l.weight, 0);
 
-    const bottomY = 400;
-    const rimY = 170;
-    const inner = bottomY - rimY;
+    let y = INNER_BOT + 6;
+    layers.forEach(l => {
+      const im = Assets.get(l.name);
+      if (!im) return;
+      const slot = (total * l.weight) / sum;
+      const h = slot * 1.75;                       // 層どうしが重なって見えるよう大きめに
+      const w = (h * im.naturalWidth) / im.naturalHeight;
+      this.put(l.name, GLASS.cx, y, w);            // 器からはみ出た分はクリップされる
+      y -= slot;
+    });
 
-    let hGranola = book > 0 ? 16 + 4.0 * book : 0;
-    let hJelly = hair > 0 ? 14 + 3.6 * hair : 0;
-    let hSauce = house > 0 ? 5 + 1.3 * house : 0;
-    let hCream = muscle > 0 ? 22 + 6.0 * muscle : 0;
-
-    // 器からあふれない範囲に収める
-    const sum = hGranola + hJelly + hSauce + hCream;
-    if (sum > inner) {
-      const k = inner / sum;
-      hGranola *= k; hJelly *= k; hSauce *= k; hCream *= k;
-    }
-
-    let y = bottomY;
-    if (hGranola > 0) { this.drawGranola(y - hGranola, hGranola, book); y -= hGranola; }
-    if (hJelly > 0) { this.drawJelly(y - hJelly, hJelly, hair); y -= hJelly; }
-    if (hSauce > 0) { this.drawSauce(y - hSauce, hSauce); y -= hSauce; }
-    if (hCream > 0) { this.drawCreamInCup(y - hCream, hCream); y -= hCream; }
-
-    ctx.restore();
-
-    // --- 盛り付け（クリームの山・ウエハー・果実・仕上げ） ---
-    // 器に沈む部分はガラスの内側に、せり出す部分はガラスの外側に描く。
-    const topY = Math.max(rimY - 4, y);
-    const peakY = muscle > 0 ? this.creamGeom(topY, muscle).peak : topY;
-    const drawTop = () => {
-      if (vba > 0) this.drawWafers(peakY, vba);      // ウエハーはクリームの後ろに立てる
-      if (muscle > 0) this.drawCreamMound(topY, muscle);
-      if (eng > 0) this.drawFruits(peakY, eng);
-      if (house > 0) this.drawFinish(peakY, house);
-    };
-
-    ctx.save();
-    this.bowlPath(ctx);
-    ctx.clip();
-    drawTop();
-    ctx.restore();
-
-    this.drawGlassFront(manner);
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, 0, VW, rimY + 1);
-    ctx.clip();
-    drawTop();
-    ctx.restore();
-
-    // --- スペシャル実績のどデカトッピング ---
-    this.drawSpecials(peakY);
-
-    this.drawSparkles(peakY, manner, house, hair);
-
-    // --- 何も育っていないとき ---
-    const total = STATS.reduce((a, s) => a + this.lv(s.key), 0);
-    if (total < 0.2) {
-      ctx.fillStyle = 'rgba(140,115,100,0.6)';
-      ctx.font = '14px "Hiragino Sans", "Yu Gothic", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('からっぽのグラス', VW / 2, 120);
-      ctx.font = '12px "Hiragino Sans", "Yu Gothic", sans-serif';
-      ctx.fillText('今日の達成をチェックしよう', VW / 2, 142);
-    }
+    return Math.max(y, INNER_TOP - 2);
   },
 
-  /* ---------- 器 ---------- */
+  /**
+   * 器の上の盛り付け。器の内側と外側で2回呼ばれるので、
+   * 時間以外の乱れを持たない（同じ絵が2回描かれる）。
+   * 戻り値はてっぺんのy。
+   */
+  drawTop(contentTop) {
+    const muscle = this.lv('muscle');
+    const vba = this.lv('vba');
+    const eng = this.lv('english');
+    const house = this.lv('housework');
 
-  bowlPath(ctx) {
-    ctx.beginPath();
-    ctx.moveTo(95, 170);
-    ctx.bezierCurveTo(103, 300, 120, 360, 137, 385);
-    ctx.quadraticCurveTo(170, 406, 203, 385);
-    ctx.bezierCurveTo(220, 360, 237, 300, 245, 170);
-    ctx.closePath();
-  },
+    // 中身の上に載る。中身が少なければ器の中に沈み、満ちていれば口からあふれる
+    const base = Math.max(contentTop + 14, INNER_TOP + 60);
 
-  drawDoily(manner, house) {
-    if (manner < 3) return;
-    const ctx = this.ctx;
-    const cx = 170, cy = 486;
-    const r = 62 + manner * 1.6;
-    const petals = 16;
-
-    ctx.save();
-    ctx.globalAlpha = Math.min(1, manner / 8);
-    ctx.beginPath();
-    for (let i = 0; i <= petals; i++) {
-      const a = (Math.PI * 2 * i) / petals;
-      const rr = r + Math.cos(a * petals) * 0;
-      const x = cx + Math.cos(a) * rr;
-      const y = cy + Math.sin(a) * rr * 0.24;
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(201,162,39,0.5)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // レース模様
-    for (let i = 0; i < petals; i++) {
-      const a = (Math.PI * 2 * i) / petals;
-      const x = cx + Math.cos(a) * (r - 7);
-      const yy = cy + Math.sin(a) * (r - 7) * 0.24;
-      ctx.beginPath();
-      ctx.arc(x, yy, 2.4, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(201,162,39,0.35)';
-      ctx.fill();
-    }
-    if (house > 6) {
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, r - 14, (r - 14) * 0.24, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(201,162,39,0.3)';
-      ctx.stroke();
-    }
-    ctx.restore();
-  },
-
-  drawGlassBack(manner) {
-    const ctx = this.ctx;
-    const stemH = 34 + manner * 2.2;   // マナーが高いほど脚が伸びて格が上がる
-    const baseR = 40 + manner * 1.5;
-    const baseY = 478;
-    const stemTop = 400;
-    const stemBottom = baseY - 6;
-
-    // 台座
-    ctx.beginPath();
-    ctx.ellipse(170, baseY, baseR, baseR * 0.22, 0, 0, Math.PI * 2);
-    const g = ctx.createLinearGradient(170 - baseR, 0, 170 + baseR, 0);
-    g.addColorStop(0, 'rgba(215,232,238,0.9)');
-    g.addColorStop(0.45, 'rgba(250,255,255,0.95)');
-    g.addColorStop(1, 'rgba(205,222,230,0.9)');
-    ctx.fillStyle = g;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(160,185,195,0.8)';
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
-
-    // 脚
-    const sw = 7;
-    ctx.beginPath();
-    ctx.moveTo(170 - sw, stemTop);
-    ctx.bezierCurveTo(170 - sw + 1, stemTop + stemH * 0.5, 170 - sw - 3, stemBottom - 8, 170 - sw - 6, stemBottom);
-    ctx.lineTo(170 + sw + 6, stemBottom);
-    ctx.bezierCurveTo(170 + sw + 3, stemBottom - 8, 170 + sw - 1, stemTop + stemH * 0.5, 170 + sw, stemTop);
-    ctx.closePath();
-    const gs = ctx.createLinearGradient(160, 0, 182, 0);
-    gs.addColorStop(0, 'rgba(200,222,232,0.95)');
-    gs.addColorStop(0.4, 'rgba(255,255,255,0.98)');
-    gs.addColorStop(1, 'rgba(198,218,228,0.95)');
-    ctx.fillStyle = gs;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(160,185,195,0.75)';
-    ctx.stroke();
-
-    // 節（マナーが育つと現れる装飾）
-    if (manner >= 6) {
-      ctx.beginPath();
-      ctx.ellipse(170, stemTop + 26, 12, 8, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(245,252,255,0.95)';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(160,185,195,0.8)';
-      ctx.stroke();
-    }
-    if (manner >= 12) {
-      ctx.beginPath();
-      ctx.ellipse(170, baseY, baseR - 9, (baseR - 9) * 0.22, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(201,162,39,0.75)';
-      ctx.lineWidth = 1.6;
-      ctx.stroke();
-    }
-
-    // グラスの内側の陰
-    ctx.save();
-    this.bowlPath(ctx);
-    ctx.fillStyle = 'rgba(236,246,250,0.75)';
-    ctx.fill();
-    ctx.restore();
-  },
-
-  drawGlassFront(manner) {
-    const ctx = this.ctx;
-    ctx.save();
-    this.bowlPath(ctx);
-
-    // ガラスのつや
-    const g = ctx.createLinearGradient(95, 0, 245, 0);
-    g.addColorStop(0, 'rgba(255,255,255,0.42)');
-    g.addColorStop(0.16, 'rgba(255,255,255,0.10)');
-    g.addColorStop(0.7, 'rgba(255,255,255,0.05)');
-    g.addColorStop(0.93, 'rgba(255,255,255,0.34)');
-    ctx.fillStyle = g;
-    ctx.fill();
-
-    ctx.strokeStyle = 'rgba(150,180,192,0.85)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.restore();
-
-    // 縦のハイライト
-    ctx.beginPath();
-    ctx.moveTo(110, 190);
-    ctx.bezierCurveTo(114, 270, 124, 330, 136, 366);
-    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
-    ctx.lineWidth = 4;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-
-    // 口縁（マナーで金縁になる）
-    ctx.beginPath();
-    ctx.ellipse(170, 170, 75, 13, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = manner >= 4 ? 'rgba(201,162,39,0.95)' : 'rgba(150,180,192,0.9)';
-    ctx.lineWidth = manner >= 10 ? 3 : 2;
-    ctx.stroke();
-    if (manner >= 16) {
-      ctx.beginPath();
-      ctx.ellipse(170, 176, 71, 11, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(230,205,120,0.8)';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-    }
-  },
-
-  /* ---------- 中身の層 ---------- */
-
-  drawGranola(y, h, lv) {
-    const ctx = this.ctx;
-    ctx.fillStyle = '#b07d3a';
-    ctx.fillRect(80, y, 180, h + 10);
-
-    // 簿記＝正確さ。レベルが上がるほど縞がきっちり等間隔に整う
-    const rows = Math.max(2, Math.round(2 + lv / 2));
-    const gap = h / rows;
-    const jitter = Math.max(0, 6 - lv * 0.35);
-    for (let i = 0; i < rows; i++) {
-      const yy = y + gap * i + (i % 2 ? jitter * 0.4 : 0);
-      ctx.fillStyle = i % 2 ? 'rgba(230,196,143,0.75)' : 'rgba(140,96,42,0.55)';
-      ctx.fillRect(80, yy, 180, gap * 0.42);
-    }
-    // 粒
-    for (let i = 0; i < 26; i++) {
-      const rx = 88 + ((i * 61) % 164);
-      const ry = y + ((i * 37) % Math.max(1, h));
-      ctx.beginPath();
-      ctx.arc(rx, ry, 1.6 + ((i * 7) % 3) * 0.6, 0, Math.PI * 2);
-      ctx.fillStyle = i % 3 ? 'rgba(255,236,200,0.6)' : 'rgba(90,58,25,0.45)';
-      ctx.fill();
-    }
-  },
-
-  drawJelly(y, h, lv) {
-    const ctx = this.ctx;
-    const clarity = Math.min(1, lv / MAX_LEVEL);          // 脱毛＝透明感
-    const g = ctx.createLinearGradient(0, y, 0, y + h);
-    g.addColorStop(0, `rgba(196,150,224,${0.85 - clarity * 0.35})`);
-    g.addColorStop(1, `rgba(143,97,196,${0.9 - clarity * 0.35})`);
-    ctx.fillStyle = g;
-    ctx.fillRect(80, y, 180, h + 2);
-
-    // 気泡（つるんとするほど増える）
-    const bubbles = Math.round(3 + clarity * 16);
-    for (let i = 0; i < bubbles; i++) {
-      const bx = 92 + ((i * 47) % 156);
-      const drift = Math.sin(this.t * 0.8 + i) * 2;
-      const by = y + 4 + ((i * 29) % Math.max(1, h - 6)) + drift;
-      ctx.beginPath();
-      ctx.arc(bx, by, 1.4 + (i % 3) * 0.8, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,255,255,0.55)';
-      ctx.fill();
-    }
-    // 表面のつや
-    ctx.beginPath();
-    ctx.ellipse(140, y + 5, 26, 4, -0.15, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,255,255,${0.2 + clarity * 0.45})`;
-    ctx.fill();
-  },
-
-  drawSauce(y, h) {
-    const ctx = this.ctx;
-    ctx.fillStyle = 'rgba(255,252,246,0.95)';
-    ctx.fillRect(80, y, 180, h + 2);
-    ctx.beginPath();
-    ctx.ellipse(170, y + 1, 78, 5, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#fffdf8';
-    ctx.fill();
-  },
-
-  drawCreamInCup(y, h) {
-    const ctx = this.ctx;
-    const g = ctx.createLinearGradient(80, 0, 260, 0);
-    g.addColorStop(0, '#f4dfc8');
-    g.addColorStop(0.35, '#fff8ee');
-    g.addColorStop(1, '#eed3b6');
-    ctx.fillStyle = g;
-    ctx.fillRect(80, y, 180, h + 4);
-  },
-
-  /* ---------- せり出す造形 ---------- */
-
-  /** クリームの山の寸法（描く前に頂点を知るため） */
-  creamGeom(topY, lv) {
-    const height = 14 + lv * 5.2;                       // 高さ＝筋トレLv
-    const turns = Math.max(2, Math.round(2 + lv / 3));  // 渦の段数
-    const baseY = topY;                                 // 中身の上に載る
-    const step = height / turns;
-    const rwTop = 72 * (1 - ((turns - 1) / turns) * 0.6);
-    const peak = baseY - step * (turns - 1) - Math.max(6.5, rwTop * 0.36) - 8;
-    return { height, turns, baseY, step, peak };
-  },
-
-  /** 筋トレ：クリームの山 */
-  drawCreamMound(topY, lv) {
-    const ctx = this.ctx;
-    const { turns, baseY, step } = this.creamGeom(topY, lv);
-    let peak = baseY;
-
-    for (let i = 0; i < turns; i++) {
-      const p = i / turns;
-      const cy = baseY - step * i;
-      const rw = 72 * (1 - p * 0.6);
-      const rh = Math.max(6.5, rw * 0.36);
-      const off = Math.sin(i * 1.9) * rw * 0.13;
-
-      // 段の落ち影（渦の重なりを見せる）
-      ctx.beginPath();
-      ctx.ellipse(170 + off, cy + rh * 0.42, rw, rh, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(196,152,112,0.40)';
-      ctx.fill();
-
-      // 本体
-      ctx.beginPath();
-      ctx.ellipse(170 + off, cy, rw, rh, 0, 0, Math.PI * 2);
-      const g = ctx.createLinearGradient(170 + off - rw, cy - rh, 170 + off + rw, cy + rh);
-      g.addColorStop(0, '#e4c39f');
-      g.addColorStop(0.35, '#fffaf2');
-      g.addColorStop(0.72, '#f7e6d2');
-      g.addColorStop(1, '#dcb894');
-      ctx.fillStyle = g;
-      ctx.fill();
-
-      // つや
-      ctx.beginPath();
-      ctx.ellipse(170 + off - rw * 0.28, cy - rh * 0.32, rw * 0.30, rh * 0.30, -0.3, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.fill();
-
-      peak = cy - rh;
-    }
-
-    // てっぺんのとがり
-    ctx.beginPath();
-    ctx.moveTo(163, peak + 9);
-    ctx.quadraticCurveTo(170, peak - 10, 177, peak + 9);
-    ctx.closePath();
-    ctx.fillStyle = '#fffaf2';
-    ctx.fill();
-  },
-
-  /** VBA：格子ウエハー。レベルで本数と格子の密度が増す */
-  drawWafers(peakY, lv) {
-    const ctx = this.ctx;
-    const count = Math.min(5, Math.max(1, Math.round(lv / 4 + 0.6)));
-    const grid = Math.min(6, 2 + Math.round(lv / 4)); // 格子の目の数
-
-    for (let i = 0; i < count; i++) {
-      const dir = i % 2 ? 1 : -1;
-      const idx = Math.floor(i / 2);
-      const x = 170 + dir * (34 + idx * 16);
-      const y = peakY + 42 + idx * 10;
-      const angle = dir * (0.28 + idx * 0.12);
-      const w = 26, h = 74 + lv * 1.2;
-
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(angle);
-
-      ctx.beginPath();
-      ctx.roundRect ? ctx.roundRect(-w / 2, -h / 2, w, h, 3) : ctx.rect(-w / 2, -h / 2, w, h);
-      const g = ctx.createLinearGradient(-w / 2, 0, w / 2, 0);
-      g.addColorStop(0, '#c98f4e');
-      g.addColorStop(0.4, '#e8b978');
-      g.addColorStop(1, '#b87e40');
-      ctx.fillStyle = g;
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(120,78,32,0.7)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      // 格子模様＝ロジックの目
-      ctx.strokeStyle = 'rgba(120,78,32,0.45)';
-      for (let c = 1; c < grid; c++) {
-        const xx = -w / 2 + (w * c) / grid;
-        ctx.beginPath(); ctx.moveTo(xx, -h / 2); ctx.lineTo(xx, h / 2); ctx.stroke();
+    // VBA：ウエハースを後ろに立てる
+    if (vba > 0) {
+      const n = 1 + Math.floor(vba / 8);
+      for (let i = 0; i < n; i++) {
+        const dir = i % 2 ? 1 : -1;
+        const idx = Math.floor(i / 2);
+        this.put('wafer_board', GLASS.cx + dir * (44 + idx * 20), base - 4,
+          26 + vba * 0.5, { rot: dir * (0.2 + idx * 0.12) });
       }
-      const rowsN = Math.round(grid * 2.2);
-      for (let r = 1; r < rowsN; r++) {
-        const yy = -h / 2 + (h * r) / rowsN;
-        ctx.beginPath(); ctx.moveTo(-w / 2, yy); ctx.lineTo(w / 2, yy); ctx.stroke();
-      }
-      ctx.restore();
     }
-  },
+    if (vba >= 7) this.put('wafer_stick', GLASS.cx + 54, base + 10, 54 + vba, { rot: 0.35 });
+    if (vba >= 13) this.put('pretzel_sticks', GLASS.cx - 58, base + 6, 44 + vba * 0.6, { rot: -0.2 });
 
-  /** 英語：世界の果実。レベルで種類と数が増える */
-  drawFruits(peakY, lv) {
-    const ctx = this.ctx;
-    const kinds = Math.min(5, 1 + Math.floor(lv / 4));
-    const count = Math.min(9, 1 + Math.floor(lv / 2));
-    const spots = [
-      [170, peakY + 2], [140, peakY + 30], [200, peakY + 28],
-      [163, peakY + 56], [190, peakY + 72], [130, peakY + 66],
-      [210, peakY + 98], [146, peakY + 96], [176, peakY + 110]
+    // 筋トレ：てっぺんの生クリーム
+    let peak = base;
+    if (muscle > 0) {
+      const name = muscle >= 6 ? 'whip_cherry' : 'whip_small';
+      const im = Assets.get(name);
+      const w = 86 + muscle * 2.8;
+      const h = im ? (w * im.naturalHeight) / im.naturalWidth : 0;
+      const bottom = Math.max(base + 6, 26 + h);   // 高く育っても画面からはみ出さない
+      this.put(name, GLASS.cx, bottom, w);
+      peak = bottom - h;
+    }
+
+    // 英語：世界のフルーツ。レベルが上がるほど種類が増える
+    const fruits = [
+      [1, 'strawberry', 170, 26, 42],
+      [4, 'blueberry', 133, 48, 40],
+      [7, 'pineapple_chunks', 208, 44, 48],
+      [10, 'orange_segment', 137, 84, 46],
+      [13, 'lemon_star', 205, 84, 44],
+      [16, 'melon_pistachio', 170, 108, 48],
+      [19, 'pineapple_slice', 112, 116, 30]
     ];
+    fruits.forEach(([need, name, x, dy, w]) => {
+      if (eng < need) return;
+      const bob = Math.sin(this.t * 1.1 + need) * 1.2;
+      this.put(name, x, peak + dy + bob, w);
+    });
 
-    for (let i = 0; i < count; i++) {
-      const [x, y0] = spots[i];
-      const y = y0 + Math.sin(this.t * 1.2 + i) * 0.6;
-      const kind = i % kinds;
-      const r = i === 0 ? 21 : 15;
+    // 家事：仕上げの添え物
+    if (house >= 8) this.put('dango', GLASS.cx + 66, peak + 150, 22, { rot: 0.28 });
+    if (house >= 14) this.put('choco_twist', GLASS.cx - 62, peak + 128, 62, { rot: -0.18 });
 
-      // クリームに載っている影
-      ctx.beginPath();
-      ctx.ellipse(x, y + r * 0.62, r * 0.78, r * 0.26, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(184,142,106,0.28)';
-      ctx.fill();
-
-      switch (kind) {
-        case 0: this.fruitStrawberry(x, y, r); break;
-        case 1: this.fruitBerry(x, y, r * 0.8, '#4a63c8', '#8fa3ee'); break;
-        case 2: this.fruitKiwi(x, y, r * 0.95); break;
-        case 3: this.fruitBerry(x, y, r * 0.85, '#e88a2a', '#ffc47a'); break;
-        default: this.fruitBerry(x, y, r * 0.85, '#7a3fa0', '#c396e0'); break;
-      }
+    // Unity実績：チョコミントアイスはてっぺんに丸ごと
+    if (this.milestones.unity) {
+      const h = this.put('chocomint_scoops', GLASS.cx + 4, peak + 30, 78);
+      peak = peak + 26 - h;
     }
+
+    return peak;
   },
 
-  fruitStrawberry(x, y, r) {
+  /** マナー：器の口の金縁 */
+  drawGoldRim(manner) {
     const ctx = this.ctx;
+    const y = GLASS_TOP + GLASS_H * 0.036;
     ctx.save();
-    ctx.translate(x, y);
     ctx.beginPath();
-    ctx.moveTo(0, r);
-    ctx.bezierCurveTo(-r, r * 0.4, -r * 0.9, -r * 0.7, 0, -r * 0.8);
-    ctx.bezierCurveTo(r * 0.9, -r * 0.7, r, r * 0.4, 0, r);
-    const g = ctx.createLinearGradient(-r, -r, r, r);
-    g.addColorStop(0, '#f4645c');
-    g.addColorStop(1, '#c62f2c');
-    ctx.fillStyle = g;
-    ctx.fill();
-    // 種
-    ctx.fillStyle = 'rgba(255,235,180,0.9)';
-    for (let i = 0; i < 6; i++) {
-      const a = -1.2 + i * 0.45;
-      ctx.beginPath();
-      ctx.ellipse(Math.cos(a) * r * 0.42, Math.sin(a) * r * 0.35 + 1, 0.9, 1.4, a, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    // ヘタ
-    ctx.fillStyle = '#4b9b52';
-    for (let i = 0; i < 5; i++) {
-      const a = -Math.PI / 2 + (i - 2) * 0.5;
-      ctx.beginPath();
-      ctx.ellipse(Math.cos(a) * r * 0.35, -r * 0.75 + Math.sin(a) * 2, r * 0.34, r * 0.16, a, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    ctx.ellipse(GLASS.cx, y, GLASS.w * 0.478, GLASS.w * 0.055, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(201,162,39,${Math.min(0.95, 0.35 + manner * 0.05)})`;
+    ctx.lineWidth = manner >= 15 ? 3 : 2;
+    ctx.stroke();
     ctx.restore();
-  },
-
-  fruitBerry(x, y, r, c1, c2) {
-    const ctx = this.ctx;
-    const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.2, x, y, r);
-    g.addColorStop(0, c2);
-    g.addColorStop(1, c1);
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = g;
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(x - r * 0.35, y - r * 0.4, r * 0.22, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.fill();
-  },
-
-  fruitKiwi(x, y, r) {
-    const ctx = this.ctx;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = '#8fae3e';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.8, 0, Math.PI * 2);
-    ctx.fillStyle = '#b7d45f';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.28, 0, Math.PI * 2);
-    ctx.fillStyle = '#f4f7e2';
-    ctx.fill();
-    ctx.fillStyle = '#2f3b1a';
-    for (let i = 0; i < 8; i++) {
-      const a = (Math.PI * 2 * i) / 8;
-      ctx.beginPath();
-      ctx.ellipse(x + Math.cos(a) * r * 0.5, y + Math.sin(a) * r * 0.5, 1, 1.6, a, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  },
-
-  /** 家事：仕上げ（ミント・粉雪・皿の艶） */
-  drawFinish(peakY, lv) {
-    const ctx = this.ctx;
-    // ミント
-    if (lv >= 2) {
-      ctx.save();
-      ctx.translate(182, peakY - 2);
-      ctx.rotate(0.3);
-      [[0, 0, 14, 7, -0.5], [6, -6, 12, 6, 0.2]].forEach(([dx, dy, rw, rh, rot]) => {
-        ctx.save();
-        ctx.translate(dx, dy);
-        ctx.rotate(rot);
-        ctx.beginPath();
-        ctx.ellipse(0, 0, rw, rh, 0, 0, Math.PI * 2);
-        const g = ctx.createLinearGradient(-rw, 0, rw, 0);
-        g.addColorStop(0, '#3f7d45');
-        g.addColorStop(1, '#79c274');
-        ctx.fillStyle = g;
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(40,80,40,0.5)';
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.moveTo(-rw, 0); ctx.lineTo(rw, 0);
-        ctx.stroke();
-        ctx.restore();
-      });
-      ctx.restore();
-    }
-    // 粉雪（粉糖）
-    const n = Math.round(lv * 3);
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    for (let i = 0; i < n; i++) {
-      const x = 110 + ((i * 53) % 120);
-      const y = peakY + 10 + ((i * 31) % 110);
-      ctx.beginPath();
-      ctx.arc(x, y, 0.9 + (i % 2) * 0.5, 0, Math.PI * 2);
-      ctx.fill();
-    }
   },
 
   /* ---------- スペシャル実績のどデカトッピング ---------- */
@@ -647,18 +311,17 @@ const Parfait = {
   /**
    * 4つの大勝負（VBAベーシック／簿記3級／TOEIC更新／Unity1画面）は、
    * 日々の積み上げとは別格の大きさでパフェに載る。
+   * ※ Unityのチョコミントアイスは盛り付けの一部として drawTop() で描く。
    */
   drawSpecials(peakY) {
     const ms = this.milestones;
     if (!ms || Object.keys(ms).length === 0) return;
 
-    // クリームの頂点に載せる。高く育ちすぎても画面から出ないよう抑える
-    const aY = Math.max(84, Math.min(peakY, 168));
+    const aY = Math.max(76, Math.min(peakY, 150));
 
-    if (ms.boki3) this.drawBookCake(242, Math.min(aY + 152, 278), 0.26);
-    if (ms.toeic) this.drawGlobeMacaron(108, aY + 40, 33, ms.toeic);
-    if (ms.vba_basic) this.drawGearCookie(236, aY + 36, 38);
-    if (ms.unity) this.drawChocoMintIce(172, aY + 16, 35);
+    if (ms.boki3) this.drawBookCake(246, Math.min(aY + 168, 300), 0.26);
+    if (ms.toeic) this.drawGlobeMacaron(92, aY + 48, 33, ms.toeic);
+    if (ms.vba_basic) this.drawGearCookie(250, aY + 40, 36);
   },
 
   /** VBAベーシック：ゆっくり回る巨大な歯車クッキー */
@@ -668,10 +331,9 @@ const Parfait = {
     ctx.save();
     ctx.translate(cx, cy);
 
-    // 影
     ctx.beginPath();
     ctx.ellipse(2, R * 0.9, R * 0.8, R * 0.22, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(160,120,90,0.25)';
+    ctx.fillStyle = 'rgba(120,90,60,0.22)';
     ctx.fill();
 
     ctx.rotate(this.t * 0.22);
@@ -694,7 +356,6 @@ const Parfait = {
     ctx.lineWidth = 1.6;
     ctx.stroke();
 
-    // 中心の穴
     ctx.beginPath();
     ctx.arc(0, 0, R * 0.26, 0, Math.PI * 2);
     ctx.fillStyle = '#8a5a25';
@@ -703,7 +364,6 @@ const Parfait = {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // ロジックの目（格子）
     ctx.save();
     ctx.beginPath();
     ctx.arc(0, 0, R * 0.68, 0, Math.PI * 2);
@@ -717,7 +377,6 @@ const Parfait = {
     }
     ctx.restore();
 
-    // 金の縁取り（合格の証）
     ctx.beginPath();
     ctx.arc(0, 0, R * 0.86, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(226,190,90,0.9)';
@@ -735,13 +394,11 @@ const Parfait = {
     ctx.translate(cx, cy);
     ctx.rotate(rot || 0);
 
-    // 影
     ctx.beginPath();
     ctx.ellipse(4, h / 2 + 6, w * 0.45, 7, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(150,110,80,0.25)';
+    ctx.fillStyle = 'rgba(120,90,60,0.22)';
     ctx.fill();
 
-    // ページ（白いスポンジ）
     const round = (x, y, ww, hh, r) => {
       ctx.beginPath();
       if (ctx.roundRect) ctx.roundRect(x, y, ww, hh, r);
@@ -754,7 +411,6 @@ const Parfait = {
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // ページの線＝帳簿の罫線
     ctx.strokeStyle = 'rgba(150,120,80,0.4)';
     for (let i = 1; i < 7; i++) {
       const y = -h / 2 + 4 + ((h - 6) * i) / 7;
@@ -764,7 +420,6 @@ const Parfait = {
       ctx.stroke();
     }
 
-    // 表紙
     round(-w / 2, -h / 2, w - 10, h, 5);
     const g = ctx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
     g.addColorStop(0, '#8c5a26');
@@ -775,12 +430,10 @@ const Parfait = {
     ctx.strokeStyle = 'rgba(70,42,14,0.8)';
     ctx.stroke();
 
-    // 背表紙
     round(-w / 2, -h / 2, 11, h, 5);
     ctx.fillStyle = 'rgba(60,36,12,0.55)';
     ctx.fill();
 
-    // 金の枠と題字
     round(-w / 2 + 17, -h / 2 + 8, w - 36, h - 16, 3);
     ctx.strokeStyle = 'rgba(230,196,120,0.95)';
     ctx.lineWidth = 1.6;
@@ -792,7 +445,6 @@ const Parfait = {
     ctx.textBaseline = 'middle';
     ctx.fillText('簿', -w / 2 + (w - 10) / 2 + 3, 1);
 
-    // しおり
     ctx.beginPath();
     ctx.moveTo(w / 2 - 22, h / 2 - 2);
     ctx.lineTo(w / 2 - 12, h / 2 - 2);
@@ -815,13 +467,11 @@ const Parfait = {
     ctx.save();
     ctx.translate(cx, cy);
 
-    // 影
     ctx.beginPath();
     ctx.ellipse(0, R + 6, R * 0.8, R * 0.2, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(150,120,100,0.25)';
+    ctx.fillStyle = 'rgba(120,90,60,0.22)';
     ctx.fill();
 
-    // 球体（マカロンの殻）
     const g = ctx.createRadialGradient(-R * 0.35, -R * 0.4, R * 0.2, 0, 0, R);
     g.addColorStop(0, '#8fc0f5');
     g.addColorStop(0.6, '#3d6fd1');
@@ -831,25 +481,20 @@ const Parfait = {
     ctx.fillStyle = g;
     ctx.fill();
 
-    // 大陸
     ctx.save();
     ctx.beginPath();
     ctx.arc(0, 0, R, 0, Math.PI * 2);
     ctx.clip();
     ctx.fillStyle = '#5fb36a';
-    const lands = [
-      [-0.35, -0.30, 0.34, 0.22, 0.3],
-      [0.28, -0.10, 0.30, 0.30, -0.4],
-      [-0.10, 0.42, 0.30, 0.20, 0.1],
-      [0.42, 0.40, 0.20, 0.14, 0.5]
-    ];
-    lands.forEach(([x, y, rw, rh, rot]) => {
+    [[-0.35, -0.30, 0.34, 0.22, 0.3],
+     [0.28, -0.10, 0.30, 0.30, -0.4],
+     [-0.10, 0.42, 0.30, 0.20, 0.1],
+     [0.42, 0.40, 0.20, 0.14, 0.5]].forEach(([x, y, rw, rh, rot]) => {
       ctx.beginPath();
       ctx.ellipse(x * R, y * R, rw * R, rh * R, rot, 0, Math.PI * 2);
       ctx.fill();
     });
 
-    // マカロンの中身（クリームの帯）
     ctx.fillStyle = 'rgba(255,247,232,0.95)';
     ctx.fillRect(-R, -R * 0.16, R * 2, R * 0.32);
     ctx.strokeStyle = 'rgba(200,170,130,0.5)';
@@ -859,7 +504,6 @@ const Parfait = {
     ctx.moveTo(-R, R * 0.16); ctx.lineTo(R, R * 0.16);
     ctx.stroke();
 
-    // 経線
     ctx.strokeStyle = 'rgba(255,255,255,0.35)';
     for (let i = 1; i <= 2; i++) {
       ctx.beginPath();
@@ -868,27 +512,23 @@ const Parfait = {
     }
     ctx.restore();
 
-    // つや
     ctx.beginPath();
     ctx.ellipse(-R * 0.34, -R * 0.42, R * 0.26, R * 0.16, -0.5, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(255,255,255,0.7)';
     ctx.fill();
 
-    // 金のリング（地球儀の枠）
     ctx.beginPath();
     ctx.ellipse(0, 0, R * 1.12, R * 0.42, -0.5, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(226,190,90,0.95)';
     ctx.lineWidth = 2.4;
     ctx.stroke();
 
-    // 更新回数ぶんの星
     const stars = Math.min(8, count);
     for (let i = 0; i < stars; i++) {
       const a = -Math.PI / 2 + (Math.PI * 2 * i) / Math.max(4, stars) + this.t * 0.15;
       this.star(Math.cos(a) * (R + 15), Math.sin(a) * (R + 15), 5.5, '#f5c542');
     }
 
-    // スコアの帯
     if (score) {
       const label = `TOEIC ${score}`;
       ctx.font = 'bold 11px "Hiragino Sans", "Yu Gothic", sans-serif';
@@ -909,80 +549,6 @@ const Parfait = {
     }
 
     ctx.restore();
-  },
-
-  /** Unity1画面完成：ダブルスクープのチョコミントアイス */
-  drawChocoMintIce(cx, baseY, R) {
-    const ctx = this.ctx;
-
-    // 下段・上段
-    this.mintScoop(cx, baseY - R * 0.72, R, 0);
-    this.mintScoop(cx - 4, baseY - R * 1.78, R * 0.72, 3);
-
-    // てっぺんのドット星（1画面完成のしるし）
-    this.star(cx - 4, baseY - R * 2.55, 7, '#ffe9a8');
-
-    // ミントの葉
-    ctx.save();
-    ctx.translate(cx + R * 0.62, baseY - R * 2.05);
-    ctx.rotate(0.5);
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 11, 5.5, 0, 0, Math.PI * 2);
-    const g = ctx.createLinearGradient(-11, 0, 11, 0);
-    g.addColorStop(0, '#2f7a44');
-    g.addColorStop(1, '#68c47a');
-    ctx.fillStyle = g;
-    ctx.fill();
-    ctx.restore();
-  },
-
-  /** チョコミントのひとすくい */
-  mintScoop(x, y, r, seed) {
-    const ctx = this.ctx;
-    const lobes = 11;
-
-    ctx.beginPath();
-    for (let i = 0; i <= 64; i++) {
-      const a = (Math.PI * 2 * i) / 64;
-      const wob = 1 + Math.sin(a * lobes + seed) * 0.055;
-      const px = x + Math.cos(a) * r * wob;
-      const py = y + Math.sin(a) * r * wob * 0.94;
-      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-    }
-    ctx.closePath();
-    const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.2, x, y, r);
-    g.addColorStop(0, '#dffaef');
-    g.addColorStop(0.55, '#9ce3c8');
-    g.addColorStop(1, '#5fbfa2');
-    ctx.fillStyle = g;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(70,150,125,0.5)';
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
-
-    // チョコチップ
-    for (let i = 0; i < 9; i++) {
-      const a = (i * 2.399 + seed) % (Math.PI * 2);
-      const d = r * (0.22 + ((i * 7) % 5) * 0.13);
-      const px = x + Math.cos(a) * d;
-      const py = y + Math.sin(a) * d * 0.9;
-      const s = r * (0.10 + (i % 3) * 0.028);
-      ctx.save();
-      ctx.translate(px, py);
-      ctx.rotate(a);
-      ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(-s, -s * 0.7, s * 2, s * 1.4, s * 0.5);
-      else ctx.rect(-s, -s * 0.7, s * 2, s * 1.4);
-      ctx.fillStyle = '#3b2a1e';
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // つや
-    ctx.beginPath();
-    ctx.ellipse(x - r * 0.36, y - r * 0.44, r * 0.26, r * 0.14, -0.5, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    ctx.fill();
   },
 
   /** 小さな星 */
@@ -1013,8 +579,8 @@ const Parfait = {
     const ctx = this.ctx;
     const n = Math.round(3 + shine * 12);
     for (let i = 0; i < n; i++) {
-      const seedX = 78 + ((i * 71) % 190);
-      const seedY = peakY - 20 + ((i * 97) % 300);
+      const seedX = 70 + ((i * 71) % 200);
+      const seedY = Math.max(20, peakY - 20) + ((i * 97) % 300);
       const phase = (this.t * 1.4 + i * 0.7) % 3;
       const a = phase < 1 ? phase : phase < 2 ? 2 - phase : 0;
       if (a <= 0) continue;
