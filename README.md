@@ -44,6 +44,8 @@
 - 「皆勤」の判定を変えたいときは `js/data.js` の `PERFECT_NEEDED`（既定 7項目）と
   `PERFECT_FOR_HEAL`（既定 2日）を書き換えてください。
 
+カップの絵は7コマのドット絵（`assets/parts/matcha_0〜6.png`）を残量に応じて差し替えています。
+下のドットが残りメモリ、満タンのときは湯気、今日まだ0項目のときは「次に消えるメモリ」が点滅します。
 ヘッダーにも残りメモリが出て、残りわずか／空のときは色が変わります。
 
 ---
@@ -115,8 +117,9 @@ js/parfait.js      パフェの組み立て（素材の配置＋実績トッピ�
 js/app.js          画面の組み立てとイベント
 assets/raw/        元のドット絵素材（背景あり・アップロードしたまま）
 assets/parts/      背景を抜いて切り詰めた素材（アプリが読むのはこちら）
-tools/make-assets.js  背景透過ツール
-tools/asset-map.json  元ファイル名 → 素材名としきい値の対応表
+tools/make-assets.js       背景透過ツール
+tools/make-matcha-frames.js  抹茶ラテのスプライトシートを1コマずつに切り出すツール
+tools/asset-map.json       元ファイル名 → 素材名としきい値の対応表
 ```
 
 ## 素材について
@@ -134,6 +137,8 @@ node tools/make-assets.js # assets/raw → assets/parts
 - 素材ごとのしきい値は `tools/asset-map.json`（`near` / `far` / `erode`）で調整できます
 - グラスだけは中身を透かすため、白を全面的に抜く `colorkey` 指定です
 - 新しい素材を足すときは `assets/raw/` に置き、`asset-map.json` に1行足して再実行
+- 抹茶ラテのカップはマゼンタ背景のスプライトシート（`assets/raw/matcha_sheet.png`）で、
+  `node tools/make-matcha-frames.js` が7コマに切り分けます（色かぶりも落とします）
 
 > `index.html` を `file://` で直接開くと、ブラウザの制限で「画像として保存」だけ使えません。
 > 使いたいときは `python3 -m http.server` などローカルサーバー経由で開いてください。
