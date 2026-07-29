@@ -227,6 +227,55 @@ function computeLevels(xp) {
   return levels;
 }
 
+/**
+ * 抹茶ラテの残りメモリを、記録の最初の日から今日まで1日ずつたどって求める。
+ *   ・まるごとサボった日（0項目）… 1メモリ減る／皆勤の貯めはリセット
+ *   ・皆勤の日（7項目すべて）  … 2日で1メモリ回復
+ *   ・今日はまだ終わっていないので、サボり判定はしない
+ */
+function matchaState(log) {
+  const today = todayKey();
+  const keys = sortedLogKeys(log);
+  const state = {
+    level: MATCHA_MAX,
+    pending: 0,        // 回復までに貯まった皆勤日数
+    lost: 0,           // これまでに失ったメモリ
+    gained: 0,         // これまでに取り戻したメモリ
+    todayCount: (log[today] || []).length,
+    todayPerfect: (log[today] || []).length >= PERFECT_NEEDED,
+    started: keys.length > 0,
+    empty: false
+  };
+  if (!state.started) return state;
+
+  let level = MATCHA_MAX;
+  let pending = 0;
+  let d = parseKey(keys[0]);
+
+  while (dateKey(d) <= today) {
+    const k = dateKey(d);
+    const n = (log[k] || []).length;
+    if (n === 0) {
+      if (k !== today) {            // 今日のサボりは日付が変わってから確定
+        if (level > 0) { level--; state.lost++; }
+        pending = 0;
+      }
+    } else if (n >= PERFECT_NEEDED) {
+      pending++;
+      if (pending >= PERFECT_FOR_HEAL) {
+        pending = 0;
+        if (level < MATCHA_MAX) { level++; state.gained++; }
+      }
+    }
+    d = addDays(d, 1);
+  }
+
+  state.level = level;
+  state.pending = pending;
+  state.empty = level <= 0;
+  return state;
+}
+
 /** 総達成回数 */
 function totalChecks(log) {
   return Object.keys(log).reduce((a, k) => a + (log[k] || []).length, 0);

@@ -22,6 +22,7 @@
       <div class="hstat"><span class="hstat-num" id="totalLevel">0</span><span class="hstat-label">総レベル</span></div>
       <div class="hstat"><span class="hstat-num" id="streakNum">0</span><span class="hstat-label">連続日数</span></div>
       <div class="hstat"><span class="hstat-num" id="harmonyNum">0</span><span class="hstat-label">調和度</span></div>
+      <div class="hstat matcha-hstat"><span class="hstat-num" id="matchaNum">7</span><span class="hstat-label">抹茶ラテ</span></div>
     </div>
   </div>
 </header>
@@ -70,6 +71,29 @@
     <p class="hint center">外側ほどレベルが高い（最大 Lv.20）</p>
   </section>
 
+  <!-- ============ 抹茶ラテ ============ -->
+  <section class="card matcha-card">
+    <div class="card-head">
+      <h2 class="card-title">抹茶ラテ</h2>
+      <span class="date-badge" id="matchaCount">7 / 7</span>
+    </div>
+    <div class="matcha-body">
+      <div class="matcha-stage">
+        <canvas id="matchaCanvas"></canvas>
+      </div>
+      <div class="matcha-info">
+        <p class="matcha-state" id="matchaState">なみなみ</p>
+        <p class="matcha-msg" id="matchaMsg"></p>
+        <ul class="matcha-rules">
+          <li>1日まるごとサボると <b>−1メモリ</b></li>
+          <li>7日サボると <b>空</b>になる</li>
+          <li>皆勤（7項目すべて）<b>2日</b>で <b>+1メモリ</b></li>
+        </ul>
+        <div class="matcha-log" id="matchaLog"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ スペシャル実績 ============ -->
   <section class="card special-card">
     <div class="card-head">
@@ -110,6 +134,7 @@
 <script src="js/data.js"></script>
 <script src="js/store.js"></script>
 <script src="js/radar.js"></script>
+<script src="js/matcha.js"></script>
 <script src="js/parfait.js"></script>
 <script src="js/app.js"></script>
 </body>

@@ -11,6 +11,7 @@ const App = {
     Assets.load();
     Parfait.init(document.getElementById('parfaitCanvas'));
     Radar.init(document.getElementById('radarCanvas'));
+    Matcha.init(document.getElementById('matchaCanvas'));
 
     document.getElementById('todayLabel').textContent = this.formatDate(this.today);
     document.getElementById('baseXpLabel').textContent = BASE_XP;
@@ -162,11 +163,21 @@ const App = {
 
   onToggle(statKey) {
     const before = this.levels[statKey] || 0;
+    const matchaBefore = this.matcha ? this.matcha.level : MATCHA_MAX;
+    const perfectBefore = this.matcha ? this.matcha.todayPerfect : false;
     const on = Store.toggle(this.today, statKey);
     this.render();
     const after = this.levels[statKey] || 0;
 
     const stat = STATS.find(s => s.key === statKey);
+    if (this.matcha.level > matchaBefore) {
+      this.toast(`🍵 皆勤2日達成！ 抹茶ラテが1メモリ回復（${this.matcha.level}/${MATCHA_MAX}）`);
+      return;
+    }
+    if (this.matcha.todayPerfect && !perfectBefore) {
+      this.toast('🍵 今日は皆勤！ あと1日皆勤で抹茶ラテが1メモリ回復');
+      return;
+    }
     if (after > before) {
       this.toast(`🎉 ${stat.name} が Lv.${after} に！ ${stat.parfait}が育った`);
     } else if (on) {
@@ -358,7 +369,48 @@ const App = {
     const note = document.getElementById('noteInput');
     if (document.activeElement !== note) note.value = Store.getNote(this.today);
 
+    this.renderMatcha(log);
     this.renderHeatmap(log, xp);
+  },
+
+  /** 抹茶ラテ（継続のメモリ） */
+  renderMatcha(log) {
+    const s = matchaState(log);
+    this.matcha = s;
+    Matcha.set(s);
+
+    const card = document.querySelector('.matcha-card');
+    card.classList.toggle('empty', s.level <= 0);
+    card.classList.toggle('low', s.level > 0 && s.level <= 2);
+
+    document.getElementById('matchaCount').textContent = `${s.level} / ${MATCHA_MAX}`;
+    const hstat = document.querySelector('.matcha-hstat');
+    document.getElementById('matchaNum').textContent = s.level;
+    hstat.classList.toggle('empty', s.level <= 0);
+    hstat.classList.toggle('low', s.level > 0 && s.level <= 2);
+
+    const names = ['空っぽ', '残りひとくち', '残りわずか', '半分', '半分', 'たっぷり', 'たっぷり', 'なみなみ'];
+    document.getElementById('matchaState').textContent = names[s.level] || 'なみなみ';
+
+    let msg;
+    if (!s.started) {
+      msg = 'まだ記録がありません。今日ひとつ達成すれば、この抹茶ラテは減りません。';
+    } else if (s.todayCount === 0) {
+      msg = s.level > 0
+        ? `今日はまだ0項目。このまま日付が変わると −1メモリ（残り ${s.level - 1}）。`
+        : '今日はまだ0項目。もう空なので、これ以上は減りません。';
+    } else if (s.todayPerfect) {
+      if (s.level >= MATCHA_MAX) msg = '今日も皆勤。抹茶ラテは満タンです。';
+      else if (s.pending === 1) msg = '今日は皆勤！ あと1日皆勤で +1メモリ。';
+      else msg = '皆勤2日ぶんが貯まり、+1メモリ回復しました。';
+    } else {
+      msg = `今日は ${s.todayCount} 項目。今日の減りは止まりました。皆勤まであと ${PERFECT_NEEDED - s.todayCount} 項目。`;
+    }
+    document.getElementById('matchaMsg').textContent = msg;
+
+    document.getElementById('matchaLog').textContent =
+      `これまで −${s.lost} メモリ／+${s.gained} メモリ回復` +
+      (s.pending ? `　皆勤の貯め ${s.pending}/${PERFECT_FOR_HEAL}` : '');
   },
 
   renderHeatmap(log, xp) {

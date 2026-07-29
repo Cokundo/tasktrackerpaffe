@@ -153,6 +153,15 @@ const MILESTONES = [
   }
 ];
 
+/* ---------- 抹茶ラテ（毎日の継続メモリ） ----------
+   ・7メモリから始まる
+   ・1日まるごとサボる（どの項目も手付かず）と 1メモリ減る → 7日で空
+   ・「皆勤」＝その日7項目すべて達成。皆勤2日で 1メモリ回復
+   （皆勤の判定をゆるめたいときは PERFECT_NEEDED を下げる）           */
+const MATCHA_MAX = 7;
+const PERFECT_NEEDED = 7;      // 皆勤とみなす達成項目数
+const PERFECT_FOR_HEAL = 2;    // 1メモリ回復に必要な皆勤日数
+
 const MAX_LEVEL = 20;
 const BASE_XP = 10;      // 1日達成あたりの基礎XP
 const STREAK_BONUS_CAP = 10; // 連続日数ボーナスの上限XP
