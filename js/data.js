@@ -31,8 +31,8 @@ const STATS = [
     name: 'VBA',
     kanji: '巧',
     trait: '効率・自動化',
-    parfait: 'ウエハースとプレッツェル',
-    desc: '伸ばすほど本数が増え、Lv7でロールクッキー、Lv13でプレッツェル。',
+    parfait: '狐プレート',
+    desc: '伸ばすほど枚数が増え、Lv7でロールクッキー、Lv13でプレッツェルが加わる。',
     color: '#3f8f6b',
     color2: '#9fd9bd',
     ranks: ['手作業', 'マクロ記録', 'ループ使い', '関数設計者', '自動化の魔術師'],
@@ -110,29 +110,29 @@ const MILESTONES = [
     key: 'vba_basic',
     name: 'VBAベーシック取得',
     detail: 'VBAエキスパート ベーシック合格',
-    topping: '巨大ロジック歯車クッキー',
-    note: 'ゆっくり回る金の歯車がパフェに刺さる',
+    topping: '特大ワッフルクッキー',
+    note: '格子が焼き上がった特大ワッフルが刺さる',
     stat: 'vba',
     xp: 200,
     color: '#3f8f6b',
-    emoji: '⚙️'
+    emoji: '🧇'
   },
   {
     key: 'boki3',
     name: '簿記3級取得',
     detail: '日商簿記3級 合格',
-    topping: '特大 帳簿ブックケーキ',
-    note: '金箔押しの帳簿がグラスに立てかけられる',
+    topping: '特大チーズケーキ',
+    note: 'ずっしり一切れがグラスに立てかけられる',
     stat: 'bookkeeping',
     xp: 200,
     color: '#b07d3a',
-    emoji: '📒'
+    emoji: '🍰'
   },
   {
     key: 'toeic',
     name: 'TOEIC点数更新',
     detail: 'ベストスコア更新（何度でも）',
-    topping: '地球儀マカロン',
+    topping: '地球グミ',
     note: '更新するたび、まわりの星が増える',
     stat: 'english',
     xp: 150,
@@ -210,7 +210,7 @@ const CROWN = {
 
 const SUFFIX = {
   muscle: 'クリーム仕立て',
-  vba: 'ウエハース添え',
+  vba: '狐プレート添え',
   bookkeeping: 'チョコフレーク地層盛り',
   manner: 'レース席仕立て',
   english: 'ワールドフルーツ',

@@ -14,7 +14,7 @@ const ASSET_NAMES = [
   'strawberry', 'strawberry_half', 'blueberry', 'pineapple_chunks', 'pineapple_slice',
   'orange_segment', 'lemon_star', 'melon_pistachio',
   'icing_cookies', 'dango', 'choco_twist',
-  'chocomint_scoops',
+  'chocomint_scoops', 'waffle_cookie', 'cheesecake', 'earth_gummy', 'fox_plate',
   'matcha_0', 'matcha_1', 'matcha_2', 'matcha_3', 'matcha_4', 'matcha_5', 'matcha_6'
 ];
 

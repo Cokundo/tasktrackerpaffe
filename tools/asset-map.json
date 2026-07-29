@@ -128,5 +128,23 @@
     "file": "file_00000000ec90820bb4b116972e2cd094.png",
     "name": "wafer_board",
     "erode": 2
+  },
+  {
+    "file": "earth_gummy_src.png",
+    "name": "earth_gummy"
+  },
+  {
+    "file": "fox_plate_src.png",
+    "name": "fox_plate",
+    "near": 40,
+    "far": 86
+  },
+  {
+    "file": "waffle_cookie_src.png",
+    "name": "waffle_cookie"
+  },
+  {
+    "file": "cheesecake_src.png",
+    "name": "cheesecake"
   }
 ]
