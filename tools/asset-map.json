@@ -114,7 +114,8 @@
   },
   {
     "file": "file_00000000c4b4820b9ab17c1a64265425.png",
-    "name": "strawberry"
+    "name": "strawberry",
+    "rotate": 180
   },
   {
     "file": "file_00000000d294821187e28e991ec1d428.png",

@@ -45,7 +45,8 @@ async function main() {
       near: item.near || 34,   // これ以下の色差は背景
       far: item.far || 74,     // これ以上の色差は素材（探索を止める）
       erode: item.erode || 0,  // 元画像のふちの光（ハロー）を削る画素数
-      colorkey: item.colorkey || null // 指定色を全面的に抜く（ガラスのように中も透かしたいもの）
+      colorkey: item.colorkey || null, // 指定色を全面的に抜く（ガラスのように中も透かしたいもの）
+      rotate: item.rotate || 0        // 180 を指定すると上下逆さに焼き込む
     });
 
     const outPath = path.join(OUT, item.name + '.png');
@@ -57,7 +58,7 @@ async function main() {
 }
 
 /* ---- ブラウザ内で動く処理本体 ---- */
-async function processImage({ uri, keepBg, maxSide, near, far, erode, colorkey }) {
+async function processImage({ uri, keepBg, maxSide, near, far, erode, colorkey, rotate }) {
   const img = new Image();
   img.src = uri;
   await img.decode();
@@ -212,6 +213,10 @@ async function processImage({ uri, keepBg, maxSide, near, far, erode, colorkey }
   out.height = Math.max(1, Math.round(bh * k));
   const octx = out.getContext('2d');
   octx.imageSmoothingQuality = 'high';
+  if (rotate === 180) {
+    octx.translate(out.width, out.height);
+    octx.rotate(Math.PI);
+  }
   octx.drawImage(cv, box.x0, box.y0, bw, bh, 0, 0, out.width, out.height);
 
   return { png: out.toDataURL('image/png'), w: out.width, h: out.height };
