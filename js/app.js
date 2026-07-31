@@ -138,7 +138,8 @@ const App = {
         <div class="rank" data-rank="${s.key}"></div>
         <div class="part">🍨 ${s.parfait}<br><span style="opacity:.7">${s.desc}</span></div>
         <div class="bar"><i data-bar="${s.key}" style="width:0%"></i></div>
-        <div class="xp-text" data-xp="${s.key}"></div>`;
+        <div class="xp-text" data-xp="${s.key}"></div>
+        <div class="next" data-next="${s.key}"></div>`;
       grid.appendChild(div);
     });
   },
@@ -363,6 +364,16 @@ const App = {
         Math.round(info.ratio * 100) + '%';
       document.querySelector(`[data-xp="${s.key}"]`).textContent =
         info.level >= MAX_LEVEL ? 'MAX（累計 ' + xp[s.key] + ' XP）' : `${info.cur} / ${info.need} XP`;
+
+      const next = nextStage(s.key, info.level);
+      const nextEl = document.querySelector(`[data-next="${s.key}"]`);
+      if (next) {
+        nextEl.innerHTML = `<b>次の変化</b> Lv.${next.lv} ${next.text}`;
+        nextEl.classList.remove('done');
+      } else {
+        nextEl.textContent = 'この項目の変化はすべて解放ずみ';
+        nextEl.classList.add('done');
+      }
     });
 
     // メモ

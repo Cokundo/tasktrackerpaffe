@@ -5,7 +5,7 @@
      筋トレ   → てっぺんの生クリーム（レベルで大きさ・さくらんぼ付きに）
      VBA      → 狐プレート／ロールクッキー／プレッツェル（枚数が増える）
      簿記     → チョコフレークの地層＋ブラウニー（厚みが増す）
-     マナー   → 器とレースの席（きれいに整い、金縁が付く）
+     マナー   → 席・金縁・金の受け皿・スプーン（段階的に格が上がる）
      英語     → 世界のフルーツ（種類が増える）
      脱毛     → クリスタル・花ゼリー・かき氷（澄んでいく）
      家事     → アイシングクッキー・団子・チョコツイスト（仕上げ）
@@ -148,9 +148,13 @@ const Parfait = {
     const peakInside = this.drawTop(contentTop);
     ctx.restore();
 
+    // マナー：金の受け皿（器の下に敷く）
+    if (manner >= 6) this.drawCharger(manner);
+
     // 器（線と艶が中身の上に重なり、ガラス越しに見える）
     this.put('glass', GLASS.cx, GLASS.bottom, GLASS.w);
-    if (manner >= 8) this.drawGoldRim(manner);
+    if (manner >= 3) this.drawGoldRim(manner);
+    if (manner >= 12) this.drawSpoon(manner);
 
     // 器の口より上（あふれた部分は器の手前に）
     ctx.save();
@@ -182,7 +186,7 @@ const Parfait = {
     const scale = Math.max(VW / im.naturalWidth, VH / im.naturalHeight);
     const w = im.naturalWidth * scale, h = im.naturalHeight * scale;
     ctx.save();
-    ctx.globalAlpha = Math.min(1, 0.45 + manner * 0.028);
+    ctx.globalAlpha = Math.min(1, 0.30 + manner * 0.042);
     ctx.drawImage(im, (VW - w) / 2, VH - h, w, h);
     ctx.restore();
   },
@@ -241,7 +245,7 @@ const Parfait = {
 
     // VBA：狐プレートを後ろに立てる
     if (vba > 0) {
-      const n = 1 + Math.floor(vba / 8);
+      const n = vba >= 17 ? 3 : vba >= 9 ? 2 : 1;
       for (let i = 0; i < n; i++) {
         const dir = i % 2 ? 1 : -1;
         const idx = Math.floor(i / 2);
@@ -293,16 +297,110 @@ const Parfait = {
     return peak;
   },
 
-  /** マナー：器の口の金縁 */
+  /**
+   * マナー：器の口の金縁。
+   * Lv3 で細く入り、Lv9 で太く、Lv16 で二重、Lv19 からきらめく。
+   */
   drawGoldRim(manner) {
     const ctx = this.ctx;
     const y = GLASS_TOP + GLASS_H * 0.036;
+    const shine = manner >= 19 ? 0.75 + Math.abs(Math.sin(this.t * 1.6)) * 0.25 : 1;
+
     ctx.save();
     ctx.beginPath();
     ctx.ellipse(GLASS.cx, y, GLASS.w * 0.478, GLASS.w * 0.055, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(201,162,39,${Math.min(0.95, 0.35 + manner * 0.05)})`;
-    ctx.lineWidth = manner >= 15 ? 3 : 2;
+    ctx.strokeStyle = `rgba(201,162,39,${Math.min(0.95, 0.45 + manner * 0.04) * shine})`;
+    ctx.lineWidth = manner >= 9 ? 3.4 : 1.8;
     ctx.stroke();
+
+    if (manner >= 16) {
+      ctx.beginPath();
+      ctx.ellipse(GLASS.cx, y + 9, GLASS.w * 0.455, GLASS.w * 0.05, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(230,198,110,${0.85 * shine})`;
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+    }
+    ctx.restore();
+  },
+
+  /** マナー：器の下に敷く金の受け皿（レベルで広がる） */
+  drawCharger(manner) {
+    const ctx = this.ctx;
+    const y = GLASS.bottom - 2;
+    const r = 62 + manner * 1.8;
+    ctx.save();
+
+    ctx.beginPath();
+    ctx.ellipse(GLASS.cx, y, r, r * 0.24, 0, 0, Math.PI * 2);
+    const g = ctx.createLinearGradient(GLASS.cx - r, y, GLASS.cx + r, y);
+    g.addColorStop(0, 'rgba(214,178,84,0.85)');
+    g.addColorStop(0.45, 'rgba(248,232,176,0.92)');
+    g.addColorStop(1, 'rgba(206,168,74,0.85)');
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(160,120,30,0.75)';
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.ellipse(GLASS.cx, y, r - 10, (r - 10) * 0.24, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,244,200,0.9)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // 縁の飾り（レベルが上がるほど数が増える）
+    const dots = Math.min(24, 10 + manner);
+    for (let i = 0; i < dots; i++) {
+      const a = (Math.PI * 2 * i) / dots;
+      ctx.beginPath();
+      ctx.arc(GLASS.cx + Math.cos(a) * (r - 5), y + Math.sin(a) * (r - 5) * 0.24, 1.6, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,250,225,0.9)';
+      ctx.fill();
+    }
+    ctx.restore();
+  },
+
+  /** マナー：添えられるパフェスプーン */
+  drawSpoon(manner) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.translate(GLASS.cx + 74, 250);
+    ctx.rotate(0.2);
+
+    // 柄
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(-4, -190, 8, 210, 4);
+    else ctx.rect(-4, -190, 8, 210);
+    const g = ctx.createLinearGradient(-4, 0, 4, 0);
+    g.addColorStop(0, '#9fb0ba');
+    g.addColorStop(0.35, '#f2f7fa');
+    g.addColorStop(1, '#a8b8c2');
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(90,110,120,0.8)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // すくう部分
+    ctx.beginPath();
+    ctx.ellipse(0, 30, 11, 17, 0, 0, Math.PI * 2);
+    const g2 = ctx.createLinearGradient(-11, 0, 11, 0);
+    g2.addColorStop(0, '#93a5b0');
+    g2.addColorStop(0.4, '#eef5f8');
+    g2.addColorStop(1, '#9fb1bb');
+    ctx.fillStyle = g2;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(90,110,120,0.8)';
+    ctx.stroke();
+
+    // 柄の先の飾り（高マナーで金になる）
+    ctx.beginPath();
+    ctx.ellipse(0, -192, 6, 7, 0, 0, Math.PI * 2);
+    ctx.fillStyle = manner >= 16 ? '#e8c86a' : '#dce7ec';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(90,110,120,0.8)';
+    ctx.stroke();
+
     ctx.restore();
   },
 
