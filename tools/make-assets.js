@@ -46,7 +46,8 @@ async function main() {
       far: item.far || 74,     // これ以上の色差は素材（探索を止める）
       erode: item.erode || 0,  // 元画像のふちの光（ハロー）を削る画素数
       colorkey: item.colorkey || null, // 指定色を全面的に抜く（ガラスのように中も透かしたいもの）
-      rotate: item.rotate || 0        // 180 を指定すると上下逆さに焼き込む
+      rotate: item.rotate || 0,       // 180 を指定すると上下逆さに焼き込む
+      solid: item.solid || 0          // 白い素材が白背景に食われるときの穴埋め幅（画素）
     });
 
     const outPath = path.join(OUT, item.name + '.png');
@@ -58,7 +59,7 @@ async function main() {
 }
 
 /* ---- ブラウザ内で動く処理本体 ---- */
-async function processImage({ uri, keepBg, maxSide, near, far, erode, colorkey, rotate }) {
+async function processImage({ uri, keepBg, maxSide, near, far, erode, colorkey, rotate, solid }) {
   const img = new Image();
   img.src = uri;
   await img.decode();
@@ -151,6 +152,74 @@ async function processImage({ uri, keepBg, maxSide, near, far, erode, colorkey, 
       d[i + 3] = v <= NEAR ? 0 : Math.round(((v - NEAR) / (FAR - NEAR)) * 255); // 境界はやわらかく
       const x = p % W, y = (p - (p % W)) / W;
       push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1);
+    }
+
+    // --- 2.4 白い素材が白背景に食われた分を埋め戻す ---
+    // 素材の中に背景と同じ色（真っ白なハイライトなど）があると、そこから塗りつぶしが
+    // 中へ漏れてスカスカになる。確実に素材の画素を太らせて輪郭を閉じ、
+    // 閉じた輪郭の内側を「素材」として塗り直したうえで、太らせた分を元に戻す。
+    if (solid) {
+      const K = solid;
+      const strong = new Uint8Array(W * H);
+      for (let p = 0; p < W * H; p++) if (dist(p * 4) >= FAR) strong[p] = 1;
+
+      const grow = (src, times) => {
+        let cur = src;
+        for (let t = 0; t < times; t++) {
+          const next = new Uint8Array(cur);
+          for (let y = 0; y < H; y++) {
+            for (let x = 0; x < W; x++) {
+              const p = y * W + x;
+              if (cur[p]) continue;
+              if ((x > 0 && cur[p - 1]) || (x < W - 1 && cur[p + 1]) ||
+                  (y > 0 && cur[p - W]) || (y < H - 1 && cur[p + W])) next[p] = 1;
+            }
+          }
+          cur = next;
+        }
+        return cur;
+      };
+      const shrink = (src, times) => {
+        let cur = src;
+        for (let t = 0; t < times; t++) {
+          const next = new Uint8Array(cur);
+          for (let y = 0; y < H; y++) {
+            for (let x = 0; x < W; x++) {
+              const p = y * W + x;
+              if (!cur[p]) continue;
+              if ((x > 0 && !cur[p - 1]) || (x < W - 1 && !cur[p + 1]) ||
+                  (y > 0 && !cur[p - W]) || (y < H - 1 && !cur[p + W])) next[p] = 0;
+            }
+          }
+          cur = next;
+        }
+        return cur;
+      };
+
+      // 太らせた素材の外側だけを外周からたどる（内側の穴は残る＝素材とみなす）
+      const fat = grow(strong, K);
+      const outside = new Uint8Array(W * H);
+      const st = [];
+      const seed = (x, y) => {
+        const p = y * W + x;
+        if (fat[p] || outside[p]) return;
+        outside[p] = 1; st.push(p);
+      };
+      for (let x = 0; x < W; x++) { seed(x, 0); seed(x, H - 1); }
+      for (let y = 0; y < H; y++) { seed(0, y); seed(W - 1, y); }
+      while (st.length) {
+        const p = st.pop();
+        const x = p % W, y = (p - (p % W)) / W;
+        if (x > 0) seed(x - 1, y);
+        if (x < W - 1) seed(x + 1, y);
+        if (y > 0) seed(x, y - 1);
+        if (y < H - 1) seed(x, y + 1);
+      }
+      let filled = new Uint8Array(W * H);
+      for (let p = 0; p < W * H; p++) filled[p] = outside[p] ? 0 : 1;
+      filled = shrink(filled, K);            // 太らせた分を戻す
+
+      for (let p = 0; p < W * H; p++) if (filled[p]) d[p * 4 + 3] = 255;
     }
 
     // --- 2.5 ふちを削る（元画像が持っている光のにじみを落とす） ---

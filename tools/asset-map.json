@@ -55,7 +55,8 @@
   },
   {
     "file": "file_000000007edc820b907cb9028b6f512e.png",
-    "name": "whip_small"
+    "name": "whip_small",
+    "solid": 12
   },
   {
     "file": "file_0000000086a4820bb6fb967e7259ac31.png",
@@ -119,7 +120,8 @@
   },
   {
     "file": "file_00000000d294821187e28e991ec1d428.png",
-    "name": "whip_cherry"
+    "name": "whip_cherry",
+    "solid": 12
   },
   {
     "file": "file_00000000decc8211ae0f7586508284e1.png",
