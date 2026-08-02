@@ -100,7 +100,24 @@ xdg-open index.html      # Linux
 ```
 
 記録はブラウザの localStorage（キー `growth-parfait-v1`）に保存されます。
+**記録は端末の中だけ**にあり、どこにも送信されません（通信するコードはありません）。
 端末を移すときは「データ書き出し」でJSONを保存し、移行先で「読み込み」してください。
+
+### 1枚だけで動くアプリ版
+
+`dist/ikuteru-parfait.html` は CSS・JS・素材をすべて埋め込んだ**単体ファイル**です。
+ダウンロードしてダブルタップ／ダブルクリックで開くだけで、サーバーもネットも要りません。
+
+```bash
+node tools/build-standalone.js   # 更新したら作り直す
+```
+
+- リポジトリを **private** にすると（無料アカウントでは）GitHub Pages は止まりますが、
+  このファイルを端末に置いておけば今までどおり使えます
+- `file://` で開いても **「画像として保存」まで動きます**（素材を埋め込んでいるため、
+  フォルダ版で起きるブラウザの制限を受けません）
+- 記録は開いたブラウザの localStorage に入ります。フォルダ版・Pages版とは別枠になるので、
+  移すときは「データ書き出し／読み込み」を使ってください
 
 ---
 
@@ -108,6 +125,7 @@ xdg-open index.html      # Linux
 
 ```
 index.html         画面の骨組み
+dist/              1枚で動くアプリ版（配布用・ビルド結果）
 css/style.css      スタイル（ダークモード対応・レスポンシブ）
 js/assets.js       パフェ素材の読み込み
 js/data.js         7項目の定義、レベル計算、パフェ名の生成
@@ -118,6 +136,7 @@ js/parfait.js      パフェの組み立て（素材の配置＋実績トッピ�
 js/app.js          画面の組み立てとイベント
 assets/raw/        元のドット絵素材（背景あり・アップロードしたまま）
 assets/parts/      背景を抜いて切り詰めた素材（アプリが読むのはこちら）
+tools/build-standalone.js  1枚だけで動くHTMLを書き出すツール
 tools/make-assets.js       背景透過ツール
 tools/make-matcha-frames.js  抹茶ラテのスプライトシートを1コマずつに切り出すツール
 tools/asset-map.json       元ファイル名 → 素材名としきい値の対応表
@@ -141,8 +160,8 @@ node tools/make-assets.js # assets/raw → assets/parts
 - 抹茶ラテのカップはマゼンタ背景のスプライトシート（`assets/raw/matcha_sheet.png`）で、
   `node tools/make-matcha-frames.js` が7コマに切り分けます（色かぶりも落とします）
 
-> `index.html` を `file://` で直接開くと、ブラウザの制限で「画像として保存」だけ使えません。
-> 使いたいときは `python3 -m http.server` などローカルサーバー経由で開いてください。
+> フォルダ版の `index.html` を `file://` で直接開くと、ブラウザの制限で「画像として保存」だけ使えません。
+> `python3 -m http.server` 経由で開くか、素材を埋め込んだ `dist/ikuteru-parfait.html` を使ってください。
 
 ## カスタマイズ
 

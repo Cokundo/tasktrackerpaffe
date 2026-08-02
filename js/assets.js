@@ -24,6 +24,9 @@ const Assets = {
   total: 0,
 
   load(onProgress) {
+    // 1枚HTML版（tools/build-standalone.js）では素材が埋め込まれている
+    const embedded = typeof window !== 'undefined' && window.ASSET_DATA;
+
     this.total = ASSET_NAMES.length;
     ASSET_NAMES.forEach(name => {
       const im = new Image();
@@ -34,7 +37,7 @@ const Assets = {
       };
       im.onload = () => done(true);
       im.onerror = () => done(false);
-      im.src = ASSET_DIR + name + '.png';
+      im.src = (embedded && embedded[name]) || ASSET_DIR + name + '.png';
       this.img[name] = im;
     });
   },
