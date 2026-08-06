@@ -191,7 +191,18 @@ function renderTodayCheck() {
 function renderProfile() {
   $('pfName').value = S.profile.nickname || '';
   $('pfWedding').value = S.profile.weddingDate || '';
-  $('pfBlitz').value = String(S.profile.blitzDays || 120);
+  // 電撃度は選択肢外の数字（今日から逆算した日数など）にもなるので、必要なら足す
+  const sel = $('pfBlitz');
+  const bd = String(S.profile.blitzDays || 120);
+  if (![...sel.options].some(o => o.value === bd)) {
+    const o = document.createElement('option');
+    o.value = bd;
+    o.textContent = `${bd}日 ─ 今日から逆算`;
+    o.dataset.dyn = '1';
+    sel.append(o);
+  }
+  [...sel.options].filter(o => o.dataset.dyn && o.value !== bd).forEach(o => o.remove());
+  sel.value = bd;
   $('pfMet').value = S.profile.metDate || '';
 
   const box = $('decidedBox');
@@ -217,8 +228,26 @@ function renderProfile() {
           ? `出会いは ${jpDate(parseKey(S.profile.metDate))}。そこから ${diffDays(S.profile.metDate, S.profile.weddingDate)} 日での入籍。`
           : meetLeft > 0
             ? `逆算すると、出会うのは <b>${jpDate(parseKey(meetKey))}ごろ</b>（あと${meetLeft}日）。`
-            : `逆算した出会いの日は <b>もう過ぎています</b>。相手はすでに知り合いの中にいるか、これから前倒しで現れる、ということ。`}
+            : meetLeft === 0
+              ? `逆算すると、出会うのは <b>今日</b>。ここからです。`
+              : `逆算した出会いの日は <b>もう過ぎています</b>。<br>これは遅れではなく、<b>出会いはもう始まっている</b>ということ。相手はすでに知り合いの中にいるか、この先もっと短い期間で現れます。`}
       </p>
+      ${!S.profile.metDate && meetLeft < 0 ? pastMeetFix(left) : ''}
+    </div>`;
+}
+
+/* 出会いの日が過ぎているときの、その場で押せる直し方 */
+function pastMeetFix(left) {
+  const opts = [];
+  if (left > 0) {
+    opts.push(`<button class="btn tiny primary" data-fix="shrink">出会いは今日からにする（電撃度${left}日）</button>`);
+  }
+  const pushed = dateKey(addDays(new Date(), Number(S.profile.blitzDays) || 120));
+  opts.push(`<button class="btn tiny ghost" data-fix="push">入籍日を ${jpShort(parseKey(pushed))} へずらす</button>`);
+  opts.push(`<button class="btn tiny ghost" data-fix="met">もう出会っている（今日を出会いの日にする）</button>`);
+  return `<div class="dc-fix">
+      <p>どれを選んでもいい。焦りが出たなら、日付を先へずらすのが正解です。</p>
+      <div class="dc-fix-btns">${opts.join('')}</div>
     </div>`;
 }
 
@@ -259,11 +288,13 @@ function renderRoad() {
     const key = dateKey(d);
     const rec = S.road[r.key] || {};
     const past = diffDays(todayKey(), key) < 0;
+    // 過ぎた段は「遅れ」ではなく「もう始まっている」として出す。
+    // 逆算した日付は締切ではないので、灰色にして焦らせない。
     return `
       <li class="road-item ${rec.done ? 'done' : ''} ${past && !rec.done ? 'past' : ''}">
         <button class="road-check" data-road="${r.key}">${rec.done ? '✓' : ''}</button>
         <div class="road-body">
-          <p class="road-head"><b>${r.label}</b><span class="road-date">${jpShort(d)}</span></p>
+          <p class="road-head"><b>${r.label}</b><span class="road-date">${jpShort(d)}${past && !rec.done ? '<em>もう始まっている</em>' : ''}</span></p>
           <p class="road-note">${r.note}${caution ? ` <em>${caution}</em>` : ''}</p>
           ${rec.done ? `<p class="road-done">${rec.at} に完了</p>` : ''}
         </div>
@@ -768,6 +799,25 @@ function initEvents() {
     S.profile.decidedAt = todayKey();
     save(); renderAll();
     toast('決まりました。ここから先は「そうなる予定の人」として過ごすだけ。');
+  });
+
+  /* 出会いの日が過ぎているときの直し方 */
+  $('decidedBox').addEventListener('click', e => {
+    const b = e.target.closest('[data-fix]');
+    if (!b) return;
+    const left = diffDays(todayKey(), S.profile.weddingDate);
+    if (b.dataset.fix === 'shrink') {
+      S.profile.blitzDays = left;
+      toast(`電撃度${left}日。出会いは今日から、ということになりました。`);
+    } else if (b.dataset.fix === 'push') {
+      S.profile.weddingDate = dateKey(addDays(new Date(), Number(S.profile.blitzDays) || 120));
+      toast('日付を先へずらしました。締切ではないので、これでいい。');
+    } else if (b.dataset.fix === 'met') {
+      S.profile.metDate = todayKey();
+      toast('出会いは済んでいることに。ここからの日数が電撃度になります。');
+    }
+    S.profile.decidedAt = todayKey();
+    save(); renderAll();
   });
 
   $('road').addEventListener('click', e => {

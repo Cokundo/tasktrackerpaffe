@@ -237,6 +237,9 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
 .dc-line { margin: 2px 0 6px; font-size: 15px; color: var(--plum); }
 .dc-sub { margin: 0; font-size: 12px; color: var(--ink-soft); }
 .dc-meet { margin: 10px 0 0; font-size: 13px; }
+.dc-fix { margin-top: 12px; border-top: 1px dashed var(--rose); padding-top: 10px; }
+.dc-fix p { margin: 0 0 8px; font-size: 12px; color: var(--ink-soft); }
+.dc-fix-btns { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 
 /* ---------- ロードマップ ---------- */
 
@@ -249,10 +252,11 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
 }
 .road-item.done .road-check { background: var(--rose); border-color: var(--rose); color: #fff; }
 .road-item.done .road-head b { text-decoration: line-through; opacity: .6; }
-.road-item.past:not(.done) { opacity: .6; }
 .road-body { flex: 1; }
 .road-head { margin: 0; display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
 .road-date { color: var(--gold); font-size: 12.5px; white-space: nowrap; }
+.road-date em { display: block; font-style: normal; font-size: 10.5px; color: var(--rose); }
+.road-item.past:not(.done) .road-check { border-color: var(--rose); border-style: dashed; }
 .road-note { margin: 2px 0 0; font-size: 12px; color: var(--ink-soft); }
 .road-note em { color: var(--ng); font-style: normal; }
 .road-done { margin: 2px 0 0; font-size: 11px; color: var(--rose); }
