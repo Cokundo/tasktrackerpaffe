@@ -1,0 +1,2858 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>電撃婚ノート｜引き寄せの法則ちゃんぽん実践アプリ</title>
+<style>
+/* =========================================================
+   電撃婚ノート — スタイル
+   ========================================================= */
+
+:root {
+  --bg: #fbf6f4;
+  --card: #fffcfb;
+  --ink: #3f3038;
+  --ink-soft: #8b7680;
+  --line: rgba(140, 100, 115, 0.16);
+  --rose: #c96b84;
+  --rose-soft: #fbe8ee;
+  --plum: #6b4a5e;
+  --gold: #c8a03c;
+  --gold-soft: #f7eed6;
+  --ok: #3f8f6d;
+  --ng: #c05b52;
+  --radius: 18px;
+  --shadow: 0 10px 30px rgba(120, 80, 100, 0.09);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(1100px 560px at 10% -10%, #fff1f4 0%, rgba(255,241,244,0) 60%),
+    radial-gradient(900px 500px at 100% 0%, #f7f0e4 0%, rgba(247,240,228,0) 55%),
+    var(--bg);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.75;
+}
+
+/* ---------- ヘッダー ---------- */
+
+.site-header { padding: 24px 18px 0; }
+
+.header-inner {
+  max-width: 1040px; margin: 0 auto;
+  display: flex; flex-wrap: wrap; gap: 18px;
+  align-items: center; justify-content: space-between;
+}
+
+.brand { display: flex; gap: 14px; align-items: center; }
+.brand-icon { font-size: 40px; line-height: 1; }
+.brand h1 { margin: 0; font-size: 26px; letter-spacing: .04em; color: var(--plum); }
+.tagline { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+
+.header-stats { display: flex; gap: 8px; }
+.hstat {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 8px 14px; text-align: center; min-width: 74px; box-shadow: var(--shadow);
+}
+.hstat-num { display: block; font-size: 21px; font-weight: 700; color: var(--rose); line-height: 1.2; }
+.hstat-num.good { color: var(--ok); }
+.hstat-num.low { color: var(--ng); }
+.hstat-label { display: block; font-size: 10.5px; color: var(--ink-soft); }
+
+/* ---------- タブ ---------- */
+
+.tabs {
+  max-width: 1040px; margin: 18px auto 0;
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px;
+}
+.tab {
+  flex: 0 0 auto; border: 1px solid var(--line); border-bottom: none;
+  background: rgba(255,255,255,.55); color: var(--ink-soft);
+  padding: 9px 18px; border-radius: 12px 12px 0 0; cursor: pointer;
+  font-size: 14px; font-family: inherit; transition: .15s;
+}
+.tab:hover { background: #fff; color: var(--ink); }
+.tab.is-on { background: var(--card); color: var(--plum); font-weight: 700; box-shadow: 0 -3px 0 var(--rose) inset; }
+
+/* ---------- レイアウト ---------- */
+
+.layout { max-width: 1040px; margin: 0 auto; padding: 16px 18px 60px; }
+.panel { display: none; }
+.panel.is-on { display: block; animation: fade .25s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 20px 22px; margin-bottom: 16px; box-shadow: var(--shadow);
+}
+.card-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.card-title { margin: 0; font-size: 17px; color: var(--plum); letter-spacing: .03em; }
+.card-lead { margin: 0 0 12px; font-size: 13.5px; color: var(--ink-soft); }
+.sub { margin: 10px 0 6px; font-size: 13px; color: var(--plum); }
+.hint { font-size: 12px; color: var(--ink-soft); margin: 8px 0 0; }
+.hint .ok, .ok { color: var(--ok); }
+.hint .ng, .ng { color: var(--ng); }
+.quote { font-size: 12.5px; color: var(--ink-soft); border-left: 3px solid var(--rose-soft); padding-left: 12px; }
+
+.school-tag {
+  font-size: 10.5px; padding: 2px 9px; border-radius: 999px;
+  background: var(--rose-soft); color: var(--rose); white-space: nowrap;
+}
+.school-tag[data-school="neville"] { background: #ece7f6; color: #6a5aa0; }
+.school-tag[data-school="abraham"] { background: #e4f1ec; color: #3f8f6d; }
+.school-tag[data-school="murphy"]  { background: #eceaf0; color: #6b5f79; }
+.school-tag[data-school="secret"]  { background: var(--gold-soft); color: #9a7a20; }
+.school-tag[data-school="board"]   { background: #e9eef5; color: #4f6b90; }
+.school-tag[data-school="jp"]      { background: var(--rose-soft); color: var(--rose); }
+.school-tag[data-school="real"]    { background: #f0ece5; color: #83725c; }
+
+details.mini { font-size: 13px; margin: 10px 0; }
+details.mini summary { cursor: pointer; color: var(--rose); font-size: 12.5px; }
+details.mini p { font-size: 12.5px; color: var(--ink-soft); }
+
+/* ---------- ボタン・入力 ---------- */
+
+.btn {
+  font-family: inherit; font-size: 13.5px; padding: 9px 18px; border-radius: 999px;
+  border: 1px solid var(--line); background: #fff; color: var(--ink);
+  cursor: pointer; transition: .15s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.primary { background: var(--rose); border-color: var(--rose); color: #fff; font-weight: 700; }
+.btn.ghost { background: transparent; color: var(--ink-soft); }
+.btn.danger { background: transparent; border-color: rgba(192,91,82,.4); color: var(--ng); }
+.btn.tiny { padding: 4px 12px; font-size: 12px; }
+.row-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+input[type="text"], input[type="date"], select, textarea {
+  font-family: inherit; font-size: 14px; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px;
+  background: #fff; width: 100%;
+}
+textarea { resize: vertical; line-height: 1.8; }
+input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft); border-color: var(--rose); }
+
+.add-row { display: flex; gap: 8px; margin-top: 8px; }
+.add-row input { flex: 1; }
+.block-label { display: block; font-size: 12.5px; color: var(--plum); margin: 10px 0 4px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.line-in { margin-bottom: 6px; }
+
+/* ---------- ステージ ---------- */
+
+.stage-card { border-color: rgba(200,160,60,.3); background: linear-gradient(180deg, #fffdf7, var(--card)); }
+.stage-line { display: flex; align-items: center; gap: 4px; margin-bottom: 12px; }
+.stage-line i { flex: 1; height: 2px; background: var(--line); }
+.stage-dot {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid var(--line); font-size: 12px; color: var(--ink-soft); background: #fff;
+}
+.stage-dot.past { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); }
+.stage-dot.now { background: var(--rose); border-color: var(--rose); color: #fff; font-weight: 700; transform: scale(1.15); }
+.stage-title { margin: 0 0 4px; font-size: 16px; color: var(--plum); }
+.stage-title small { font-size: 11.5px; color: var(--ink-soft); margin-left: 10px; font-weight: 400; }
+.stage-lead { margin: 0 0 10px; font-size: 13.5px; }
+.stage-todo { margin: 0 0 12px; padding-left: 20px; font-size: 13px; color: var(--ink-soft); }
+.stage-next { background: var(--rose-soft); border-radius: 12px; padding: 10px 16px; font-size: 12.5px; }
+.stage-next ul { margin: 4px 0 0; padding-left: 18px; }
+
+/* ---------- 警告 ---------- */
+
+.warn { border-left: 4px solid var(--gold); font-size: 13px; }
+.warn b { display: block; font-size: 12px; color: var(--gold); margin-bottom: 4px; }
+.warn p { margin: 0; }
+.warn-stop { border-left-color: var(--ng); }
+.warn-stop b { color: var(--ng); }
+.warn-note { border-left-color: var(--ink-soft); }
+.warn-note b { color: var(--ink-soft); }
+
+/* ---------- 感情スケール ---------- */
+
+.scale { display: flex; flex-direction: column; gap: 3px; }
+.sc {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  border: 1px solid transparent; border-radius: 10px; cursor: pointer;
+  font-family: inherit; font-size: 13px; text-align: left; padding: 5px 12px;
+  background: color-mix(in srgb, var(--ok) calc((1 - var(--t)) * 16%), transparent);
+  transition: .12s;
+}
+.sc:hover { border-color: var(--rose); }
+.sc.is-on { background: var(--rose); color: #fff; font-weight: 700; }
+.sc.is-next { border: 1px dashed var(--gold); }
+.sc-n { width: 22px; text-align: right; color: var(--ink-soft); font-size: 11.5px; }
+.sc.is-on .sc-n { color: #fff; }
+
+.bridge { margin-top: 12px; }
+.bridge-in { background: var(--gold-soft); border-radius: 12px; padding: 12px 16px; }
+.bridge-now { margin: 0; font-size: 13px; color: var(--plum); }
+.bridge-do { margin: 6px 0; font-size: 14px; }
+.bridge-up { margin: 0; font-size: 12.5px; color: var(--ink-soft); }
+
+/* ---------- 自愛 ---------- */
+
+.tap-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.tap {
+  border: 1px solid var(--line); border-radius: 14px; background: #fff; cursor: pointer;
+  padding: 12px 8px; font-family: inherit; text-align: center; transition: .15s;
+}
+.tap:active { transform: scale(.96); }
+.tap.is-on { background: var(--rose-soft); border-color: var(--rose); }
+.tap-label { display: block; font-size: 15px; font-weight: 700; color: var(--plum); }
+.tap-note { display: block; font-size: 10.5px; color: var(--ink-soft); }
+.tap-num { display: block; font-size: 18px; color: var(--rose); font-weight: 700; }
+
+.notice-work { display: flex; gap: 8px; margin-top: 12px; }
+.notice-work input { flex: 1; }
+.chip-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-list li {
+  font-size: 12px; background: #f4eff1; color: var(--ink-soft);
+  padding: 3px 12px; border-radius: 999px;
+}
+
+/* ---------- 今日の実践 ---------- */
+
+.today-check { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.tc {
+  display: flex; align-items: center; gap: 6px; font-size: 12.5px;
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; color: var(--ink-soft);
+}
+.tc.done { background: var(--rose-soft); border-color: var(--rose); color: var(--rose); }
+.tc.now { box-shadow: 0 0 0 2px var(--gold-soft); }
+.tc-mark { font-weight: 700; }
+.tc-stage { font-size: 10px; opacity: .6; }
+
+/* ---------- 電撃婚 ---------- */
+
+.blitz-card { border-color: rgba(201,107,132,.35); }
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 14px; }
+.form-grid label { font-size: 12.5px; color: var(--plum); display: block; }
+.form-grid input, .form-grid select { margin-top: 4px; }
+
+.decided { margin-top: 14px; }
+.decided-in {
+  background: linear-gradient(180deg, var(--rose-soft), #fff);
+  border: 1px solid var(--rose); border-radius: 14px; padding: 18px; text-align: center;
+}
+.dc-date { margin: 0; font-size: 22px; font-weight: 700; color: var(--rose); letter-spacing: .04em; }
+.dc-line { margin: 2px 0 6px; font-size: 15px; color: var(--plum); }
+.dc-sub { margin: 0; font-size: 12px; color: var(--ink-soft); }
+.dc-meet { margin: 10px 0 0; font-size: 13px; }
+
+/* ---------- ロードマップ ---------- */
+
+.road { list-style: none; margin: 0; padding: 0; }
+.road-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+.road-item:last-child { border-bottom: none; }
+.road-check {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; margin-top: 3px;
+  border: 1px solid var(--line); background: #fff; cursor: pointer; color: var(--rose); font-weight: 700;
+}
+.road-item.done .road-check { background: var(--rose); border-color: var(--rose); color: #fff; }
+.road-item.done .road-head b { text-decoration: line-through; opacity: .6; }
+.road-item.past:not(.done) { opacity: .6; }
+.road-body { flex: 1; }
+.road-head { margin: 0; display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+.road-date { color: var(--gold); font-size: 12.5px; white-space: nowrap; }
+.road-note { margin: 2px 0 0; font-size: 12px; color: var(--ink-soft); }
+.road-note em { color: var(--ng); font-style: normal; }
+.road-done { margin: 2px 0 0; font-size: 11px; color: var(--rose); }
+.road-empty { font-size: 13px; color: var(--ink-soft); }
+
+/* ---------- 100項目リスト ---------- */
+
+.list-progress { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.lp-bar { flex: 1; height: 8px; background: #f0e7ea; border-radius: 999px; overflow: hidden; }
+.lp-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--rose), var(--gold)); width: 0; transition: width .3s; }
+.lp-num { font-size: 12.5px; color: var(--ink-soft); white-space: nowrap; }
+
+.cat-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.cat {
+  border: 1px solid var(--line); background: #fff; border-radius: 999px; cursor: pointer;
+  font-family: inherit; font-size: 12.5px; padding: 5px 14px; color: var(--ink-soft);
+}
+.cat span { margin-left: 6px; font-size: 11px; color: var(--rose); }
+.cat.is-on { background: var(--rose); border-color: var(--rose); color: #fff; }
+.cat.is-on span { color: #fff; }
+
+.prompt-line { font-size: 12.5px; color: var(--plum); margin: 10px 0 0; }
+.wish-list { list-style: none; margin: 10px 0 0; padding: 0; }
+.wish-list li {
+  display: flex; justify-content: space-between; gap: 10px; align-items: center;
+  font-size: 13.5px; padding: 6px 0; border-bottom: 1px dashed var(--line);
+}
+.wish-list li.empty, .act-list li.empty, .diary-list li.empty { color: var(--ink-soft); font-size: 12.5px; border: none; }
+.x { border: none; background: none; color: var(--ink-soft); cursor: pointer; font-size: 16px; line-height: 1; }
+.x:hover { color: var(--ng); }
+
+/* ---------- アファメーション ---------- */
+
+.score-row { display: flex; gap: 16px; align-items: flex-start; margin-top: 12px; }
+.score-ring {
+  flex: 0 0 auto; width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 21px; font-weight: 700; border: 3px solid var(--line); color: var(--ink-soft);
+}
+.score-ring.hi { border-color: var(--ok); color: var(--ok); }
+.score-ring.mid { border-color: var(--gold); color: var(--gold); }
+.score-ring.lo { border-color: var(--ng); color: var(--ng); }
+.score-detail { flex: 1; }
+.ok-list, .ng-list { margin: 0 0 6px; padding-left: 18px; font-size: 12.5px; }
+.ok-list li { color: var(--ok); }
+.ng-list li { color: var(--ng); }
+
+.discomfort { margin-top: 14px; }
+.discomfort label { font-size: 13px; display: block; }
+.discomfort input[type="range"] { width: 60%; vertical-align: middle; margin: 0 8px; accent-color: var(--rose); }
+.soft-head { font-size: 12.5px; color: var(--plum); margin: 10px 0 6px; }
+.soft {
+  display: block; width: 100%; text-align: left; font-family: inherit; font-size: 13px;
+  border: 1px dashed var(--rose); background: var(--rose-soft); color: var(--plum);
+  border-radius: 12px; padding: 8px 14px; margin-bottom: 6px; cursor: pointer;
+}
+.fixed-at { font-size: 12px; color: var(--rose); margin-left: 10px; }
+
+/* ---------- SATS ---------- */
+
+.sats-run { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
+.chk { font-size: 12.5px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+.chk input { accent-color: var(--rose); }
+.sats-stage { margin-top: 14px; }
+.sats-now {
+  background: linear-gradient(180deg, #2e2334, #40304a); color: #f6eef4;
+  border-radius: 16px; padding: 22px; text-align: center;
+}
+.sats-step { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: .06em; }
+.sats-body { margin: 8px 0 0; font-size: 13.5px; opacity: .85; }
+.sats-scene { margin: 12px 0 0; font-size: 14px; color: #f3d9e4; border-top: 1px solid rgba(255,255,255,.2); padding-top: 10px; }
+.sats-left { margin: 12px 0 4px; font-size: 30px; font-weight: 300; letter-spacing: .08em; }
+.sats-bar { height: 4px; background: rgba(255,255,255,.18); border-radius: 999px; overflow: hidden; }
+.sats-bar span { display: block; height: 100%; background: #e7b9cc; transition: width 1s linear; }
+.sats-of { margin: 8px 0 0; font-size: 11px; opacity: .5; }
+
+/* ---------- 369 / 55×5 ---------- */
+
+.m369-aff { font-size: 14px; background: var(--gold-soft); border-radius: 12px; padding: 10px 16px; margin: 0 0 12px; }
+.m369-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.m369-btn {
+  border: 1px solid var(--line); border-radius: 14px; background: #fff; cursor: pointer;
+  padding: 12px; font-family: inherit; transition: .15s;
+}
+.m369-btn:active { transform: scale(.97); }
+.m369-btn.is-on { background: var(--rose-soft); border-color: var(--rose); }
+.m-label { display: block; font-size: 14px; font-weight: 700; color: var(--plum); }
+.m-num { display: block; font-size: 12.5px; color: var(--ink-soft); }
+.m-dots { display: flex; gap: 3px; justify-content: center; margin-top: 6px; }
+.m-dots i { width: 7px; height: 7px; border-radius: 50%; background: #eadfe3; }
+.m-dots i.on { background: var(--rose); }
+
+.order-text { font-size: 15px; background: var(--rose-soft); border-radius: 12px; padding: 10px 16px; margin: 12px 0; }
+.m55-days { display: flex; gap: 6px; margin-bottom: 10px; }
+.d55 {
+  flex: 1; text-align: center; font-size: 11.5px; padding: 5px 0; border-radius: 8px;
+  background: #f4eff1; color: var(--ink-soft);
+}
+.d55.on { background: var(--rose); color: #fff; }
+.d55.cur { box-shadow: 0 0 0 2px var(--gold) inset; }
+.m55-count { font-size: 13px; color: var(--ink-soft); }
+.m55-count b { font-size: 20px; color: var(--rose); }
+.m55-bar { height: 8px; background: #f0e7ea; border-radius: 999px; overflow: hidden; margin-top: 4px; }
+.m55-bar span { display: block; height: 100%; background: var(--rose); transition: width .2s; }
+
+/* ---------- 17秒タイマー ---------- */
+
+.timer17 { text-align: center; }
+.t17-bar { display: flex; gap: 6px; margin-bottom: 10px; }
+.t17-bar span {
+  --p: 0;
+  flex: 1; height: 12px; border-radius: 999px; border: 1px solid var(--line);
+  background: linear-gradient(to right, var(--gold) calc(var(--p) * 100%), #f6f0f2 0);
+  transition: background .3s;
+}
+.t17-bar span.full { border-color: var(--gold); }
+.t17-num { font-size: 40px; font-weight: 300; color: var(--plum); letter-spacing: .04em; }
+.t17-num small { font-size: 14px; margin-left: 4px; color: var(--ink-soft); }
+.timer17 .row-btns { justify-content: center; }
+
+/* ---------- ありがとう ---------- */
+
+.arig { text-align: center; }
+.arig-num { font-size: 14px; color: var(--ink-soft); }
+.arig-num b { font-size: 30px; color: var(--rose); }
+.arig-bar { height: 10px; background: #f0e7ea; border-radius: 999px; overflow: hidden; margin: 8px 0; }
+.arig-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--rose), var(--gold)); transition: width .2s; }
+.arig .row-btns { justify-content: center; }
+.swap-work { margin-top: 18px; border-top: 1px dashed var(--line); padding-top: 14px; }
+.swap-reply { font-size: 16px; color: var(--gold); font-weight: 700; margin-top: 10px; min-height: 24px; }
+
+/* ---------- 手放し ---------- */
+
+.vow {
+  margin: 12px 0; padding: 16px; text-align: center; font-size: 17px; color: var(--plum);
+  background: var(--gold-soft); border-radius: 14px; border: none;
+}
+.calm-label { font-size: 13px; display: block; margin-bottom: 12px; }
+.calm-label input { width: 55%; margin: 0 8px; vertical-align: middle; accent-color: var(--rose); }
+.calm-chart { display: flex; align-items: flex-end; gap: 4px; margin-top: 16px; }
+.calm-chart.has-bars { height: 110px; }
+.cbar { flex: 1; max-width: 22px; background: #ecd9e0; border-radius: 4px 4px 0 0; }
+.cbar.hi { background: var(--ok); }
+
+.blocks { display: grid; gap: 10px; }
+.block { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.block.noticed { border-color: var(--rose); background: #fffafb; }
+.block-head {
+  width: 100%; display: flex; gap: 10px; align-items: center; text-align: left;
+  border: none; background: none; font-family: inherit; font-size: 14px;
+  padding: 12px 16px; cursor: pointer; color: var(--plum);
+}
+.block-mark { color: var(--rose); font-size: 15px; }
+.block-label { flex: 1; margin: 0; }
+.block-arrow { color: var(--ink-soft); font-size: 13px; }
+.block-body { display: none; padding: 0 16px 14px; }
+.block.open .block-body { display: block; }
+.block-ask { margin: 0 0 8px; font-size: 12.5px; color: var(--ink-soft); }
+.block-foot { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+.block-at { font-size: 11.5px; color: var(--ink-soft); }
+
+.declutter { text-align: center; }
+.dc-num { font-size: 14px; color: var(--ink-soft); margin-bottom: 8px; }
+.dc-num b { font-size: 26px; color: var(--rose); }
+.dc-total { font-size: 12px; color: var(--ink-soft); margin-top: 8px; }
+
+/* ---------- 先取り行動 ---------- */
+
+.pre-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.pre {
+  display: flex; align-items: center; gap: 10px; text-align: left;
+  border: 1px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer;
+  font-family: inherit; font-size: 13px; padding: 11px 14px; color: var(--ink);
+}
+.pre.done { background: var(--rose-soft); border-color: var(--rose); }
+.pre-mark {
+  flex: 0 0 auto; width: 20px; height: 20px; border-radius: 6px; border: 1px solid var(--line);
+  display: grid; place-items: center; font-size: 12px; color: var(--rose); background: #fff;
+}
+.pre.done .pre-mark { background: var(--rose); color: #fff; border-color: var(--rose); }
+.pre-label { flex: 1; }
+.pre-at { font-size: 10.5px; color: var(--ink-soft); }
+
+.act-list { list-style: none; margin: 12px 0 0; padding: 0; }
+.act-list li { display: flex; gap: 12px; font-size: 13.5px; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.act-date { color: var(--rose); font-size: 12px; white-space: nowrap; }
+
+.rule-list { margin: 0; padding-left: 20px; font-size: 13.5px; }
+.rule-list li { margin-bottom: 6px; }
+.debate .sub { color: var(--rose); }
+
+/* ---------- 記録 ---------- */
+
+.diary-list { list-style: none; margin: 14px 0 0; padding: 0; }
+.diary-list li {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px dashed var(--line);
+}
+.diary-list li p { margin: 0; flex: 1; font-size: 13.5px; }
+.d-at { font-size: 11.5px; color: var(--rose); white-space: nowrap; padding-top: 3px; }
+.kouten-list { list-style: none; margin: 8px 0 0; padding: 0; font-size: 12.5px; }
+.kouten-list li { display: flex; gap: 10px; padding: 4px 0; color: var(--ink-soft); }
+.kouten-list span { color: var(--rose); }
+
+.heat {
+  display: grid; grid-template-rows: repeat(7, 14px); grid-auto-flow: column;
+  gap: 4px; margin: 12px 0; justify-content: start; overflow-x: auto;
+}
+.hc { display: block; width: 14px; height: 14px; border-radius: 4px; background: #f2ecee; }
+.hc-pad { background: transparent; }
+.hc1 { background: #f3d8e1; }
+.hc2 { background: #e6aac0; }
+.hc3 { background: #d4809f; }
+.hc4 { background: var(--rose); }
+
+.mini-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; margin-top: 12px; }
+.ms { text-align: center; background: #faf4f6; border-radius: 12px; padding: 8px 4px; }
+.ms b { display: block; font-size: 16px; color: var(--plum); }
+.ms span { font-size: 10.5px; color: var(--ink-soft); }
+
+/* ---------- 流派 ---------- */
+
+.schools { display: grid; gap: 10px; }
+.school-card { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+.school-card p { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+.school-mark {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+  background: var(--rose-soft); color: var(--rose); font-weight: 700;
+}
+.school-card[data-school="neville"] .school-mark { background: #ece7f6; color: #6a5aa0; }
+.school-card[data-school="abraham"] .school-mark { background: #e4f1ec; color: #3f8f6d; }
+.school-card[data-school="secret"] .school-mark { background: var(--gold-soft); color: #9a7a20; }
+.school-card[data-school="board"] .school-mark { background: #e9eef5; color: #4f6b90; }
+.school-card[data-school="real"] .school-mark { background: #f0ece5; color: #83725c; }
+
+.authors { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.author { border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+.author b { color: var(--plum); }
+.author-point { font-size: 11px; background: var(--gold-soft); color: #9a7a20; border-radius: 999px; padding: 2px 10px; margin-left: 8px; }
+.author p { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+
+.glossary { display: grid; gap: 10px; }
+.gl { border-left: 3px solid var(--rose-soft); padding-left: 14px; }
+.gl b { color: var(--plum); margin-right: 8px; }
+.gl p { margin: 4px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+
+.caveat-card { background: #fbf8f4; border-color: rgba(200,160,60,.3); }
+.caveat-card .rule-list { font-size: 12.5px; color: var(--ink-soft); }
+
+/* ---------- フッター・トースト ---------- */
+
+.site-footer { text-align: center; padding: 0 20px 40px; font-size: 11.5px; color: var(--ink-soft); }
+
+.toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 20px);
+  background: var(--plum); color: #fff; font-size: 13px; padding: 11px 22px;
+  border-radius: 999px; opacity: 0; pointer-events: none; transition: .25s;
+  max-width: 90vw; text-align: center; z-index: 50;
+}
+.toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- 狭い画面 ---------- */
+
+@media (max-width: 680px) {
+  .header-inner { flex-direction: column; align-items: flex-start; }
+  .header-stats { width: 100%; justify-content: space-between; }
+  .hstat { flex: 1; min-width: 0; padding: 8px 6px; }
+  .two-col, .form-grid { grid-template-columns: 1fr; }
+  .tap-row { grid-template-columns: repeat(2, 1fr); }
+  .card { padding: 16px 15px; }
+  .sc-l { font-size: 12px; }
+  .heat { grid-template-rows: repeat(7, 12px); gap: 3px; }
+  .heat .hc { width: 12px; height: 12px; }
+  .discomfort input[type="range"], .calm-label input { width: 45%; }
+}
+
+</style>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💍</text></svg>">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-icon">💍</span>
+      <div>
+        <h1>電撃婚ノート</h1>
+        <p class="tagline">エイブラハム・ネヴィル・マーフィー・シークレット・掲示板系 ─ 全部ちゃんぽんの結婚引き寄せ実践帳</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="hstat"><span class="hstat-num" id="hStage">0</span><span class="hstat-label">ステージ</span></div>
+      <div class="hstat"><span class="hstat-num" id="hMood">–</span><span class="hstat-label">感情の段</span></div>
+      <div class="hstat"><span class="hstat-num" id="hStreak">0</span><span class="hstat-label">連続日数</span></div>
+      <div class="hstat"><span class="hstat-num" id="hCount">–</span><span class="hstat-label">入籍まで</span></div>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab is-on" data-panel="today">今日</button>
+    <button class="tab" data-panel="decide">決める</button>
+    <button class="tab" data-panel="imprint">刷り込む</button>
+    <button class="tab" data-panel="release">手放す</button>
+    <button class="tab" data-panel="move">動く</button>
+    <button class="tab" data-panel="log">記録</button>
+    <button class="tab" data-panel="school">流派</button>
+  </nav>
+</header>
+
+<main class="layout">
+
+<!-- ==================== 今日 ==================== -->
+<section class="panel is-on" id="panel-today">
+
+  <div class="card stage-card">
+    <div class="card-head">
+      <h2 class="card-title">今のステージ</h2>
+    </div>
+    <div id="stageBox"></div>
+  </div>
+
+  <div id="warnBox"></div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">感情のスケール</h2>
+      <span class="school-tag" data-school="abraham">エイブラハム系</span>
+    </div>
+    <p class="card-lead">今どのへん？ いきなり最上段を目指さない。<b>今より一段だけ上</b>へ動かすのがコツ。</p>
+    <div class="scale" id="scale"></div>
+    <div class="bridge" id="bridge"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">自愛 — 鏡のワーク</h2>
+      <span class="school-tag" data-school="board">掲示板系</span>
+    </div>
+    <p class="card-lead">鏡に向かって自分に言う。最初は「愛してるなんて思えない」と泣きながらでもいい。言葉は言葉として、囚われすぎない。</p>
+    <div class="tap-row" id="jiaiRow"></div>
+    <details class="mini">
+      <summary>自愛が苦手なとき（自己否定が噴き出す人向け）</summary>
+      <p>無理にポジティブに捉えようとすると自己否定が噴き出す罠があります。まずは「ありのままの状態で自分らしく存在することを<b>許可する</b>」から。上の〈許可する〉だけ押せば今日はOKです。</p>
+      <p class="quote">「自分を愛せなくても、そんな自分を愛す」— isaさん<br>「いきなり快を目指さなくていい。もやもやしても『まぁいいか』と思うと一瞬無になる」— 369さん<br>「ネガティブは許すのではなく淡々と気づくだけでいい」— 自己観察さん</p>
+    </details>
+    <div class="notice-work">
+      <input type="text" id="noticeInput" placeholder="いま気づいたネガティブを、淡々と言葉にする（消さなくていい）">
+      <button class="btn ghost" id="noticeBtn">気づいた</button>
+    </div>
+    <ul class="chip-list" id="noticeList"></ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">夜のノート</h2>
+      <span class="school-tag" data-school="jp">奥平亜美衣</span>
+      <span class="school-tag" data-school="secret">シークレット系</span>
+    </div>
+    <p class="card-lead">いいことノート（今日の良かったこと3つ）と、感謝ワーク。いい気分にフォーカスする習慣そのものが本体。</p>
+    <div class="two-col">
+      <div>
+        <h3 class="sub">今日の良かったこと</h3>
+        <div id="goodInputs"></div>
+      </div>
+      <div>
+        <h3 class="sub">感謝していること</h3>
+        <div id="thanksInputs"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">今日の実践</h2>
+    </div>
+    <ul class="today-check" id="todayCheck"></ul>
+  </div>
+
+</section>
+
+<!-- ==================== 決める ==================== -->
+<section class="panel" id="panel-decide">
+
+  <div class="card blitz-card">
+    <div class="card-head">
+      <h2 class="card-title">電撃婚を決める</h2>
+      <span class="school-tag" data-school="jp">Honami「決めれば、叶う。」</span>
+    </div>
+    <p class="card-lead">
+      「いつか結婚できたらいいな」は願望形。ここでは<b>日付を決めて</b>しまいます。
+      これは締切ではなく、<b>すでに決まっている予定</b>として扱うもの。焦りが出たら日付を先へずらして構いません。
+    </p>
+    <div class="form-grid">
+      <label>呼び名<input type="text" id="pfName" placeholder="ゆゆ"></label>
+      <label>入籍する日<input type="date" id="pfWedding"></label>
+      <label>電撃度（出会ってから入籍まで）
+        <select id="pfBlitz">
+          <option value="30">30日 ─ 出会って1か月で入籍</option>
+          <option value="60">60日 ─ 2か月</option>
+          <option value="90">90日 ─ 3か月</option>
+          <option value="120">120日 ─ 4か月（標準の電撃）</option>
+          <option value="180">180日 ─ 半年</option>
+          <option value="365">365日 ─ 1年</option>
+        </select>
+      </label>
+      <label>すでに出会っている場合の出会った日<input type="date" id="pfMet"></label>
+    </div>
+    <button class="btn primary" id="decideBtn">これで決めた</button>
+    <div class="decided" id="decidedBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">逆算ロードマップ</h2>
+      <span class="school-tag" data-school="real">先取り行動</span>
+      <span class="school-tag" data-school="neville">なる</span>
+    </div>
+    <p class="card-lead">決めた日から逆算した、電撃婚の道のり。<b>途中の経路は指定しない</b>のが原則（出来事の橋）。ただし指輪の納期のような現実の段取りだけは、先に押さえておきます。</p>
+    <ol class="road" id="road"></ol>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">理想の相手リスト 100項目</h2>
+      <span class="school-tag" data-school="murphy">潜在意識</span>
+    </div>
+    <p class="card-lead">
+      100個以上書き出すと潜在意識の本音が表に出やすいとされます。<b>見せる相手はいないので本音で。</b>
+      外見・条件を抜かすと、条件が合っていても「スルー」してしまうと言われるので網羅を。
+      そして<b>フィーリング（どんな気持ちでいたいか）</b>を必ず入れる ─ 条件だけ追うと本当の願いとズレます。
+    </p>
+    <div class="list-progress"><div class="lp-bar"><span id="lpFill"></span></div><span class="lp-num" id="lpNum">0 / 100</span></div>
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="add-row">
+      <input type="text" id="listInput" placeholder="例：機嫌のいい人／台所で並んで料理している／一緒にいると呼吸が深くなる">
+      <button class="btn primary" id="listAdd">追加</button>
+    </div>
+    <p class="hint" id="listHint"></p>
+    <p class="prompt-line">書けなくなったら → <span id="promptText"></span> <button class="btn tiny ghost" id="promptNext">別の問い</button></p>
+    <ul class="wish-list" id="wishList"></ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">アファメーションを1本決める</h2>
+      <span class="school-tag" data-school="murphy">マーフィー系</span>
+    </div>
+    <p class="card-lead">主語は「私は」。語尾は現在形・完了形。否定形は使わない。五感で描けるほど具体的に。</p>
+    <textarea id="affText" rows="3" placeholder="例：私は、朝の光の入る台所で、二人ぶんのコーヒーを淹れている。"></textarea>
+    <div class="score-row">
+      <div class="score-ring" id="affScore">–</div>
+      <div class="score-detail" id="affDetail"></div>
+    </div>
+    <div class="discomfort">
+      <label>この文を声に出したときの<b>違和感</b>
+        <input type="range" id="affDiscomfort" min="0" max="10" step="1">
+        <output id="affDiscomfortOut">5</output> / 10
+      </label>
+      <p class="hint">違和感が強いまま断言すると、認知的不協和で「そんなの嘘だ」という反発をかえって刷り込みます。6以上なら下の緩和形へ。</p>
+      <div id="softenBox"></div>
+    </div>
+    <button class="btn primary" id="affFix">これでいく（確定）</button>
+    <span class="fixed-at" id="affFixedAt"></span>
+  </div>
+
+</section>
+
+<!-- ==================== 刷り込む ==================== -->
+<section class="panel" id="panel-imprint">
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">SATS — 眠りに近い状態で</h2>
+      <span class="school-tag" data-school="neville">ネヴィル・ゴダード</span>
+    </div>
+    <p class="card-lead">
+      ネヴィルが最も強力とした技法。起きている意識は「でも実際にはまだない」と想定を拒否し続けますが、
+      うとうと状態では批判的意識が働かず、暗示がそのまま届く（穏やかな自己催眠）。
+    </p>
+    <label class="block-label">今夜入る場面（叶ったあとの、ありふれた日常の一場面）</label>
+    <textarea id="satsScene" rows="2" placeholder="例：夜、私の隣で寝息が聞こえている。布団が少し重い。"></textarea>
+    <p class="hint" id="satsHint"></p>
+    <div class="sats-run">
+      <button class="btn primary" id="satsStart">誘導をはじめる</button>
+      <button class="btn ghost" id="satsStop" hidden>やめる</button>
+      <label class="chk"><input type="checkbox" id="satsDone"> 今夜はSATSをやった</label>
+    </div>
+    <div class="sats-stage" id="satsStage"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">369メソッド</h2>
+      <span class="school-tag" data-school="murphy">書く系</span>
+    </div>
+    <p class="card-lead">アファメーションを 朝3回・昼6回・夜9回 書く。ニコラ・テスラの3・6・9に着想。書いたら1タップ。</p>
+    <div class="m369" id="m369"></div>
+    <p class="hint">効果があるとすれば①毎日ノートで目標を意識する②チャンスを逃さず掴めるようになる、と自己分析する実践者もいます。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">55×5メソッド</h2>
+      <span class="school-tag" data-school="murphy">書く系</span>
+    </div>
+    <p class="card-lead">ひとつの願いを 1日55回・5日間連続で書く。<b>ワンオーダー制</b> ─ レストランでコックに注文するように、一度に一つだけ。</p>
+    <div class="add-row">
+      <input type="text" id="orderInput" placeholder="今回のオーダー（1つだけ）">
+      <button class="btn primary" id="orderSet">注文する</button>
+    </div>
+    <div id="orderBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">17秒・68秒ルール</h2>
+      <span class="school-tag" data-school="abraham">エイブラハム系</span>
+    </div>
+    <p class="card-lead">
+      ある思いを否定・矛盾なく純粋に17秒保つと同じ波動が加わって増幅し、17秒×4＝68秒でエネルギーが十分になり現実化が始まる、という説明。
+      途中で「でも」が混ざったら〈混ざった〉を押してやり直し。
+    </p>
+    <div class="timer17">
+      <div class="t17-bar" id="t17Bar"><span></span><span></span><span></span><span></span></div>
+      <div class="t17-num" id="t17Num">0<small>秒</small></div>
+      <div class="row-btns">
+        <button class="btn primary" id="t17Start">はじめる</button>
+        <button class="btn ghost" id="t17Mix">混ざった</button>
+      </div>
+      <p class="hint">ネガティブな思考にも同じ増幅が働くとされます。だから「混ざった」は失敗ではなく、正しく気づけたということ。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">口ぐせ — ありがとう500回</h2>
+      <span class="school-tag" data-school="jp">小池浩</span>
+    </div>
+    <p class="card-lead">宇宙は発した言葉をただ増幅する場所で、善悪の判断はない。だからネガティブな口ぐせも「オーダー」として通ってしまう。</p>
+    <div class="arig">
+      <div class="arig-num"><b id="arigNum">0</b> / 500</div>
+      <div class="arig-bar"><span id="arigFill"></span></div>
+      <div class="row-btns">
+        <button class="btn primary" id="arig1">ありがとう +1</button>
+        <button class="btn ghost" id="arig10">+10</button>
+        <button class="btn ghost" id="arig50">+50</button>
+      </div>
+    </div>
+    <div class="swap-work">
+      <label class="block-label">うっかり言ってしまったネガティブな口ぐせ</label>
+      <div class="add-row">
+        <input type="text" id="swapInput" placeholder="例：どうせ私なんて">
+        <button class="btn primary" id="swapBtn">オーダー訂正</button>
+      </div>
+      <div class="swap-reply" id="swapReply"></div>
+      <ul class="chip-list" id="swapList"></ul>
+    </div>
+  </div>
+
+</section>
+
+<!-- ==================== 手放す ==================== -->
+<section class="panel" id="panel-release">
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">手放しチェック</h2>
+      <span class="school-tag" data-school="jp">Honami系</span>
+    </div>
+    <p class="card-lead">
+      「絶対に叶えたい」という執着は「まだ叶っていない＝欠乏」の波動を出すとされます。
+      でも執着は強力で、理性で手放そうとするほど強まるジレンマがある。だから<b>測るだけ</b>にします。
+    </p>
+    <blockquote class="vow">結婚が叶わなくても、私は幸せです。</blockquote>
+    <p class="card-lead">声に出して唱えて、それでも穏やかでいられたか。</p>
+    <label class="calm-label">穏やかさ
+      <input type="range" id="calmRange" min="0" max="10" step="1" value="5">
+      <output id="calmOut">5</output> / 10
+    </label>
+    <button class="btn primary" id="calmSave">記録する</button>
+    <div class="calm-chart" id="calmChart"></div>
+    <p class="hint">7以上が3回そろうと、ステージ4（先取り行動）へ進む目安です。低い日があっても悪いことではありません。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">結婚への隠れたブロック</h2>
+      <span class="school-tag" data-school="murphy">内観</span>
+    </div>
+    <p class="card-lead">
+      ブロックは「親や先生に怒られた」「失敗した」等の記憶から作られ、潜在意識の奥に固定観念として封印されているとされます。
+      解除の基本は<b>気づくこと</b>。「早く外したい」と焦ると潜在意識が抵抗するので、ゆっくり自然に。
+    </p>
+    <div class="blocks" id="blocks"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">物理的な手放し</h2>
+      <span class="school-tag" data-school="jp">断捨離</span>
+    </div>
+    <p class="card-lead">1年以上使っていない物を捨て、ワクワクする物だけ残す。エネルギーの循環という理屈ですが、単純に「もう一人分の空き」が生まれます。</p>
+    <div class="declutter">
+      <div class="dc-num"><b id="dcNum">0</b> 個 手放した（今日）</div>
+      <button class="btn primary" id="dcBtn">1つ手放した</button>
+      <div class="dc-total" id="dcTotal"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">自分単体の未来を見る</h2>
+      <span class="school-tag" data-school="board">別の領域</span>
+    </div>
+    <p class="card-lead">特定の誰かに焦点を当てすぎるとエネルギーが滞るとされます。相手を一度頭から追い出し、<b>自分単体としてどんな未来が欲しいか</b>だけを書きます。</p>
+    <textarea id="soloText" rows="3" placeholder="相手のことは一旦置いて。私は、どんな毎日を過ごしている？"></textarea>
+    <button class="btn ghost" id="soloSave">書き留める</button>
+  </div>
+
+</section>
+
+<!-- ==================== 動く ==================== -->
+<section class="panel" id="panel-move">
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">先取り行動</h2>
+      <span class="school-tag" data-school="real">ステージ4</span>
+    </div>
+    <p class="card-lead">
+      「すでに結婚が決まった人の行動」を先取りする。指輪は購入から手元に届くまで1〜2か月（オーダーメイドは2〜3か月）かかるので、
+      欲しいタイミングより前に動くのはブライダルの実務としても普通のことです。＝「なる」の恋愛版。
+    </p>
+    <div class="pre-grid" id="preGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">48時間ルール</h2>
+      <span class="school-tag" data-school="jp">Honami</span>
+    </div>
+    <p class="card-lead">思い立ったら48時間以内に行動する。多くの実践者が「小さくても行動する人がうまくいく」と口をそろえます。イメージだけで止まる人が最も多い失敗。</p>
+    <div class="add-row">
+      <input type="text" id="actInput" placeholder="今日やった現実の一歩（小さくていい）">
+      <button class="btn primary" id="actAdd">記録</button>
+    </div>
+    <ul class="act-list" id="actList"></ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">婚活・アプリとの併用</h2>
+      <span class="school-tag" data-school="real">現実的アプローチ</span>
+    </div>
+    <p class="card-lead">
+      作法の核は「<b>行動はするが結果に執着しない</b>」。婚活を「戦い」や「焦り」でやると不安の波動を出すため、
+      今の生活に満足し自分を愛している充足の波動で臨むと、同じく満たされた相手が現れるとされます。
+    </p>
+    <ul class="rule-list">
+      <li>会う前から「この人かも」と結果を握りしめない。会うのはただの<b>出会いの場を増やす</b>行為。</li>
+      <li>断られた／進まなかったを「私の価値」に接続しない。出来事の橋は思いがけない経路を通る。</li>
+      <li>内面ワーク（SATS・アファメーション）と、現実の母数を増やす作業は<b>両輪</b>。どちらか片方では止まる。</li>
+      <li>疲れたら休む。義務感でやる婚活は、そのまま焦りの波動になる。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">「なる」— 立ち位置を移す</h2>
+      <span class="school-tag" data-school="board">701式</span>
+    </div>
+    <p class="card-lead">
+      願望を「これから叶える」のではなく、なりたい私を決めた瞬間に「既にそうなった私」へ立ち位置を移す。
+      全メソッドの終着点とされ、「<b>メソッドは叶えるためにやるな</b>（まだ叶っていない前提になるから）」という逆説が語られます。
+    </p>
+    <ul class="rule-list">
+      <li>今日の立ち居振る舞いを1つ変える。「結婚した私」なら、この場面でどうする？</li>
+      <li>言葉づかい・姿勢・買うもの・断り方。未来の目標ではなく<b>当たり前</b>として。</li>
+      <li>ここまで来たら、このアプリを開く回数はむしろ減っていい。</li>
+    </ul>
+  </div>
+
+</section>
+
+<!-- ==================== 記録 ==================== -->
+<section class="panel" id="panel-log">
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">未来日記</h2>
+      <span class="school-tag" data-school="neville">終わりに生きる</span>
+    </div>
+    <p class="card-lead">すでに叶った前提で日記を書く。「〇〇と結婚しました」と過去形・完了形で。日付は未来のものでも構いません。</p>
+    <textarea id="diaryText" rows="3" placeholder="例：入籍しました。区役所の帰りに、二人でうどんを食べました。"></textarea>
+    <div class="row-btns">
+      <button class="btn primary" id="diaryAdd">書き込む</button>
+      <span class="hint" id="diaryHint"></span>
+    </div>
+    <ul class="diary-list" id="diaryList"></ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">好転反応メモ</h2>
+      <span class="school-tag" data-school="jp">日本語圏の概念</span>
+    </div>
+    <p class="card-lead">
+      願いが叶う前に一時的に体調不良・情緒不安定・現実の悪化が起きる現象を「好転反応」と呼ぶ説明があります（復縁ジャンルでは5日前後が目安）。
+      ただしこれは<b>実践者コミュニティ内の説明概念</b>。数週間以上続くときは、この枠組みから離れてください。
+    </p>
+    <textarea id="koutenText" rows="2" placeholder="今日、うまくいかなかったこと・しんどかったこと"></textarea>
+    <button class="btn ghost" id="koutenSave">記録する</button>
+    <div id="koutenBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">実践のカレンダー</h2>
+    </div>
+    <p class="card-lead">濃いほどその日たくさん実践した日。<b>空白があっても大丈夫</b> ─ 義務感でやる実践は焦りの波動になります。</p>
+    <div class="heat" id="heat"></div>
+    <div class="mini-stats" id="miniStats"></div>
+    <div class="row-btns">
+      <button class="btn ghost" id="exportBtn">データ書き出し</button>
+      <button class="btn ghost" id="importBtn">読み込み</button>
+      <button class="btn danger" id="resetBtn">全消去</button>
+      <input type="file" id="importFile" accept="application/json" hidden>
+    </div>
+    <p class="hint">記録はこの端末のブラウザ（localStorage）にだけ保存されます。どこにも送信されません。</p>
+  </div>
+
+</section>
+
+<!-- ==================== 流派 ==================== -->
+<section class="panel" id="panel-school">
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">5つの系譜</h2></div>
+    <p class="card-lead">
+      土台の世界観は「思考・感情には波動（周波数）があり、同じ波動の現実が引き合う」。
+      波動の発生源とされるのが潜在意識で、氷山モデル（水面上の顕在意識と、9割以上を占める水面下の潜在意識）で説明されます。
+      実践者コミュニティ内では、以下は矛盾しつつ併用されています。
+    </p>
+    <div class="schools" id="schools"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">言葉の整理</h2></div>
+    <ul class="rule-list">
+      <li><b>引き寄せの法則</b>（Law of Attraction）＝同じ波動が引き合うという「法則」そのもの。</li>
+      <li><b>顕現／マニフェステーション</b>＝願望を現実化させる行為・プロセス全般。近年TikTok等で369メソッドとともに広がった語。</li>
+      <li><b>アファメーション</b>＝肯定的な自己宣言を繰り返す「手法」の一つ。潜在意識書き換えの道具。</li>
+      <li><b>潜在意識書き換え</b>＝セルフイメージ・信念を作り変える上位概念。アファメーション・イメージング・自愛はすべてこのための手段。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">日本語圏の主要な書き手</h2></div>
+    <div class="authors" id="authors"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">用語辞典</h2></div>
+    <div class="glossary" id="glossary"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">特定の相手 vs 相手を特定しない</h2></div>
+    <p class="card-lead">最大の論争点。このアプリは既定で<b>相手を特定しない</b>設定です（それが今の状況に合っているため）。両論を置いておきます。</p>
+    <div class="two-col debate">
+      <div>
+        <h3 class="sub">否定派</h3>
+        <p>「あの人に〜してほしい」という他人への願望・操作はできない。相手にも自由意志があり曲げられない。だから「〇〇にプロポーズしてほしい」ではなく「〇〇が結婚したくなるような魅力的な私になる」と<b>主語を自分に変えて</b>願うべき。特定の人を引き寄せようとするのは束縛と同じで、相手は潜在意識を通して居心地の悪さを感じ反発する、という理屈も語られる。</p>
+      </div>
+      <div>
+        <h3 class="sub">肯定派</h3>
+        <p>特定の相手がいればこそ引き寄せは強力に働く。「一人は寂しい」程度の人より「あの人と幸せな家庭を築きたい」人の方が思いは強い。潜在意識で特定の相手との恋愛成就は可能だと、自身の実験で結論づける実践者もいる。</p>
+      </div>
+    </div>
+    <p class="card-lead"><b>折衷案</b>：相手の自由意志を尊重し、「この人に〇〇してほしい」ではなく「互いに幸せな関係」というエネルギーに焦点を当てる。特定の人だけに焦点を当てすぎるとエネルギーが滞るので、まず自分の内面の充実を優先する ─ これが広く共有されています。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">失敗パターン</h2></div>
+    <div class="two-col">
+      <div>
+        <h3 class="sub">うまくいかない主因</h3>
+        <ul class="rule-list">
+          <li>欠乏感から願う（「ない」を前提に願うと「ない」現実を引き寄せる）</li>
+          <li>執着が強すぎる／焦り</li>
+          <li>疑い ─ 望みと疑いの両方の波動を同時に出して停滞する</li>
+          <li>他人軸・承認欲求（「一人は寂しい」「年だから」）</li>
+          <li>否定形の願い／ネガティブ語</li>
+          <li>願うだけで行動しない ─ イメージだけで止まる人が最も多い失敗</li>
+          <li>他人の心を操作しようとする</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="sub">やってはいけないこと</h3>
+        <ul class="rule-list">
+          <li>願望を「これでもか」と念じて執着を強める</li>
+          <li>ネガティブ感情を無理に抑圧する（かえって本音が見えなくなる）。むしろ<b>感じきる・許す</b></li>
+          <li>完璧を求めて動かない、結果を急ぐ、他人と比較する</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card caveat-card">
+    <div class="card-head"><h2 class="card-title">留意点</h2></div>
+    <ul class="rule-list" id="caveats"></ul>
+  </div>
+
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <p>電撃婚ノート — 引き寄せの法則 徹底ガイドをちゃんぽんした実践帳。記録は端末内のみ。</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   data.js — 引き寄せ（電撃婚仕様）の定義データ
+   流派ごとに矛盾する主張は、無理に統一せず両論のまま持つ。
+   各カードには出典の系譜タグ（school）を付けて、
+   「今どの流派のことをやっているか」が分かるようにしている。
+   ========================================================= */
+
+/* ---------- 流派（系譜） ---------- */
+
+const SCHOOLS = {
+  abraham: { name: 'エイブラハム系', short: '亜', desc: '感情＝波動の指標。いい気分でいることが本体。17秒・68秒ルール、感情のスケール。' },
+  neville: { name: 'ネヴィル系', short: '想', desc: '想定の法則。すでに叶った前提を内側で占有する（Living in the End）。SATS。' },
+  murphy: { name: 'マーフィー系', short: '潜', desc: '潜在意識の書き換え。暗示・アファメーションで願望を刷り込む。' },
+  secret: { name: 'ザ・シークレット系', short: '感', desc: 'イメージング＋感謝。実現した未来を信じて思い描く。' },
+  board: { name: '掲示板系（潜在意識ちゃんねる）', short: '掲', desc: '「なる」「認識の変更」「別の領域」「自愛」。日本語圏で独自発達。' },
+  jp: { name: '日本の著者系', short: '和', desc: '奥平亜美衣／小池浩／MACO／Honami など。口ぐせ・手帳・決める・いい気分。' },
+  real: { name: '現実的アプローチ', short: '現', desc: '先取り行動・婚活・48時間ルール。「行動はするが結果に執着しない」。' }
+};
+
+/* ---------- 感情のスケール（エイブラハム系・22段階） ----------
+   1が最上段。いきなり1を目指さず「今より少しだけ上」へ動かすのがコツ。
+   bridge は「その段から一つ上へ出るための足がかり」。 */
+
+const EMOTION_SCALE = [
+  { n: 1,  label: '喜び・感謝・自由・愛',       bridge: 'ここが上限。無理に保とうとせず、この感じを17秒だけ味わって手を離す。' },
+  { n: 2,  label: '情熱',                       bridge: '今わいている熱を、誰かに説明するつもりで言葉にしてみる。' },
+  { n: 3,  label: '熱意・やる気・幸福',         bridge: '「これが当たり前の私」と一度だけ言って、そのまま日常に戻る。' },
+  { n: 4,  label: '前向きな期待・信念',         bridge: '期待している場面を、朝の光や食器の音まで足して具体化する。' },
+  { n: 5,  label: '楽観',                       bridge: '「たぶん、うまくいく」を「もう決まっている」に一段だけ言い換える。' },
+  { n: 6,  label: '希望',                       bridge: '過去に「まさか」で叶ったことを一つ思い出す。' },
+  { n: 7,  label: '満足',                       bridge: '今すでに満たされているものを3つ数える（いいことノート）。' },
+  { n: 8,  label: '退屈',                       bridge: '心が少しだけ喜ぶことを一つやる。小さくていい。' },
+  { n: 9,  label: '悲観',                       bridge: '「まだ分からない」まで戻す。決めつけを一段ゆるめる。' },
+  { n: 10, label: '不満・苛立ち・焦り',         bridge: '焦りを消そうとしない。「今の生活で気に入っているところ」を1つ言う。' },
+  { n: 11, label: '圧倒される感じ',             bridge: '全部やろうとしない。今日は自愛だけでいい、と決める。' },
+  { n: 12, label: '失望',                       bridge: '「期待した私はちゃんと願っていた」と認める。' },
+  { n: 13, label: '疑い',                       bridge: '疑いは信じたい証拠。「疑ってる私もいていい」と許可する。' },
+  { n: 14, label: '心配',                       bridge: '心配していることを紙に書き出して、閉じる。頭の外に置く。' },
+  { n: 15, label: '非難',                       bridge: '相手のことを一度頭から追い出し、自分単体の願いだけを見る。' },
+  { n: 16, label: '落胆',                       bridge: '「私は今、落胆している」と実況する。淡々と気づくだけでいい。' },
+  { n: 17, label: '怒り',                       bridge: '怒りは無力感より上。抑圧せず感じきってよい。' },
+  { n: 18, label: '復讐心',                     bridge: 'エネルギーは戻ってきている。矛先を自分の望みへ向け直す。' },
+  { n: 19, label: '憎しみ・激怒',               bridge: '誰にも見せない紙に全部書く。書いたら破る。' },
+  { n: 20, label: '嫉妬',                       bridge: '嫉妬は「私にも可能だ」と潜在意識が知っているサイン。' },
+  { n: 21, label: '不安・罪悪感・自己卑下',     bridge: '「自分を愛せなくても、そんな自分を愛す」（isaさん）。' },
+  { n: 22, label: '恐れ・絶望・無力感',         bridge: 'ここでは願いを一度置いていい。「まぁいいか」とだけ言って休む。' }
+];
+
+/* ---------- 4ステージ（段階的指針） ---------- */
+
+const STAGES = [
+  {
+    n: 0, title: '土台づくり', span: '最初の2週間',
+    lead: 'まず自愛といい気分の選択から。ここで自己肯定感の土台を作らないと、アファメーションが認知的不協和で逆効果になる。',
+    todo: ['鏡のワークを毎日', 'いいことノート（毎日3つ）', '感情スケールで今の位置を見る'],
+    next: '断言に「嘘っぽさ」を感じなくなったら次へ（違和感メーター5以下が目安）'
+  },
+  {
+    n: 1, title: '願望の明確化', span: '2〜4週目',
+    lead: '理想を100項目リストアップ。条件だけでなく「どんな気持ちでいたいか」を必ず含める。',
+    todo: ['理想の相手リスト100項目', 'フィーリングを10項目以上', 'アファメーションを1本決める'],
+    next: 'リストが100項目・フィーリング10項目以上、アファメーションが確定したら次へ'
+  },
+  {
+    n: 2, title: '潜在意識への刷り込み', span: '並行して継続',
+    lead: '自分に合う刷り込み法を1〜2個だけ選ぶ。全部やらない。',
+    todo: ['夜はSATS（叶った後の日常を静かに感じて眠る）', '日中は17〜68秒のいい気分の集中', '書く派は369か55×5'],
+    next: 'やっていて「楽しい・自然」なら続行。「義務・焦り」を感じたら方法を変える'
+  },
+  {
+    n: 3, title: '手放し・執着ケア', span: '恋愛はここが成否を分ける',
+    lead: '「叶わなくても私は幸せ」と唱えてなお穏やかでいられるかを、執着の指標にする。',
+    todo: ['手放しチェック（穏やかさ7以上を3回）', '物理的断捨離', '隠れたブロックに気づく'],
+    next: '穏やかさ7以上が3回そろったら次へ'
+  },
+  {
+    n: 4, title: '先取り行動と現実的行動', span: 'ここまで来たら動く',
+    lead: '指輪・ドレス・式場を見に行く先取り行動。婚活は「行動はするが結果に執着しない」で継続。イメージだけで止まらない。',
+    todo: ['先取り行動を3つ以上', '出会いの場を増やす', '思い立ったら48時間以内に動く'],
+    next: 'ここが終着点ではなく、日常。気分が下がったらステージ0に戻る'
+  }
+];
+
+/* ---------- 電撃婚ロードマップ ----------
+   決めた入籍日から逆算する。ratio は「電撃期間D」に対する割合（1.0＝出会いの日）。 */
+
+const ROADMAP = [
+  { key: 'meet',     ratio: 1.00, label: '出会う',                     note: '知らない誰かとは限らない。すでに知り合いの中にいることもある。' },
+  { key: 'start',    ratio: 0.85, label: '付き合いはじめる',           note: '「様子を見る」より「決める」。Honami系の48時間ルールが効く場面。' },
+  { key: 'sure',     ratio: 0.62, label: '「この人だ」と静かに確信する', note: '歓喜ではなく静けさ。SATSで選ぶべきなのはこの質感。' },
+  { key: 'future',   ratio: 0.48, label: '将来の話をする',             note: '条件のすり合わせではなく「一緒にどんな時間を過ごすか」から。' },
+  { key: 'ering',    ratio: 0.38, label: '婚約指輪を選びに行く',       note: '受け取りまで1〜2か月（オーダーメイドは2〜3か月）。' },
+  { key: 'propose',  ratio: 0.30, label: 'プロポーズされる',           note: '「してほしい」ではなく「そうなった私」を先に生きる。' },
+  { key: 'bands',    ratio: 0.26, label: '結婚指輪を注文する',         lead: 60, note: '入籍に間に合わせるなら60日前が目安。ここは現実の納期の話。' },
+  { key: 'families', ratio: 0.16, label: '両家顔合わせ',               note: '親の結婚観のブロックが出やすい場面。事前に見ておく。' },
+  { key: 'venue',    ratio: 0.10, label: '式場・ドレスを見に行く',     note: '式をやらない選択でも、下見そのものが先取り行動になる。' },
+  { key: 'register', ratio: 0.00, label: '入籍する',                   note: 'ここは「目標」ではなく「もう決まっている日」として扱う。' }
+];
+
+/* ---------- 先取り行動（ステージ4・今日からできる） ---------- */
+
+const PREACTIONS = [
+  { key: 'ring_try',  label: '結婚指輪／婚約指輪を見に行く・試着する' },
+  { key: 'ring_size', label: '左手の薬指のサイズを測ってもらう' },
+  { key: 'dress',     label: 'ウェディングドレスを試着する' },
+  { key: 'venue',     label: '式場見学に行く' },
+  { key: 'room',      label: '二人で住む前提で部屋を内見する' },
+  { key: 'dishes',    label: '食器やマグを「2つで1組」で買う' },
+  { key: 'space',     label: 'クローゼット／部屋にもう一人分の空きを作る' },
+  { key: 'konkatsu',  label: '婚活・アプリに登録する／プロフィールを更新する' },
+  { key: 'yes',       label: '誘いに1つYESと言う（48時間以内）' },
+  { key: 'day',       label: '「妻としての自分の平凡な1日」を書き出す' },
+  { key: 'photo',     label: '写真を撮られる練習をする（自分を受け取る練習）' },
+  { key: 'money',     label: '二人の生活を前提に、お金の見取り図を書く' }
+];
+
+/* ---------- 100項目リストのカテゴリ ---------- */
+
+const LIST_CATS = [
+  { key: 'look',    label: '外見',            hint: '身長・体型・雰囲気・服装・声。抜かすと条件が合っていてもスルーしてしまう。' },
+  { key: 'person',  label: '性格・人柄',      hint: '機嫌のよさ、話の聞き方、怒ったときにどうするか。' },
+  { key: 'work',    label: '仕事・経済',      hint: '職業・働き方・お金の使い方。金額よりも「扱い方」を書く。' },
+  { key: 'life',    label: '価値観・生活',    hint: '食事、休日、家事の分担、家族との距離、子どものこと。' },
+  { key: 'with',    label: '一緒にやりたいこと', hint: '関係性のパート。行きたい場所、どんな会話、どんな週末。' },
+  { key: 'feel',    label: 'フィーリング',    hint: '★最重要。叶った先で「どんな気持ちでいたいか」。安心・自由・喜び。' }
+];
+
+const LIST_PROMPTS = [
+  '朝、目が覚めたとき隣にいる人はどんな顔をしている？',
+  'その人と一緒にいるとき、私はどんな声のトーンで話している？',
+  '喧嘩したあと、その人はどうする？',
+  '何も予定のない日曜日、二人は何をしている？',
+  'その人の食べ方のどこが好き？',
+  'お金の話をするとき、私はどんな気持ちでいる？',
+  'その人は私のどこを面白がる？',
+  '疲れて帰ってきた日、玄関でどんな言葉をかけられたい？',
+  '二人で最初に行く旅行はどこ？',
+  'その人の実家に行ったとき、私はどんな顔をしている？',
+  '私が泣いたとき、その人はどうする？',
+  '一緒に住む部屋の、いちばん好きな場所はどこ？',
+  'その人が私を紹介するとき、なんて言う？',
+  '10年後、二人は何を笑っている？',
+  '私はその人の前で、どんな服を着ている？',
+  'その人の手はどんな手？',
+  '二人の間で決まっている小さなルールは？',
+  '私が仕事で失敗した日、その人は何をする？',
+  '一緒に食べたい平日の夜ごはんは？',
+  'その関係の中で、私はどれくらい自由でいる？'
+];
+
+/* ---------- 結婚への隠れたブロック ---------- */
+
+const BLOCKS = [
+  {
+    key: 'single',
+    label: '独身でいるメリットを手放したくない',
+    ask: '自由・気楽さ・お金の使い方。結婚しても手放さなくていいものはどれ？ 手放すつもりのものはどれ？'
+  },
+  {
+    key: 'parents',
+    label: '親の結婚観が刷り込まれている',
+    ask: '両親の関係を見て「結婚とは◯◯だ」と学んだ。その◯◯を言葉にすると？ それは私が選ぶ結婚と同じもの？'
+  },
+  {
+    key: 'father',
+    label: '父親（または最初の男性像）との関係',
+    ask: '男の人に対して、いつも身構えてしまう場面はある？ それは誰との記憶から来ている？'
+  },
+  {
+    key: 'independent',
+    label: '過剰な自立「一人でも大丈夫」',
+    ask: '最近、人に頼るのをやめた場面は？ 甘える・受け取る練習を1つするなら何？'
+  },
+  {
+    key: 'sealed',
+    label: '女性性／男性性を封印している',
+    ask: '「私はそういうタイプじゃない」と切り捨てているものは？ それは本当に好みの問題？'
+  },
+  {
+    key: 'fear',
+    label: '結婚したいのに、具体的に想像すると怖い',
+    ask: '想像したときに出てくる「怖い場面」を1つ書く。その怖さは誰の経験？'
+  },
+  {
+    key: 'age',
+    label: '年齢・世間体の焦り（他人軸）',
+    ask: 'その願いから「周りが」「年齢が」を抜いても残る？ 残らないなら、それは私の願いではないかもしれない。'
+  },
+  {
+    key: 'unworthy',
+    label: '「私は幸せになっていい」と思えない',
+    ask: '愛されている自分を想像したとき、身体のどこが緊張する？ そこに手を当てて、ただ気づく。'
+  }
+];
+
+/* ---------- SATS（ネヴィル）5ステップ ---------- */
+
+const SATS_STEPS = [
+  { sec: 90, title: '① 体をゆるめる', body: '仰向けで、足先から順に力を抜く。眠りに落ちる直前の、うとうとした境界まで下りていく。' },
+  { sec: 45, title: '② 重さを感じる', body: '体が重い／時間の感覚が歪む。これが正しい状態に入ったサイン。焦らず待つ。' },
+  { sec: 30, title: '③ 場面を決める', body: '「叶った瞬間」ではなく「叶ったあとの、ありふれた日常の一場面」を選ぶ。登録した場面を思い出す。' },
+  { sec: 120, title: '④ 中に入る', body: '外から眺めない。一人称で、手ざわり・音・匂いまで。今それを体験している。' },
+  { sec: 60, title: '⑤ 静けさのまま眠る', body: '「これが当たり前」という静けさを保ったまま、その場面の中で眠りに落ちる。' }
+];
+
+/* 場面として選ぶと弱い言葉（＝叶った瞬間の歓喜） */
+const SATS_PEAK_WORDS = ['プロポーズ', '指輪を渡', 'ひざまず', '号泣', '泣いて', '結婚式', 'バージンロード', '入籍した瞬間', 'サプライズ', '歓声', '祝福され'];
+
+/* ---------- アファメーションの言葉チェック用 ---------- */
+
+const NG_WISH = ['たい', 'ますように', 'ください', 'なれます', 'どうか', 'お願いします'];
+const NG_NEG = ['ない', 'なく', 'ません', 'ぬ', '嫌', '不安', '心配', 'まだ', '無理', 'できず', 'ずに'];
+const NG_OTHER = ['彼が', '彼は', '彼氏が', '夫が', 'あの人が', 'あの人は', '相手が', '相手は', '誰かが', '男性が'];
+const SENSE_WORDS = ['朝', '光', '匂い', '香り', '声', '音', '手', '温かい', 'あたたか', '笑', '台所', '玄関', '布団', 'コーヒー', '肌', '指', '味'];
+
+/* 違和感が強いときの緩和テンプレ（認知的不協和対策） */
+const SOFTENERS = [
+  '私は{X}になりつつある。',
+  '私は{X}を受け取ることを、自分に許可している。',
+  '私は{X}になってもいいと思いはじめている。',
+  '私は{X}に向かって、ちゃんと動いている。'
+];
+
+/* ---------- 口ぐせ変換（小池浩系） ---------- */
+
+const SWAP_REPLIES = [
+  'よっしゃ来た！ タイムラグ！',
+  'はい、オーダー訂正。いま言い直しました。',
+  '宇宙さんは善悪を判断しない。だから言い直せば通る。',
+  'それ、注文じゃないです。取り消し。'
+];
+
+/* ---------- 用語辞典（日本語圏の文脈） ---------- */
+
+const GLOSSARY = [
+  { term: 'なる（701式）', school: 'board', desc: '願望を「これから叶える」のではなく、なりたい私を決めた瞬間に「既にそうなった私」へ立ち位置を移す。全メソッドの終着点とされ、「メソッドは叶えるためにやるな（まだ叶っていない前提になるから）」という逆説が語られる。' },
+  { term: '認識の変更', school: 'board', desc: '「世界そのものが自分だ」と気づき、自己と世界の認識を書き換えること。「ない」と思っていたときは何も起きず、「ある」と認識できてから現象化が起きる。' },
+  { term: '別の領域', school: 'board', desc: 'エゴ（走り回る自我）から離れた、愛・既にある・安心・安全が全て揃った場所。そこから現実を映画のように観察する立ち位置。' },
+  { term: 'ザ・チケット（108さん）', school: 'board', desc: '掲示板の書き込みをまとめた願望実現本。「思考は願望実現を助けるものではなく妨害するもの」が核。結末は「握りしめていたチケットは最初から必要なかった」。' },
+  { term: '自愛', school: 'board', desc: '掲示板住人から生まれ、日本語圏で独自に体系化された語。「ありのままの自分をそのまま受け入れ、ただ観察して愛でる意識でいること」。' },
+  { term: 'エゴ', school: 'board', desc: '生存本能に基づく自我・観念。願望実現を妨げるが、格闘せず放っておくのがコツとされる。' },
+  { term: 'SATS', school: 'neville', desc: 'State Akin to Sleep。入眠直前のうとうとした意識で、叶ったあとの日常を一人称で体験して眠る。ネヴィルが最も強力とした技法。' },
+  { term: '出来事の橋', school: 'neville', desc: 'Bridge of Incidents。新しい自己概念が、思いがけない経路で現実化していく連鎖。だから途中の道筋は指定しない。' },
+  { term: 'メンタル・ダイエット', school: 'neville', desc: '日中の欠乏に基づく内的会話をやめ、夜の作業（SATS）を守ること。' },
+  { term: '17秒・68秒ルール', school: 'abraham', desc: '矛盾なく純粋に17秒保つと同じ波動が加わって増幅し、17秒×4＝68秒で現実化が始まるという説明。ネガティブな思考にも同じ増幅が働くと警告される。' },
+  { term: '感情のスケール', school: 'abraham', desc: '喜びから絶望まで22段階。今の感情が「どの波動を出しているか」の指標。いきなり最上段を目指さず、少し上へ段階的に上げる。' },
+  { term: '好転反応', school: 'jp', desc: '願いが叶う前に一時的に体調不良・現実の悪化が起きるという説明概念。復縁ジャンルでは5日前後が目安と語られる。数週間以上続くなら立ち止まる。' },
+  { term: 'タイムラグ', school: 'jp', desc: 'オーダーから現実化までの時間差。小池浩系では「よっしゃ来た！タイムラグ！」と言い換えて疑いを打ち消す。MACOは「タイムラグ有効利用法」を説く。' },
+  { term: '予祝', school: 'jp', desc: '前もって祝う。ひすいこたろう＆大嶋啓介『前祝いの法則』（2018）の署名概念。※MACOのものではない点に注意。' },
+  { term: '幸せの三角形', school: 'jp', desc: 'Honamiの独自概念。健康・人間関係・お金の3つ。「決めれば、叶う。」「思い立ったら48時間以内に行動する」。' },
+  { term: 'いいことノート', school: 'jp', desc: '奥平亜美衣が勧める習慣。毎日の良かったこと・いい気分を書き出し、いい気分にフォーカスする習慣をつける。' }
+];
+
+/* ---------- 著者の早見表 ---------- */
+
+const AUTHORS = [
+  { name: '奥平亜美衣', point: 'いい気分・波動', line: '「今より少しだけでいいからいい気分になる」。エイブラハム系を最も忠実に体系化した教科書的存在。累計85万部。' },
+  { name: '小池浩', point: '言葉・口ぐせ', line: '宇宙は発した言葉をただ増幅するドSな場所。「ありがとう」1日500回、「よっしゃ来た！タイムラグ！」。' },
+  { name: 'MACO', point: 'ネガティブOK', line: 'ネガティブがあっても引き寄せは叶う。感情を否定せず活かす。手帳術とタイムラグ有効利用法。' },
+  { name: 'Honami', point: '決める・行動', line: '「決めれば、叶う。」幸せの三角形（健康・人間関係・お金）。思い立ったら48時間以内に行動する。' },
+  { name: '佐藤由美子', point: '本当の願い', line: '夢を叶えたい人の100％近くが自分の本当の願いをわかっていない。親の刷り込みと無理なプラス思考が本音にフタをする。' },
+  { name: 'Happyちゃん', point: '今の幸せ', line: '幸せな気持ちに区別はない。今できる幸せを感じにいけば理想の世界が勝手に来る。' },
+  { name: 'かずみん', point: '妄想', line: '妄想で引き寄せる路線。欲しい現実のエネルギーに、先に自分がなってしまえばいい。' }
+];
+
+/* ---------- 留意点 ---------- */
+
+const CAVEATS = [
+  '波動・周波数・量子力学的な説明の多くは、当の実践者・情報源自身が「科学的に証明された話ではない」と但し書きを付けている。このアプリもその前提で作られている。',
+  '体験談は事後の自己解釈・再構成であり、成功例が選択的に語られやすい（生存者バイアス）。',
+  '掲示板系の「達人」（108／701／isa／369／自己観察さん等）はいずれも匿名の書き込みが原典で、現在流通する語録はまとめブログ経由の二次引用が中心。',
+  '流派間で主張が食い違う点（特定の相手の可否・行動の要否・執着の扱い）は、このアプリでも両論のまま置いてある。',
+  '「特定の相手」を狙う実践には、相手の自由意志の尊重という倫理的論点がある。コミュニティ内でも意見が割れる。',
+  '高額なセッション・講座・情報商材への依存や、現実的な行動・専門的支援（カウンセリング等）の放棄には注意。',
+  '「好転反応」と称して数週間以上、現実の悪化や体調不良が続くときは、引き寄せの枠組みから一度離れて医療・専門家にかかること。'
+];
+
+</script>
+<script>
+/* =========================================================
+   store.js — 保存と日付、そして「今どのステージか」の判定
+   記録はすべて localStorage。通信は一切しない。
+   ========================================================= */
+
+const HIKI_KEY = 'hikiyose-blitz-v1';
+
+/* ---------- 日付ユーティリティ ---------- */
+
+function dateKey(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function parseKey(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function addDays(d, n) {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  x.setDate(x.getDate() + n);
+  return x;
+}
+
+function todayKey() {
+  return dateKey(new Date());
+}
+
+function diffDays(aKey, bKey) {
+  const a = parseKey(aKey), b = parseKey(bKey);
+  return Math.round((b - a) / 86400000);
+}
+
+function jpDate(d) {
+  const w = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日(${w})`;
+}
+
+function jpShort(d) {
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+function uid() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+/* ---------- 1日ぶんの空データ ---------- */
+
+function emptyDay() {
+  return {
+    mood: 0,                                   // 感情スケールの位置(1-22, 0=未記録)
+    jiai: { love: 0, perfect: 0, best: 0, allow: 0 },
+    notice: [],                                // 淡々と気づいたネガティブ
+    good: ['', '', ''],                        // いいことノート
+    thanks: ['', '', ''],                      // 感謝ワーク
+    m369: { am: 0, noon: 0, pm: 0 },
+    m55: 0,
+    sec68: 0,                                  // 68秒を通した回数
+    sats: false,
+    arigatou: 0,
+    declutter: 0,
+    kouten: '',                                // 好転反応メモ
+    acted: []                                  // その日の現実の行動
+  };
+}
+
+/* ---------- 状態 ---------- */
+
+const Store = {
+  state: null,
+
+  fresh() {
+    return {
+      version: 1,
+      profile: {
+        nickname: 'ゆゆ',
+        weddingDate: '',      // 決めた入籍日
+        blitzDays: 120,       // 出会いから入籍まで＝電撃度
+        decidedAt: '',        // 「決めた」日
+        metDate: '',          // すでに出会っているなら実際の出会いの日
+        targetMode: 'open'    // open=相手を特定しない / named=特定の相手がいる
+      },
+      affirmation: { text: '', discomfort: 5, fixedAt: '' },
+      order: { text: '', startedAt: '', lastDay: '', streak: 0, checkAt: '' }, // 55×5のワンオーダー
+      satsScene: '',
+      list: [],          // {id, cat, text, at}
+      blocks: {},        // key -> {noticed, memo, at}
+      road: {},          // ROADMAPのkey -> {done, at}
+      pre: {},           // PREACTIONSのkey -> {done, at}
+      diary: [],         // {id, at, text}
+      solo: [],          // {id, at, text}  自分単体の未来
+      release: [],       // {at, calm}  手放しチェック
+      swap: [],          // {id, at, from}
+      days: {}
+    };
+  },
+
+  load() {
+    this.state = this.fresh();
+    try {
+      const raw = localStorage.getItem(HIKI_KEY);
+      if (raw) {
+        const p = JSON.parse(raw);
+        const s = this.state;
+        Object.assign(s.profile, p.profile || {});
+        Object.assign(s.affirmation, p.affirmation || {});
+        Object.assign(s.order, p.order || {});
+        s.satsScene = p.satsScene || '';
+        s.list = Array.isArray(p.list) ? p.list : [];
+        s.blocks = p.blocks && typeof p.blocks === 'object' ? p.blocks : {};
+        s.road = p.road && typeof p.road === 'object' ? p.road : {};
+        s.pre = p.pre && typeof p.pre === 'object' ? p.pre : {};
+        s.diary = Array.isArray(p.diary) ? p.diary : [];
+        s.solo = Array.isArray(p.solo) ? p.solo : [];
+        s.release = Array.isArray(p.release) ? p.release : [];
+        s.swap = Array.isArray(p.swap) ? p.swap : [];
+        s.days = p.days && typeof p.days === 'object' ? p.days : {};
+      }
+    } catch (e) {
+      console.warn('保存データを読めませんでした。新規に開始します。', e);
+      this.state = this.fresh();
+    }
+    return this.state;
+  },
+
+  save() {
+    try {
+      localStorage.setItem(HIKI_KEY, JSON.stringify(this.state));
+    } catch (e) {
+      console.warn('保存できませんでした。', e);
+    }
+  },
+
+  /* その日のデータ（なければ作る） */
+  day(key) {
+    const k = key || todayKey();
+    if (!this.state.days[k]) this.state.days[k] = emptyDay();
+    const d = this.state.days[k];
+    const base = emptyDay();
+    for (const f in base) if (d[f] === undefined) d[f] = base[f];
+    return d;
+  },
+
+  today() {
+    return this.day(todayKey());
+  },
+
+  /* 直近n日のキー（古い順） */
+  recentKeys(n) {
+    const out = [];
+    for (let i = n - 1; i >= 0; i--) out.push(dateKey(addDays(new Date(), -i)));
+    return out;
+  },
+
+  /* ---------- 集計 ---------- */
+
+  /* その日に何かしら実践したか */
+  didSomething(k) {
+    const d = this.state.days[k];
+    if (!d) return false;
+    const j = d.jiai || {};
+    return !!(d.mood || j.love || j.perfect || j.best || j.allow ||
+      d.good.some(Boolean) || d.thanks.some(Boolean) ||
+      d.m369.am || d.m369.noon || d.m369.pm || d.m55 || d.sec68 ||
+      d.sats || d.arigatou || d.declutter || (d.acted || []).length);
+  },
+
+  /* 連続実践日数（今日まだなら昨日までを数える） */
+  streak() {
+    let n = 0;
+    let cur = new Date();
+    if (!this.didSomething(todayKey())) cur = addDays(cur, -1);
+    for (;;) {
+      if (!this.didSomething(dateKey(cur))) break;
+      n++;
+      cur = addDays(cur, -1);
+      if (n > 3650) break;
+    }
+    return n;
+  },
+
+  /* 自愛を続けた日数（直近14日で jiai が動いた日） */
+  jiaiDays(n) {
+    return this.recentKeys(n).filter(k => {
+      const d = this.state.days[k];
+      if (!d) return false;
+      const j = d.jiai || {};
+      return j.love + j.perfect + j.best + j.allow > 0;
+    }).length;
+  },
+
+  /* 刷り込み（369/55×5/SATS/68秒）をやった日数 */
+  imprintDays(n) {
+    return this.recentKeys(n).filter(k => {
+      const d = this.state.days[k];
+      if (!d) return false;
+      return d.sats || d.m55 >= 55 || d.sec68 > 0 ||
+        (d.m369.am >= 3 && d.m369.noon >= 6 && d.m369.pm >= 9);
+    }).length;
+  },
+
+  /* 直近の気分（記録がある日だけの平均。数字が小さいほど上の段） */
+  moodAvg(keys) {
+    const v = keys.map(k => this.state.days[k]).filter(d => d && d.mood).map(d => d.mood);
+    if (!v.length) return null;
+    return v.reduce((a, b) => a + b, 0) / v.length;
+  },
+
+  listCount(cat) {
+    return cat ? this.state.list.filter(x => x.cat === cat).length : this.state.list.length;
+  },
+
+  calmHits() {
+    return this.state.release.filter(r => r.calm >= 7).length;
+  },
+
+  preCount() {
+    return Object.values(this.state.pre).filter(x => x && x.done).length;
+  },
+
+  /* ---------- ステージ判定 ----------
+     条件を満たした最大のステージを返す。飛び級はしない。 */
+  stage() {
+    const s = this.state;
+    let n = 0;
+    const okS0 = this.jiaiDays(14) >= 7 && s.affirmation.discomfort <= 5;
+    const okS1 = okS0 && this.listCount() >= 100 && this.listCount('feel') >= 10 && !!s.affirmation.fixedAt;
+    const okS2 = okS1 && this.imprintDays(14) >= 7;
+    const okS3 = okS2 && this.calmHits() >= 3;
+    if (okS0) n = 1;
+    if (okS1) n = 2;
+    if (okS2) n = 3;
+    if (okS3) n = 4;
+    return n;
+  },
+
+  /* 次のステージへ行くために足りていないもの */
+  stageGaps() {
+    const s = this.state, gaps = [];
+    const st = this.stage();
+    if (st === 0) {
+      const j = this.jiaiDays(14);
+      if (j < 7) gaps.push(`自愛の実践があと${7 - j}日（直近14日で7日）`);
+      if (s.affirmation.discomfort > 5) gaps.push('アファメーションの違和感を5以下に（緩和形を使ってよい）');
+    } else if (st === 1) {
+      const c = this.listCount(), f = this.listCount('feel');
+      if (c < 100) gaps.push(`理想の相手リストがあと${100 - c}項目`);
+      if (f < 10) gaps.push(`フィーリング（どんな気持ちでいたいか）があと${10 - f}項目`);
+      if (!s.affirmation.fixedAt) gaps.push('アファメーションを1本「これでいく」と確定する');
+    } else if (st === 2) {
+      const i = this.imprintDays(14);
+      if (i < 7) gaps.push(`刷り込み（SATS／369／55×5／68秒）があと${7 - i}日`);
+    } else if (st === 3) {
+      const c = this.calmHits();
+      if (c < 3) gaps.push(`手放しチェックで穏やかさ7以上が、あと${3 - c}回`);
+    } else {
+      const p = this.preCount();
+      if (p < 3) gaps.push(`先取り行動があと${3 - p}個`);
+      else gaps.push('ここから先は日常。気分が下がったらステージ0（自愛）に戻る');
+    }
+    return gaps;
+  },
+
+  /* ---------- 警告（実践のベンチマーク） ---------- */
+  warnings() {
+    const out = [];
+
+    // ①気分が慢性的に下がっている → 方法が合っていないサイン
+    const recent = this.moodAvg(this.recentKeys(7));
+    const before = this.moodAvg(this.recentKeys(14).slice(0, 7));
+    if (recent !== null && before !== null && recent > before + 2 && recent > 12) {
+      out.push({
+        level: 'warn',
+        text: '直近1週間、気分が慢性的に下がっています。方法が合っていないサインとされます。刷り込み系を一度やめて、自愛といい気分の選択だけに戻ってください。'
+      });
+    }
+
+    // ②焦り・欠乏 → 願望設定が他人軸になっていないか
+    const anx = this.recentKeys(7).filter(k => {
+      const d = this.state.days[k];
+      return d && d.mood >= 10 && d.mood <= 14;
+    }).length;
+    if (anx >= 4) {
+      out.push({
+        level: 'warn',
+        text: '焦り・心配の段が続いています。願いから「周りが」「年齢が」を抜いても残るか点検を（他人軸チェック）。'
+      });
+    }
+
+    // ③好転反応が長期化 → 立ち止まる
+    const kouten = this.recentKeys(28).filter(k => {
+      const d = this.state.days[k];
+      return d && d.kouten;
+    }).length;
+    if (kouten >= 14) {
+      out.push({
+        level: 'stop',
+        text: '「好転反応」の記録が4週間で14日を超えました。これは好転反応の枠組みで扱うものではないかもしれません。一度立ち止まり、必要なら医療・専門家に相談してください。'
+      });
+    }
+
+    // ④執着が強いまま先取り行動だけ進んでいる
+    const lastCalm = this.state.release.length ? this.state.release[this.state.release.length - 1].calm : null;
+    if (lastCalm !== null && lastCalm <= 3 && this.preCount() >= 3) {
+      out.push({
+        level: 'note',
+        text: '行動は進んでいますが、直近の手放しチェックの穏やかさが低いままです。恋愛はここが成否を分けるとされます。ステージ3に戻る日を作ってください。'
+      });
+    }
+
+    return out;
+  },
+
+  /* ---------- 書き出し／読み込み ---------- */
+
+  exportJSON() {
+    return JSON.stringify(this.state, null, 2);
+  },
+
+  importJSON(text) {
+    const p = JSON.parse(text);
+    if (!p || typeof p !== 'object') throw new Error('形式が違います');
+    localStorage.setItem(HIKI_KEY, JSON.stringify(p));
+    this.load();
+  },
+
+  clear() {
+    localStorage.removeItem(HIKI_KEY);
+    this.state = this.fresh();
+  }
+};
+
+</script>
+<script>
+/* =========================================================
+   checks.js — 言葉のチェッカー
+   流派を超えてほぼ共通とされる作法を、書いた文にその場で当てる。
+     ・主語は「私は」（他人を変える文言は効果が薄いとされる）
+     ・語尾は「〜したい」ではなく「〜している／〜した」
+     ・否定形・ネガティブ語を使わない
+     ・五感で描写できるほど具体的に
+   判定はあくまで目安。赤が出ても、本人がしっくりくるならそれが正解。
+   ========================================================= */
+
+const Checks = {
+
+  /* アファメーション／未来日記／リスト項目に共通の診断 */
+  affirmation(text) {
+    const t = (text || '').trim();
+    const issues = [];
+    const goods = [];
+    if (!t) return { score: 0, issues: [{ type: 'empty', msg: 'まだ何も書かれていません。' }], goods: [] };
+
+    // ① 主語
+    if (/^私(は|が|の|、)/.test(t) || /^わたし/.test(t)) {
+      goods.push('主語が「私」になっている');
+    } else if (/^[私わ]/.test(t)) {
+      goods.push('主語が「私」になっている');
+    } else {
+      issues.push({
+        type: 'subject',
+        msg: '主語が「私」ではありません。他人を変える文言は効果が薄いとされます。文頭に「私は」を置いてください。',
+        fix: t => '私は' + t
+      });
+    }
+
+    // ② 他人主語（「彼が〜してくれる」型）
+    const other = NG_OTHER.find(w => t.includes(w));
+    if (other) {
+      issues.push({
+        type: 'other',
+        msg: `「${other}」で相手を動かす形になっています。「〇〇にしてほしい」ではなく「そうなった私」「互いに幸せな関係」へ言い換えてください。`
+      });
+    }
+
+    // ③ 願望形
+    const wish = NG_WISH.find(w => t.includes(w));
+    if (wish) {
+      issues.push({
+        type: 'wish',
+        msg: `「${wish}」は願望形です。「今は達成していない＝不足」を刷り込むため、現在形・完了形（〜している／〜した）にします。`,
+        fix: t => t.replace(/(し)?たいです。?$/, 'しています。').replace(/たい。?$/, 'ています。').replace(/ますように。?$/, 'ています。')
+      });
+    }
+
+    // ④ 否定形・ネガティブ語
+    const negPat = /(し|れ|え|け|て|で|ら|わ|た|ま|か)ない|ません|なくて|ずに|ないで|不安|心配|無理|寂し|さみし|独りぼ|焦/;
+    const negHit = t.match(negPat);
+    if (negHit) {
+      issues.push({
+        type: 'negative',
+        msg: `「${negHit[0]}」が入っています。潜在意識は否定形を認識しにくいとされます。「ない」ではなく「ある」で書き直してください（例：「不安がない」→「安心している」）。`
+      });
+    }
+
+    // ⑤ 語尾（現在形・現在進行形・完了形）※文末で見る。「したい」を「した」と誤認しないため
+    if (/(している|しています|ている|ています|ていた|でいる|いる|した|しました|ました|なった|なっている|です|ます|だ|である|られている|られた)[。．.！!]?$/.test(t)) {
+      goods.push('語尾が現在形／完了形になっている');
+    } else {
+      issues.push({
+        type: 'tense',
+        msg: '語尾が「している／した／なった／です」のいずれでもありません。すでにそうである前提の言い方に寄せてください。'
+      });
+    }
+
+    // ⑥ 五感・具体性
+    const senses = SENSE_WORDS.filter(w => t.includes(w));
+    if (senses.length >= 2) goods.push(`五感で描けている（${senses.slice(0, 3).join('・')}）`);
+    else if (t.length >= 30) goods.push('具体的な長さがある');
+    else issues.push({
+      type: 'sense',
+      msg: '五感で描写できるほど具体的にすると強くなるとされます。朝の光、声、手ざわり、匂いなどを1つ足してみてください。'
+    });
+
+    // 採点（100点満点・目安）
+    let score = 100;
+    for (const i of issues) {
+      score -= (i.type === 'sense' ? 10 : i.type === 'subject' ? 25 : 20);
+    }
+    score = Math.max(0, Math.min(100, score));
+    return { score, issues, goods };
+  },
+
+  /* 違和感が強いときの緩和形（認知的不協和の回避） */
+  soften(text) {
+    const t = (text || '').trim();
+    if (!t) return [];
+    // 「私は◯◯している。」から中身◯◯を粗く抜く
+    let core = t.replace(/^私(は|が)/, '').replace(/[。.！!]$/, '');
+    core = core.replace(/(しています|している|しました|した|です|ます|ています|ている)$/, '');
+    core = core.trim() || t;
+    return SOFTENERS.map(tpl => tpl.replace('{X}', core));
+  },
+
+  /* SATSの場面チェック：「叶った瞬間の歓喜」を選んでいないか */
+  satsScene(text) {
+    const t = (text || '').trim();
+    if (!t) return { ok: false, msg: 'まだ場面が登録されていません。' };
+    const peak = SATS_PEAK_WORDS.find(w => t.includes(w));
+    if (peak) {
+      return {
+        ok: false,
+        msg: `「${peak}」は“叶った瞬間の歓喜”に寄っています。SATSでよくある失敗はここ。推奨は「叶ったあとの、ありふれた日常の一場面」——たとえば二人ぶんの洗濯物をたたんでいる、隣で寝息が聞こえる、台所で水を出している、など。`
+      };
+    }
+    const senses = SENSE_WORDS.filter(w => t.includes(w));
+    if (senses.length === 0) {
+      return { ok: true, msg: '静かな場面が登録されています。手ざわり・音・匂いをもう1つ足すと、中に入りやすくなります。' };
+    }
+    return { ok: true, msg: '静けさのある日常の場面です。この質感のまま眠ってください。' };
+  },
+
+  /* リスト項目：否定形で書かれていないか（肯定形で書くのが作法） */
+  listItem(text) {
+    const t = (text || '').trim();
+    if (!t) return null;
+    const m = t.match(/(し|れ|え|け|て|で|ら|わ|た|ま|か)ない|ません|嫌な|苦手/);
+    if (m) {
+      return `「${m[0]}」は否定形です。潜在意識は否定形を認識しないとされます。「怒らない人」→「機嫌のいい人」のように、欲しい状態そのものに書き換えてください。`;
+    }
+    return null;
+  }
+};
+
+</script>
+<script>
+/* =========================================================
+   app.js — 画面の組み立てと操作
+   ========================================================= */
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+let S;            // Store.state の別名
+let curCat = 'look';
+let promptIdx = 0;
+
+/* ---------- トースト ---------- */
+
+let toastTimer = null;
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('is-on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('is-on'), 2200);
+}
+
+function save() {
+  Store.save();
+}
+
+/* =========================================================
+   タブ
+   ========================================================= */
+
+function initTabs() {
+  $('tabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab');
+    if (!btn) return;
+    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('is-on', b === btn));
+    document.querySelectorAll('.panel').forEach(p => {
+      p.classList.toggle('is-on', p.id === 'panel-' + btn.dataset.panel);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/* =========================================================
+   ヘッダー・ステージ・警告
+   ========================================================= */
+
+function renderHeader() {
+  const st = Store.stage();
+  $('hStage').textContent = st;
+  const mood = Store.today().mood;
+  $('hMood').textContent = mood ? mood : '–';
+  $('hMood').classList.toggle('good', !!mood && mood <= 7);
+  $('hMood').classList.toggle('low', !!mood && mood >= 15);
+  $('hStreak').textContent = Store.streak();
+
+  const w = S.profile.weddingDate;
+  if (w) {
+    const n = diffDays(todayKey(), w);
+    $('hCount').textContent = n > 0 ? n + '日' : (n === 0 ? '今日' : '済');
+  } else {
+    $('hCount').textContent = '未定';
+  }
+}
+
+function renderStage() {
+  const n = Store.stage();
+  const st = STAGES[n];
+  const gaps = Store.stageGaps();
+  $('stageBox').innerHTML = `
+    <div class="stage-line">
+      ${STAGES.map(s => `<span class="stage-dot ${s.n < n ? 'past' : s.n === n ? 'now' : ''}">${s.n}</span>`).join('<i></i>')}
+    </div>
+    <h3 class="stage-title">ステージ${st.n}：${st.title}<small>${st.span}</small></h3>
+    <p class="stage-lead">${st.lead}</p>
+    <ul class="stage-todo">${st.todo.map(t => `<li>${t}</li>`).join('')}</ul>
+    <div class="stage-next">
+      <b>次へ進む目安</b>
+      <ul>${gaps.map(g => `<li>${esc(g)}</li>`).join('')}</ul>
+    </div>`;
+}
+
+function renderWarnings() {
+  const ws = Store.warnings();
+  $('warnBox').innerHTML = ws.map(w => `
+    <div class="card warn warn-${w.level}">
+      <b>${w.level === 'stop' ? '立ち止まってください' : w.level === 'warn' ? 'ベンチマーク' : 'メモ'}</b>
+      <p>${esc(w.text)}</p>
+    </div>`).join('');
+}
+
+/* =========================================================
+   今日：感情のスケール
+   ========================================================= */
+
+function renderScale() {
+  const cur = Store.today().mood;
+  $('scale').innerHTML = EMOTION_SCALE.map(e => `
+    <button class="sc ${cur === e.n ? 'is-on' : ''} ${cur && e.n === cur - 1 ? 'is-next' : ''}"
+            data-n="${e.n}" style="--t:${(e.n - 1) / 21}">
+      <span class="sc-n">${e.n}</span><span class="sc-l">${e.label}</span>
+    </button>`).join('');
+
+  if (!cur) {
+    $('bridge').innerHTML = '<p class="hint">今の気分にいちばん近い段を押してください。正直に押すほど役に立ちます。</p>';
+    return;
+  }
+  const now = EMOTION_SCALE[cur - 1];
+  const up = cur > 1 ? EMOTION_SCALE[cur - 2] : null;
+  $('bridge').innerHTML = `
+    <div class="bridge-in">
+      <p class="bridge-now">いま <b>${cur}. ${now.label}</b></p>
+      <p class="bridge-do">${esc(now.bridge)}</p>
+      ${up ? `<p class="bridge-up">次に目指すのは <b>${up.n}. ${up.label}</b> だけ。それ以上は狙わない。</p>`
+           : '<p class="bridge-up">最上段です。17秒だけ味わって、あとは手を離してください。</p>'}
+    </div>`;
+}
+
+/* =========================================================
+   今日：自愛
+   ========================================================= */
+
+const JIAI = [
+  { key: 'love', label: '愛してる', note: '鏡に向かって' },
+  { key: 'perfect', label: '完璧', note: 'そのままで' },
+  { key: 'best', label: '最高', note: '理由はいらない' },
+  { key: 'allow', label: '許可する', note: 'ありのままで存在することを' }
+];
+
+function renderJiai() {
+  const d = Store.today();
+  $('jiaiRow').innerHTML = JIAI.map(j => `
+    <button class="tap ${d.jiai[j.key] ? 'is-on' : ''}" data-jiai="${j.key}">
+      <span class="tap-label">${j.label}</span>
+      <span class="tap-note">${j.note}</span>
+      <span class="tap-num">${d.jiai[j.key]}</span>
+    </button>`).join('');
+
+  $('noticeList').innerHTML = (d.notice || []).map(t => `<li>${esc(t)}</li>`).join('');
+}
+
+/* =========================================================
+   今日：夜のノート
+   ========================================================= */
+
+function renderNight() {
+  const d = Store.today();
+  $('goodInputs').innerHTML = d.good.map((v, i) =>
+    `<input type="text" class="line-in" data-good="${i}" value="${esc(v)}" placeholder="${i + 1}つめ">`).join('');
+  $('thanksInputs').innerHTML = d.thanks.map((v, i) =>
+    `<input type="text" class="line-in" data-thanks="${i}" value="${esc(v)}" placeholder="${i + 1}つめ">`).join('');
+}
+
+/* =========================================================
+   今日：実践チェック
+   ========================================================= */
+
+function todayItems() {
+  const d = Store.today();
+  const j = d.jiai;
+  return [
+    { stage: 0, label: '感情の段を記録', done: !!d.mood },
+    { stage: 0, label: '自愛（鏡のワーク）', done: j.love + j.perfect + j.best + j.allow > 0 },
+    { stage: 0, label: 'いいことノート3つ', done: d.good.filter(Boolean).length >= 3 },
+    { stage: 0, label: '感謝3つ', done: d.thanks.filter(Boolean).length >= 3 },
+    { stage: 1, label: 'リスト100項目', done: Store.listCount() >= 100 },
+    { stage: 2, label: '369（朝3昼6夜9）', done: d.m369.am >= 3 && d.m369.noon >= 6 && d.m369.pm >= 9 },
+    { stage: 2, label: '55×5（55回）', done: d.m55 >= 55 },
+    { stage: 2, label: '68秒を通す', done: d.sec68 > 0 },
+    { stage: 2, label: 'SATS', done: !!d.sats },
+    { stage: 2, label: 'ありがとう500回', done: d.arigatou >= 500 },
+    { stage: 3, label: '手放しチェック', done: S.release.some(r => r.at === todayKey()) },
+    { stage: 3, label: '1つ手放す', done: d.declutter > 0 },
+    { stage: 4, label: '現実の一歩', done: (d.acted || []).length > 0 }
+  ];
+}
+
+function renderTodayCheck() {
+  const st = Store.stage();
+  $('todayCheck').innerHTML = todayItems().map(it => `
+    <li class="tc ${it.done ? 'done' : ''} ${it.stage === st ? 'now' : ''}">
+      <span class="tc-mark">${it.done ? '✓' : '·'}</span>
+      <span class="tc-label">${it.label}</span>
+      <span class="tc-stage">S${it.stage}</span>
+    </li>`).join('');
+}
+
+/* =========================================================
+   決める：電撃婚の設定とロードマップ
+   ========================================================= */
+
+function renderProfile() {
+  $('pfName').value = S.profile.nickname || '';
+  $('pfWedding').value = S.profile.weddingDate || '';
+  $('pfBlitz').value = String(S.profile.blitzDays || 120);
+  $('pfMet').value = S.profile.metDate || '';
+
+  const box = $('decidedBox');
+  if (!S.profile.weddingDate) {
+    box.innerHTML = '<p class="hint">日付が決まると、ここに「もう決まっている予定」として表示されます。</p>';
+    return;
+  }
+  const w = parseKey(S.profile.weddingDate);
+  const left = diffDays(todayKey(), S.profile.weddingDate);
+  const D = blitzSpan();
+  const meetKey = dateKey(addDays(w, -D));
+  const meetLeft = diffDays(todayKey(), meetKey);
+  const name = S.profile.nickname || '私';
+
+  box.innerHTML = `
+    <div class="decided-in">
+      <p class="dc-date">${jpDate(w)}</p>
+      <p class="dc-line">${esc(name)}は、この日に入籍している。</p>
+      <p class="dc-sub">${left > 0 ? `あと ${left} 日` : left === 0 ? '今日です' : `${-left} 日前に過ぎました（新しい日付を決めてください）`}
+        ${S.profile.decidedAt ? ` ／ ${S.profile.decidedAt} に決めた` : ''}</p>
+      <p class="dc-meet">
+        ${S.profile.metDate
+          ? `出会いは ${jpDate(parseKey(S.profile.metDate))}。そこから ${diffDays(S.profile.metDate, S.profile.weddingDate)} 日での入籍。`
+          : meetLeft > 0
+            ? `逆算すると、出会うのは <b>${jpDate(parseKey(meetKey))}ごろ</b>（あと${meetLeft}日）。`
+            : `逆算した出会いの日は <b>もう過ぎています</b>。相手はすでに知り合いの中にいるか、これから前倒しで現れる、ということ。`}
+      </p>
+    </div>`;
+}
+
+/* 電撃期間D：出会っているならその実日数、いなければ設定値 */
+function blitzSpan() {
+  if (S.profile.metDate && S.profile.weddingDate) {
+    const d = diffDays(S.profile.metDate, S.profile.weddingDate);
+    if (d > 0) return d;
+  }
+  return Number(S.profile.blitzDays) || 120;
+}
+
+function renderRoad() {
+  const box = $('road');
+  if (!S.profile.weddingDate) {
+    box.innerHTML = '<li class="road-empty">まず上で入籍する日を決めてください。決まった瞬間に、ここに道のりが引かれます。</li>';
+    return;
+  }
+  const w = parseKey(S.profile.weddingDate);
+  const D = blitzSpan();
+
+  // 日付を出してから、時間順に並べ替える。
+  // 納期の都合で前倒しになった段取りが、物語の順序を追い越すことがある ── それも含めて現実。
+  const items = ROADMAP.map(r => {
+    let d = addDays(w, -Math.round(D * r.ratio));
+    let caution = '';
+    if (r.lead) {
+      const lim = addDays(w, -r.lead);
+      if (d > lim) {
+        d = lim;
+        caution = `納期から逆算して ${jpShort(lim)} に前倒し。`;
+      }
+    }
+    return { r, d, caution };
+  }).sort((a, b) => a.d - b.d);
+
+  box.innerHTML = items.map(({ r, d, caution }) => {
+    const key = dateKey(d);
+    const rec = S.road[r.key] || {};
+    const past = diffDays(todayKey(), key) < 0;
+    return `
+      <li class="road-item ${rec.done ? 'done' : ''} ${past && !rec.done ? 'past' : ''}">
+        <button class="road-check" data-road="${r.key}">${rec.done ? '✓' : ''}</button>
+        <div class="road-body">
+          <p class="road-head"><b>${r.label}</b><span class="road-date">${jpShort(d)}</span></p>
+          <p class="road-note">${r.note}${caution ? ` <em>${caution}</em>` : ''}</p>
+          ${rec.done ? `<p class="road-done">${rec.at} に完了</p>` : ''}
+        </div>
+      </li>`;
+  }).join('');
+}
+
+/* =========================================================
+   決める：100項目リスト
+   ========================================================= */
+
+function renderList() {
+  const total = Store.listCount();
+  $('lpNum').textContent = `${total} / 100`;
+  $('lpFill').style.width = Math.min(100, total) + '%';
+
+  $('catTabs').innerHTML = LIST_CATS.map(c => `
+    <button class="cat ${curCat === c.key ? 'is-on' : ''}" data-cat="${c.key}">
+      ${c.label}<span>${Store.listCount(c.key)}</span>
+    </button>`).join('');
+
+  const cat = LIST_CATS.find(c => c.key === curCat);
+  $('listHint').innerHTML = esc(cat.hint) +
+    (curCat !== 'feel' && Store.listCount('feel') < 10
+      ? ' <b>／ フィーリングがまだ' + Store.listCount('feel') + '項目です。条件だけ追うと本当の願いとズレます。</b>'
+      : '');
+
+  const items = S.list.filter(x => x.cat === curCat);
+  $('wishList').innerHTML = items.length
+    ? items.map(x => `<li><span>${esc(x.text)}</span><button class="x" data-del="${x.id}">×</button></li>`).join('')
+    : '<li class="empty">まだありません。下の問いに答えるつもりで書くと出てきます。</li>';
+
+  $('promptText').textContent = LIST_PROMPTS[promptIdx % LIST_PROMPTS.length];
+}
+
+/* =========================================================
+   決める：アファメーション
+   ========================================================= */
+
+function renderAff() {
+  const a = S.affirmation;
+  if ($('affText').value !== a.text) $('affText').value = a.text || '';
+  $('affDiscomfort').value = a.discomfort;
+  $('affDiscomfortOut').textContent = a.discomfort;
+
+  const r = Checks.affirmation(a.text);
+  $('affScore').textContent = r.score;
+  $('affScore').className = 'score-ring ' + (r.score >= 80 ? 'hi' : r.score >= 50 ? 'mid' : 'lo');
+  $('affDetail').innerHTML =
+    (r.goods.length ? `<ul class="ok-list">${r.goods.map(g => `<li>${esc(g)}</li>`).join('')}</ul>` : '') +
+    (r.issues.length ? `<ul class="ng-list">${r.issues.map(i => `<li>${esc(i.msg)}</li>`).join('')}</ul>` : '');
+
+  const soft = $('softenBox');
+  if (a.discomfort >= 6 && a.text) {
+    soft.innerHTML = '<p class="soft-head">違和感が強いので、断定を弱めた形を置いておきます。押すと差し替わります。</p>' +
+      Checks.soften(a.text).map(s => `<button class="soft" data-soft="${esc(s)}">${esc(s)}</button>`).join('');
+  } else {
+    soft.innerHTML = '';
+  }
+  $('affFixedAt').textContent = a.fixedAt ? `${a.fixedAt} に確定` : '';
+}
+
+/* =========================================================
+   刷り込む：SATS
+   ========================================================= */
+
+let satsTimer = null;
+
+function renderSats() {
+  $('satsScene').value = S.satsScene || '';
+  const r = Checks.satsScene(S.satsScene);
+  $('satsHint').innerHTML = `<span class="${r.ok ? 'ok' : 'ng'}">${esc(r.msg)}</span>`;
+  $('satsDone').checked = !!Store.today().sats;
+}
+
+function startSats() {
+  let i = 0, left = SATS_STEPS[0].sec;
+  $('satsStart').hidden = true;
+  $('satsStop').hidden = false;
+
+  const draw = () => {
+    const s = SATS_STEPS[i];
+    $('satsStage').innerHTML = `
+      <div class="sats-now">
+        <p class="sats-step">${s.title}</p>
+        <p class="sats-body">${s.body}</p>
+        ${i === 2 && S.satsScene ? `<p class="sats-scene">${esc(S.satsScene)}</p>` : ''}
+        <p class="sats-left">${left}</p>
+        <div class="sats-bar"><span style="width:${100 * (1 - left / s.sec)}%"></span></div>
+        <p class="sats-of">${i + 1} / ${SATS_STEPS.length}</p>
+      </div>`;
+  };
+  draw();
+
+  satsTimer = setInterval(() => {
+    left--;
+    if (left <= 0) {
+      i++;
+      if (i >= SATS_STEPS.length) {
+        stopSats();
+        Store.today().sats = true;
+        save();
+        $('satsStage').innerHTML = '<div class="sats-now done"><p class="sats-step">おやすみなさい</p><p class="sats-body">静けさのまま、そこで眠ってください。日中の内的会話（メンタル・ダイエット）は、この夜の作業を守るためにあります。</p></div>';
+        renderAll();
+        return;
+      }
+      left = SATS_STEPS[i].sec;
+    }
+    draw();
+  }, 1000);
+}
+
+function stopSats() {
+  clearInterval(satsTimer);
+  satsTimer = null;
+  $('satsStart').hidden = false;
+  $('satsStop').hidden = true;
+}
+
+/* =========================================================
+   刷り込む：369 / 55×5
+   ========================================================= */
+
+const M369 = [
+  { key: 'am', label: '朝', need: 3 },
+  { key: 'noon', label: '昼', need: 6 },
+  { key: 'pm', label: '夜', need: 9 }
+];
+
+function render369() {
+  const d = Store.today();
+  const aff = S.affirmation.text;
+  $('m369').innerHTML = `
+    ${aff ? `<p class="m369-aff">${esc(aff)}</p>` : '<p class="hint">先に「決める」タブでアファメーションを書いてください。</p>'}
+    <div class="m369-row">
+      ${M369.map(m => {
+        const v = d.m369[m.key];
+        return `<button class="m369-btn ${v >= m.need ? 'is-on' : ''}" data-m369="${m.key}">
+          <span class="m-label">${m.label}</span>
+          <span class="m-num">${v} / ${m.need}</span>
+          <span class="m-dots">${Array.from({ length: m.need }, (_, i) => `<i class="${i < v ? 'on' : ''}"></i>`).join('')}</span>
+        </button>`;
+      }).join('')}
+    </div>`;
+}
+
+function render55() {
+  const o = S.order;
+  const d = Store.today();
+  const box = $('orderBox');
+  if (o.text) $('orderInput').value = '';
+  if (!o.text) {
+    box.innerHTML = '<p class="hint">まだオーダーがありません。願いを1つだけ注文してください。</p>';
+    return;
+  }
+  const dayNo = o.startedAt ? Math.min(5, diffDays(o.startedAt, todayKey()) + 1) : 1;
+  const doneDays = o.streak || 0;
+  box.innerHTML = `
+    <p class="order-text">${esc(o.text)}</p>
+    <div class="m55-days">
+      ${[1, 2, 3, 4, 5].map(n => `<span class="d55 ${n <= doneDays ? 'on' : ''} ${n === doneDays + 1 ? 'cur' : ''}">${n}日目</span>`).join('')}
+    </div>
+    <div class="m55-count">
+      <b id="m55Num">${d.m55}</b> / 55 回
+      <div class="m55-bar"><span style="width:${Math.min(100, d.m55 / 55 * 100)}%"></span></div>
+    </div>
+    <div class="row-btns">
+      <button class="btn primary" id="m55p1">書いた +1</button>
+      <button class="btn ghost" id="m55p5">+5</button>
+      <button class="btn ghost" id="orderClear">オーダーを取り下げる</button>
+    </div>
+    ${o.checkAt ? `<p class="hint">オーダー確認日：<b>${o.checkAt}</b>。その日に「願いが変わっていないか」を見て、変わっていなければもう一度書きます。</p>` : ''}
+    <p class="hint">1回あたり30分程度かかると言われます。途中で日をまたいで途切れたら、責めずに1日目から。</p>`;
+
+  $('m55p1').onclick = () => add55(1);
+  $('m55p5').onclick = () => add55(5);
+  $('orderClear').onclick = () => {
+    S.order = { text: '', startedAt: '', lastDay: '', streak: 0, checkAt: '' };
+    save(); renderAll(); toast('オーダーを取り下げました');
+  };
+}
+
+function add55(n) {
+  const d = Store.today();
+  const o = S.order;
+  d.m55 = Math.min(55, d.m55 + n);
+  if (d.m55 >= 55 && o.lastDay !== todayKey()) {
+    const cont = o.lastDay && diffDays(o.lastDay, todayKey()) === 1;
+    o.streak = cont ? (o.streak || 0) + 1 : 1;
+    o.lastDay = todayKey();
+    if (!o.startedAt || o.streak === 1) o.startedAt = todayKey();
+    if (o.streak >= 5) {
+      o.checkAt = dateKey(addDays(new Date(), 30));
+      toast('5日間そろいました。あとは1か月後の確認日まで放っておく。');
+    } else {
+      toast(`${o.streak}日目、55回そろいました。`);
+    }
+  }
+  save();
+  renderAll();
+}
+
+/* =========================================================
+   刷り込む：17秒 / 68秒
+   ========================================================= */
+
+let t17Timer = null, t17Sec = 0;
+
+function renderT17() {
+  $('t17Num').innerHTML = `${t17Sec}<small>秒</small>`;
+  const bar = $('t17Bar');
+  [...bar.children].forEach((seg, i) => {
+    const from = i * 17;
+    const p = Math.max(0, Math.min(1, (t17Sec - from) / 17));
+    seg.style.setProperty('--p', p);
+    seg.classList.toggle('full', p >= 1);
+  });
+}
+
+function startT17() {
+  if (t17Timer) return;
+  t17Timer = setInterval(() => {
+    t17Sec++;
+    if (t17Sec === 17) toast('17秒。同じ波動の思いが加わりはじめる。');
+    if (t17Sec >= 68) {
+      clearInterval(t17Timer); t17Timer = null;
+      Store.today().sec68++;
+      save();
+      toast('68秒。エネルギーが十分になった、とされるところ。ここで手を離す。');
+      renderAll();
+    }
+    renderT17();
+  }, 1000);
+}
+
+function mixT17() {
+  clearInterval(t17Timer); t17Timer = null;
+  t17Sec = 0;
+  renderT17();
+  toast('気づけたのが収穫。もう一度、純粋なところから。');
+}
+
+/* =========================================================
+   刷り込む：ありがとう・口ぐせ
+   ========================================================= */
+
+function renderArigatou() {
+  const d = Store.today();
+  $('arigNum').textContent = d.arigatou;
+  $('arigFill').style.width = Math.min(100, d.arigatou / 500 * 100) + '%';
+  $('swapList').innerHTML = S.swap.slice(-8).reverse()
+    .map(s => `<li>${esc(s.from)}</li>`).join('');
+}
+
+/* =========================================================
+   手放す
+   ========================================================= */
+
+function renderCalm() {
+  const rs = S.release.slice(-20);
+  $('calmChart').className = 'calm-chart' + (rs.length ? ' has-bars' : '');
+  $('calmChart').innerHTML = rs.length
+    ? rs.map(r => `<span class="cbar ${r.calm >= 7 ? 'hi' : ''}" style="height:${8 + r.calm * 9}px" title="${r.at}：${r.calm}"></span>`).join('')
+    : '<p class="hint">まだ記録がありません。</p>';
+}
+
+const openBlocks = new Set();
+
+function renderBlocks() {
+  $('blocks').innerHTML = BLOCKS.map(b => {
+    const rec = S.blocks[b.key] || {};
+    const open = openBlocks.has(b.key);
+    return `
+      <div class="block ${rec.noticed ? 'noticed' : ''} ${open ? 'open' : ''}">
+        <button class="block-head" data-open="${b.key}">
+          <span class="block-mark">${rec.noticed ? '◉' : '○'}</span>
+          <span class="block-label">${b.label}</span>
+          <span class="block-arrow">${open ? '−' : '＋'}</span>
+        </button>
+        <div class="block-body">
+          <p class="block-ask">${b.ask}</p>
+          <textarea rows="2" data-blockmemo="${b.key}" placeholder="思いついたことを、直さずに書く">${esc(rec.memo || '')}</textarea>
+          <div class="block-foot">
+            <button class="btn tiny ${rec.noticed ? 'primary' : 'ghost'}" data-block="${b.key}">${rec.noticed ? '気づいた' : 'これはある'}</button>
+            <span class="block-at">${rec.at ? `${rec.at} に気づいた` : '解除しようとしなくていい。気づけばそれでいい。'}</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderDeclutter() {
+  const d = Store.today();
+  $('dcNum').textContent = d.declutter;
+  const total = Object.values(S.days).reduce((a, x) => a + (x.declutter || 0), 0);
+  $('dcTotal').textContent = `これまでに合計 ${total} 個`;
+}
+
+function renderSolo() {
+  const last = S.solo[S.solo.length - 1];
+  if (last && !$('soloText').value) $('soloText').placeholder = last.text.slice(0, 40) + '…（前回）';
+}
+
+/* =========================================================
+   動く
+   ========================================================= */
+
+function renderPre() {
+  $('preGrid').innerHTML = PREACTIONS.map(p => {
+    const rec = S.pre[p.key] || {};
+    return `<button class="pre ${rec.done ? 'done' : ''}" data-pre="${p.key}">
+      <span class="pre-mark">${rec.done ? '✓' : ''}</span>
+      <span class="pre-label">${p.label}</span>
+      ${rec.at ? `<span class="pre-at">${rec.at}</span>` : ''}
+    </button>`;
+  }).join('');
+}
+
+function renderActs() {
+  const keys = Store.recentKeys(14).slice().reverse();
+  const rows = [];
+  for (const k of keys) {
+    const d = S.days[k];
+    if (!d || !(d.acted || []).length) continue;
+    rows.push(`<li><span class="act-date">${jpShort(parseKey(k))}</span><span>${d.acted.map(esc).join(' / ')}</span></li>`);
+  }
+  $('actList').innerHTML = rows.length ? rows.join('') : '<li class="empty">まだありません。小さくていいので一歩を。</li>';
+}
+
+/* =========================================================
+   記録
+   ========================================================= */
+
+function renderDiary() {
+  $('diaryList').innerHTML = S.diary.slice().reverse().slice(0, 20).map(x => `
+    <li><span class="d-at">${x.at}</span><p>${esc(x.text)}</p><button class="x" data-ddel="${x.id}">×</button></li>`).join('')
+    || '<li class="empty">まだありません。</li>';
+  const t = $('diaryText').value;
+  if (t.trim()) {
+    const r = Checks.affirmation(t);
+    const tense = r.issues.find(i => i.type === 'tense' || i.type === 'wish');
+    $('diaryHint').textContent = tense ? tense.msg : '過去形・完了形で書けています。';
+  } else {
+    $('diaryHint').textContent = '';
+  }
+}
+
+function renderKouten() {
+  const keys = Store.recentKeys(28);
+  const hits = keys.filter(k => S.days[k] && S.days[k].kouten);
+  const t = Store.today();
+  $('koutenText').value = t.kouten || '';
+  $('koutenBox').innerHTML = `
+    <p class="hint">直近28日で ${hits.length} 日の記録。${hits.length >= 14 ? '<b class="ng">長すぎます。好転反応の枠組みから一度離れてください。</b>' : hits.length >= 5 ? '5日前後が目安と言われる範囲を超えています。様子を見てください。' : ''}</p>
+    <ul class="kouten-list">${hits.slice(-6).reverse().map(k => `<li><span>${jpShort(parseKey(k))}</span>${esc(S.days[k].kouten)}</li>`).join('')}</ul>`;
+}
+
+function renderHeat() {
+  const days = 91;
+  const cells = [];
+  // 曜日で行がそろうように、先頭を空セルで埋める
+  const first = addDays(new Date(), -(days - 1));
+  for (let i = 0; i < first.getDay(); i++) cells.push('<i class="hc hc-pad"></i>');
+  for (let i = days - 1; i >= 0; i--) {
+    const k = dateKey(addDays(new Date(), -i));
+    const d = S.days[k];
+    let n = 0;
+    if (d) {
+      const j = d.jiai || {};
+      n = (d.mood ? 1 : 0) + (j.love + j.perfect + j.best + j.allow > 0 ? 1 : 0) +
+        (d.good.filter(Boolean).length >= 3 ? 1 : 0) + (d.thanks.filter(Boolean).length >= 3 ? 1 : 0) +
+        (d.sats ? 1 : 0) + (d.sec68 ? 1 : 0) + (d.m55 >= 55 ? 1 : 0) +
+        (d.m369.am >= 3 && d.m369.noon >= 6 && d.m369.pm >= 9 ? 1 : 0) +
+        (d.arigatou >= 500 ? 1 : 0) + ((d.acted || []).length ? 1 : 0);
+    }
+    const lv = n === 0 ? 0 : n <= 2 ? 1 : n <= 4 ? 2 : n <= 6 ? 3 : 4;
+    cells.push(`<i class="hc hc${lv}" title="${k}：${n}個"></i>`);
+  }
+  $('heat').innerHTML = cells.join('');
+
+  const doneDays = Object.keys(S.days).filter(k => Store.didSomething(k)).length;
+  const totalArig = Object.values(S.days).reduce((a, x) => a + (x.arigatou || 0), 0);
+  const total68 = Object.values(S.days).reduce((a, x) => a + (x.sec68 || 0), 0);
+  const satsDays = Object.values(S.days).filter(x => x.sats).length;
+  $('miniStats').innerHTML = [
+    ['実践した日', doneDays + '日'],
+    ['連続', Store.streak() + '日'],
+    ['リスト', Store.listCount() + '項目'],
+    ['先取り行動', Store.preCount() + '個'],
+    ['SATS', satsDays + '晩'],
+    ['68秒', total68 + '回'],
+    ['ありがとう', totalArig.toLocaleString() + '回'],
+    ['未来日記', S.diary.length + '本']
+  ].map(([k, v]) => `<div class="ms"><b>${v}</b><span>${k}</span></div>`).join('');
+}
+
+/* =========================================================
+   流派タブ（静的）
+   ========================================================= */
+
+function renderSchoolTab() {
+  $('schools').innerHTML = Object.entries(SCHOOLS).map(([k, s]) => `
+    <div class="school-card" data-school="${k}">
+      <span class="school-mark">${s.short}</span>
+      <div><b>${s.name}</b><p>${s.desc}</p></div>
+    </div>`).join('');
+
+  $('authors').innerHTML = AUTHORS.map(a => `
+    <div class="author"><b>${a.name}</b><span class="author-point">${a.point}</span><p>${a.line}</p></div>`).join('');
+
+  $('glossary').innerHTML = GLOSSARY.map(g => `
+    <div class="gl"><b>${g.term}</b><span class="school-tag" data-school="${g.school}">${SCHOOLS[g.school].name}</span><p>${g.desc}</p></div>`).join('');
+
+  $('caveats').innerHTML = CAVEATS.map(c => `<li>${c}</li>`).join('');
+}
+
+/* =========================================================
+   まとめて描画
+   ========================================================= */
+
+function renderAll() {
+  renderHeader();
+  renderStage();
+  renderWarnings();
+  renderScale();
+  renderJiai();
+  renderNight();
+  renderTodayCheck();
+  renderProfile();
+  renderRoad();
+  renderList();
+  renderAff();
+  renderSats();
+  render369();
+  render55();
+  renderT17();
+  renderArigatou();
+  renderCalm();
+  renderBlocks();
+  renderDeclutter();
+  renderPre();
+  renderActs();
+  renderDiary();
+  renderKouten();
+  renderHeat();
+}
+
+/* =========================================================
+   イベント
+   ========================================================= */
+
+function initEvents() {
+
+  /* --- 感情スケール --- */
+  $('scale').addEventListener('click', e => {
+    const b = e.target.closest('.sc');
+    if (!b) return;
+    const n = Number(b.dataset.n);
+    const d = Store.today();
+    d.mood = d.mood === n ? 0 : n;
+    save(); renderAll();
+  });
+
+  /* --- 自愛 --- */
+  $('jiaiRow').addEventListener('click', e => {
+    const b = e.target.closest('[data-jiai]');
+    if (!b) return;
+    Store.today().jiai[b.dataset.jiai]++;
+    save(); renderAll();
+  });
+
+  $('noticeBtn').addEventListener('click', () => {
+    const v = $('noticeInput').value.trim();
+    if (!v) return;
+    Store.today().notice.push(v);
+    $('noticeInput').value = '';
+    save(); renderJiai();
+    toast('気づいただけでいい。直さなくていい。');
+  });
+  $('noticeInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('noticeBtn').click(); });
+
+  /* --- 夜のノート --- */
+  document.addEventListener('input', e => {
+    const t = e.target;
+    if (t.dataset.good !== undefined) { Store.today().good[t.dataset.good] = t.value; save(); renderHeat(); renderTodayCheck(); }
+    if (t.dataset.thanks !== undefined) { Store.today().thanks[t.dataset.thanks] = t.value; save(); renderHeat(); renderTodayCheck(); }
+    if (t.dataset.blockmemo !== undefined) {
+      const k = t.dataset.blockmemo;
+      S.blocks[k] = S.blocks[k] || {};
+      S.blocks[k].memo = t.value;
+      save();
+    }
+  });
+
+  /* --- 決める：プロフィール --- */
+  $('decideBtn').addEventListener('click', () => {
+    S.profile.nickname = $('pfName').value.trim() || 'ゆゆ';
+    S.profile.weddingDate = $('pfWedding').value;
+    S.profile.blitzDays = Number($('pfBlitz').value);
+    S.profile.metDate = $('pfMet').value;
+    if (!S.profile.weddingDate) { toast('入籍する日を選んでください'); return; }
+    S.profile.decidedAt = todayKey();
+    save(); renderAll();
+    toast('決まりました。ここから先は「そうなる予定の人」として過ごすだけ。');
+  });
+
+  $('road').addEventListener('click', e => {
+    const b = e.target.closest('[data-road]');
+    if (!b) return;
+    const k = b.dataset.road;
+    const rec = S.road[k] || {};
+    S.road[k] = rec.done ? { done: false, at: '' } : { done: true, at: todayKey() };
+    save(); renderRoad();
+  });
+
+  /* --- 決める：リスト --- */
+  $('catTabs').addEventListener('click', e => {
+    const b = e.target.closest('[data-cat]');
+    if (!b) return;
+    curCat = b.dataset.cat;
+    renderList();
+  });
+
+  $('listAdd').addEventListener('click', () => {
+    const v = $('listInput').value.trim();
+    if (!v) return;
+    const warn = Checks.listItem(v);
+    S.list.push({ id: uid(), cat: curCat, text: v, at: todayKey() });
+    $('listInput').value = '';
+    save(); renderAll();
+    if (warn) toast(warn);
+    else if (Store.listCount() === 100) toast('100項目。ここまで書くと、潜在意識の本音が表に出やすいとされます。');
+  });
+  $('listInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('listAdd').click(); });
+
+  $('wishList').addEventListener('click', e => {
+    const b = e.target.closest('[data-del]');
+    if (!b) return;
+    S.list = S.list.filter(x => x.id !== b.dataset.del);
+    save(); renderAll();
+  });
+
+  $('promptNext').addEventListener('click', () => { promptIdx++; renderList(); });
+
+  /* --- 決める：アファメーション --- */
+  $('affText').addEventListener('input', e => {
+    S.affirmation.text = e.target.value;
+    S.affirmation.fixedAt = '';
+    save(); renderAff(); render369();
+  });
+  $('affDiscomfort').addEventListener('input', e => {
+    S.affirmation.discomfort = Number(e.target.value);
+    save(); renderAff(); renderStage(); renderHeader();
+  });
+  $('softenBox').addEventListener('click', e => {
+    const b = e.target.closest('[data-soft]');
+    if (!b) return;
+    S.affirmation.text = b.dataset.soft;
+    $('affText').value = b.dataset.soft;
+    save(); renderAff();
+    toast('ギャップを埋める段を挟むのは、後退ではなく手順です。');
+  });
+  $('affFix').addEventListener('click', () => {
+    if (!S.affirmation.text.trim()) { toast('先に一文書いてください'); return; }
+    S.affirmation.fixedAt = todayKey();
+    save(); renderAll();
+    toast('確定。あとは毎日これだけを唱えます。');
+  });
+
+  /* --- SATS --- */
+  $('satsScene').addEventListener('input', e => { S.satsScene = e.target.value; save(); renderSats(); });
+  $('satsStart').addEventListener('click', startSats);
+  $('satsStop').addEventListener('click', () => { stopSats(); $('satsStage').innerHTML = ''; });
+  $('satsDone').addEventListener('change', e => { Store.today().sats = e.target.checked; save(); renderAll(); });
+
+  /* --- 369 --- */
+  $('m369').addEventListener('click', e => {
+    const b = e.target.closest('[data-m369]');
+    if (!b) return;
+    const k = b.dataset.m369;
+    const need = M369.find(m => m.key === k).need;
+    const d = Store.today();
+    d.m369[k] = d.m369[k] >= need ? 0 : d.m369[k] + 1;
+    save(); renderAll();
+  });
+
+  /* --- 55×5 --- */
+  $('orderSet').addEventListener('click', () => {
+    const v = $('orderInput').value.trim();
+    if (!v) return;
+    S.order = { text: v, startedAt: '', lastDay: '', streak: 0, checkAt: '' };
+    save(); renderAll();
+    toast('ワンオーダー制。一度に一つだけ注文します。');
+  });
+
+  /* --- 17秒 --- */
+  $('t17Start').addEventListener('click', startT17);
+  $('t17Mix').addEventListener('click', mixT17);
+
+  /* --- ありがとう --- */
+  const arig = n => { Store.today().arigatou += n; save(); renderArigatou(); renderTodayCheck(); renderHeat(); };
+  $('arig1').addEventListener('click', () => arig(1));
+  $('arig10').addEventListener('click', () => arig(10));
+  $('arig50').addEventListener('click', () => arig(50));
+
+  $('swapBtn').addEventListener('click', () => {
+    const v = $('swapInput').value.trim();
+    if (!v) return;
+    S.swap.push({ id: uid(), at: todayKey(), from: v });
+    $('swapInput').value = '';
+    const r = SWAP_REPLIES[Math.floor(Math.random() * SWAP_REPLIES.length)];
+    $('swapReply').textContent = r;
+    save(); renderArigatou();
+  });
+  $('swapInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('swapBtn').click(); });
+
+  /* --- 手放し --- */
+  $('calmRange').addEventListener('input', e => { $('calmOut').textContent = e.target.value; });
+  $('calmSave').addEventListener('click', () => {
+    const v = Number($('calmRange').value);
+    S.release = S.release.filter(r => r.at !== todayKey());
+    S.release.push({ at: todayKey(), calm: v });
+    save(); renderAll();
+    toast(v >= 7 ? '穏やかでいられた。執着が外れているサインとされます。' : '低くても悪いことではありません。測っただけで十分。');
+  });
+
+  $('blocks').addEventListener('click', e => {
+    const o = e.target.closest('[data-open]');
+    if (o) {
+      const k = o.dataset.open;
+      openBlocks.has(k) ? openBlocks.delete(k) : openBlocks.add(k);
+      renderBlocks();
+      return;
+    }
+    const b = e.target.closest('[data-block]');
+    if (!b) return;
+    const k = b.dataset.block;
+    const rec = S.blocks[k] || {};
+    rec.noticed = !rec.noticed;
+    rec.at = rec.noticed ? todayKey() : '';
+    S.blocks[k] = rec;
+    save(); renderBlocks();
+  });
+
+  $('dcBtn').addEventListener('click', () => {
+    Store.today().declutter++;
+    save(); renderAll();
+  });
+
+  $('soloSave').addEventListener('click', () => {
+    const v = $('soloText').value.trim();
+    if (!v) return;
+    S.solo.push({ id: uid(), at: todayKey(), text: v });
+    $('soloText').value = '';
+    save();
+    toast('書けました。相手を頭から追い出しても残ったものが、本当の願いです。');
+  });
+
+  /* --- 動く --- */
+  $('preGrid').addEventListener('click', e => {
+    const b = e.target.closest('[data-pre]');
+    if (!b) return;
+    const k = b.dataset.pre;
+    const rec = S.pre[k] || {};
+    S.pre[k] = rec.done ? { done: false, at: '' } : { done: true, at: todayKey() };
+    save(); renderAll();
+  });
+
+  $('actAdd').addEventListener('click', () => {
+    const v = $('actInput').value.trim();
+    if (!v) return;
+    Store.today().acted.push(v);
+    $('actInput').value = '';
+    save(); renderAll();
+    toast('イメージだけで止まらなかった。それが一番効くとされる差です。');
+  });
+  $('actInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('actAdd').click(); });
+
+  /* --- 記録 --- */
+  $('diaryText').addEventListener('input', renderDiary);
+  $('diaryAdd').addEventListener('click', () => {
+    const v = $('diaryText').value.trim();
+    if (!v) return;
+    S.diary.push({ id: uid(), at: todayKey(), text: v });
+    $('diaryText').value = '';
+    save(); renderAll();
+  });
+  $('diaryList').addEventListener('click', e => {
+    const b = e.target.closest('[data-ddel]');
+    if (!b) return;
+    S.diary = S.diary.filter(x => x.id !== b.dataset.ddel);
+    save(); renderDiary();
+  });
+
+  $('koutenSave').addEventListener('click', () => {
+    Store.today().kouten = $('koutenText').value.trim();
+    save(); renderAll();
+  });
+
+  /* --- 書き出し／読み込み／消去 --- */
+  $('exportBtn').addEventListener('click', () => {
+    const blob = new Blob([Store.exportJSON()], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `hikiyose-${todayKey()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  $('importBtn').addEventListener('click', () => $('importFile').click());
+  $('importFile').addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        Store.importJSON(r.result);
+        S = Store.state;
+        renderAll();
+        toast('読み込みました');
+      } catch (err) {
+        toast('読み込めませんでした');
+      }
+    };
+    r.readAsText(f);
+    e.target.value = '';
+  });
+  $('resetBtn').addEventListener('click', () => {
+    if (!confirm('すべての記録を消します。よろしいですか？')) return;
+    Store.clear();
+    S = Store.state;
+    renderAll();
+    toast('消去しました');
+  });
+}
+
+/* =========================================================
+   起動
+   ========================================================= */
+
+function boot() {
+  S = Store.load();
+  promptIdx = Math.floor(Math.random() * LIST_PROMPTS.length);
+  initTabs();
+  initEvents();
+  renderSchoolTab();
+  renderAll();
+  renderSolo();
+
+  // 日付が変わったら今日の欄を作り直す
+  let lastKey = todayKey();
+  setInterval(() => {
+    if (todayKey() !== lastKey) { lastKey = todayKey(); renderAll(); }
+  }, 60000);
+}
+
+boot();
+
+</script>
+</body>
+</html>
