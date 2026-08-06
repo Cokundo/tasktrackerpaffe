@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>電撃婚ノート｜引き寄せの法則ちゃんぽん実践アプリ</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💍</text></svg>">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-icon">💍</span>
+      <div>
+        <h1>電撃婚ノート</h1>
+        <p class="tagline">エイブラハム・ネヴィル・マーフィー・シークレット・掲示板系 ─ 全部ちゃんぽんの結婚引き寄せ実践帳</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="hstat"><span class="hstat-num" id="hStage">0</span><span class="hstat-label">ステージ</span></div>
+      <div class="hstat"><span class="hstat-num" id="hMood">–</span><span class="hstat-label">感情の段</span></div>
+      <div class="hstat"><span class="hstat-num" id="hStreak">0</span><span class="hstat-label">連続日数</span></div>
+      <div class="hstat"><span class="hstat-num" id="hCount">–</span><span class="hstat-label">入籍まで</span></div>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab is-on" data-panel="today">今日</button>
+    <button class="tab" data-panel="decide">決める</button>
+    <button class="tab" data-panel="imprint">刷り込む</button>
+    <button class="tab" data-panel="release">手放す</button>
+    <button class="tab" data-panel="move">動く</button>
+    <button class="tab" data-panel="log">記録</button>
+    <button class="tab" data-panel="school">流派</button>
+  </nav>
+</header>
+
+<main class="layout">
+
+<!-- ==================== 今日 ==================== -->
+<section class="panel is-on" id="panel-today">
+
+  <div class="card stage-card">
+    <div class="card-head">
+      <h2 class="card-title">今のステージ</h2>
+    </div>
+    <div id="stageBox"></div>
+  </div>
+
+  <div id="warnBox"></div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">感情のスケール</h2>
+      <span class="school-tag" data-school="abraham">エイブラハム系</span>
+    </div>
+    <p class="card-lead">今どのへん？ いきなり最上段を目指さない。<b>今より一段だけ上</b>へ動かすのがコツ。</p>
+    <div class="scale" id="scale"></div>
+    <div class="bridge" id="bridge"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">自愛 — 鏡のワーク</h2>
+      <span class="school-tag" data-school="board">掲示板系</span>
+    </div>
+    <p class="card-lead">鏡に向かって自分に言う。最初は「愛してるなんて思えない」と泣きながらでもいい。言葉は言葉として、囚われすぎない。</p>
+    <div class="tap-row" id="jiaiRow"></div>
+    <details class="mini">
+      <summary>自愛が苦手なとき（自己否定が噴き出す人向け）</summary>
+      <p>無理にポジティブに捉えようとすると自己否定が噴き出す罠があります。まずは「ありのままの状態で自分らしく存在することを<b>許可する</b>」から。上の〈許可する〉だけ押せば今日はOKです。</p>
+      <p class="quote">「自分を愛せなくても、そんな自分を愛す」— isaさん<br>「いきなり快を目指さなくていい。もやもやしても『まぁいいか』と思うと一瞬無になる」— 369さん<br>「ネガティブは許すのではなく淡々と気づくだけでいい」— 自己観察さん</p>
+    </details>
+    <div class="notice-work">
+      <input type="text" id="noticeInput" placeholder="いま気づいたネガティブを、淡々と言葉にする（消さなくていい）">
+      <button class="btn ghost" id="noticeBtn">気づいた</button>
+    </div>
+    <ul class="chip-list" id="noticeList"></ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">夜のノート</h2>
+      <span class="school-tag" data-school="jp">奥平亜美衣</span>
+      <span class="school-tag" data-school="secret">シークレット系</span>
+    </div>
+    <p class="card-lead">いいことノート（今日の良かったこと3つ）と、感謝ワーク。いい気分にフォーカスする習慣そのものが本体。</p>
+    <div class="two-col">
+      <div>
+        <h3 class="sub">今日の良かったこと</h3>
+        <div id="goodInputs"></div>
+      </div>
+      <div>
+        <h3 class="sub">感謝していること</h3>
+        <div id="thanksInputs"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">今日の実践</h2>
+    </div>
+    <ul class="today-check" id="todayCheck"></ul>
+  </div>
+
+</section>
+
+<!-- ==================== 決める ==================== -->
+<section class="panel" id="panel-decide">
+
+  <div class="card blitz-card">
+    <div class="card-head">
+      <h2 class="card-title">電撃婚を決める</h2>
+      <span class="school-tag" data-school="jp">Honami「決めれば、叶う。」</span>
+    </div>
+    <p class="card-lead">
+      「いつか結婚できたらいいな」は願望形。ここでは<b>日付を決めて</b>しまいます。
+      これは締切ではなく、<b>すでに決まっている予定</b>として扱うもの。焦りが出たら日付を先へずらして構いません。
+    </p>
+    <div class="form-grid">
+      <label>呼び名<input type="text" id="pfName" placeholder="ゆゆ"></label>
+      <label>入籍する日<input type="date" id="pfWedding"></label>
+      <label>電撃度（出会ってから入籍まで）
+        <select id="pfBlitz">
+          <option value="30">30日 ─ 出会って1か月で入籍</option>
+          <option value="60">60日 ─ 2か月</option>
+          <option value="90">90日 ─ 3か月</option>
+          <option value="120">120日 ─ 4か月（標準の電撃）</option>
+          <option value="180">180日 ─ 半年</option>
+          <option value="365">365日 ─ 1年</option>
+        </select>
+      </label>
+      <label>すでに出会っている場合の出会った日<input type="date" id="pfMet"></label>
+    </div>
+    <button class="btn primary" id="decideBtn">これで決めた</button>
+    <div class="decided" id="decidedBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">逆算ロードマップ</h2>
+      <span class="school-tag" data-school="real">先取り行動</span>
+      <span class="school-tag" data-school="neville">なる</span>
+    </div>
+    <p class="card-lead">決めた日から逆算した、電撃婚の道のり。<b>途中の経路は指定しない</b>のが原則（出来事の橋）。ただし指輪の納期のような現実の段取りだけは、先に押さえておきます。</p>
+    <ol class="road" id="road"></ol>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">理想の相手リスト 100項目</h2>
+      <span class="school-tag" data-school="murphy">潜在意識</span>
+    </div>
+    <p class="card-lead">
+      100個以上書き出すと潜在意識の本音が表に出やすいとされます。<b>見せる相手はいないので本音で。</b>
+      外見・条件を抜かすと、条件が合っていても「スルー」してしまうと言われるので網羅を。
+      そして<b>フィーリング（どんな気持ちでいたいか）</b>を必ず入れる ─ 条件だけ追うと本当の願いとズレます。
+    </p>
+    <div class="list-progress"><div class="lp-bar"><span id="lpFill"></span></div><span class="lp-num" id="lpNum">0 / 100</span></div>
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="add-row">
+      <input type="text" id="listInput" placeholder="例：機嫌のいい人／台所で並んで料理している／一緒にいると呼吸が深くなる">
+      <button class="btn primary" id="listAdd">追加</button>
+    </div>
+    <p class="hint" id="listHint"></p>
+    <p class="prompt-line">書けなくなったら → <span id="promptText"></span> <button class="btn tiny ghost" id="promptNext">別の問い</button></p>
+    <ul class="wish-list" id="wishList"></ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">アファメーションを1本決める</h2>
+      <span class="school-tag" data-school="murphy">マーフィー系</span>
+    </div>
+    <p class="card-lead">主語は「私は」。語尾は現在形・完了形。否定形は使わない。五感で描けるほど具体的に。</p>
+    <textarea id="affText" rows="3" placeholder="例：私は、朝の光の入る台所で、二人ぶんのコーヒーを淹れている。"></textarea>
+    <div class="score-row">
+      <div class="score-ring" id="affScore">–</div>
+      <div class="score-detail" id="affDetail"></div>
+    </div>
+    <div class="discomfort">
+      <label>この文を声に出したときの<b>違和感</b>
+        <input type="range" id="affDiscomfort" min="0" max="10" step="1">
+        <output id="affDiscomfortOut">5</output> / 10
+      </label>
+      <p class="hint">違和感が強いまま断言すると、認知的不協和で「そんなの嘘だ」という反発をかえって刷り込みます。6以上なら下の緩和形へ。</p>
+      <div id="softenBox"></div>
+    </div>
+    <button class="btn primary" id="affFix">これでいく（確定）</button>
+    <span class="fixed-at" id="affFixedAt"></span>
+  </div>
+
+</section>
+
+<!-- ==================== 刷り込む ==================== -->
+<section class="panel" id="panel-imprint">
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">SATS — 眠りに近い状態で</h2>
+      <span class="school-tag" data-school="neville">ネヴィル・ゴダード</span>
+    </div>
+    <p class="card-lead">
+      ネヴィルが最も強力とした技法。起きている意識は「でも実際にはまだない」と想定を拒否し続けますが、
+      うとうと状態では批判的意識が働かず、暗示がそのまま届く（穏やかな自己催眠）。
+    </p>
+    <label class="block-label">今夜入る場面（叶ったあとの、ありふれた日常の一場面）</label>
+    <textarea id="satsScene" rows="2" placeholder="例：夜、私の隣で寝息が聞こえている。布団が少し重い。"></textarea>
+    <p class="hint" id="satsHint"></p>
+    <div class="sats-run">
+      <button class="btn primary" id="satsStart">誘導をはじめる</button>
+      <button class="btn ghost" id="satsStop" hidden>やめる</button>
+      <label class="chk"><input type="checkbox" id="satsDone"> 今夜はSATSをやった</label>
+    </div>
+    <div class="sats-stage" id="satsStage"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">369メソッド</h2>
+      <span class="school-tag" data-school="murphy">書く系</span>
+    </div>
+    <p class="card-lead">アファメーションを 朝3回・昼6回・夜9回 書く。ニコラ・テスラの3・6・9に着想。書いたら1タップ。</p>
+    <div class="m369" id="m369"></div>
+    <p class="hint">効果があるとすれば①毎日ノートで目標を意識する②チャンスを逃さず掴めるようになる、と自己分析する実践者もいます。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">55×5メソッド</h2>
+      <span class="school-tag" data-school="murphy">書く系</span>
+    </div>
+    <p class="card-lead">ひとつの願いを 1日55回・5日間連続で書く。<b>ワンオーダー制</b> ─ レストランでコックに注文するように、一度に一つだけ。</p>
+    <div class="add-row">
+      <input type="text" id="orderInput" placeholder="今回のオーダー（1つだけ）">
+      <button class="btn primary" id="orderSet">注文する</button>
+    </div>
+    <div id="orderBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">17秒・68秒ルール</h2>
+      <span class="school-tag" data-school="abraham">エイブラハム系</span>
+    </div>
+    <p class="card-lead">
+      ある思いを否定・矛盾なく純粋に17秒保つと同じ波動が加わって増幅し、17秒×4＝68秒でエネルギーが十分になり現実化が始まる、という説明。
+      途中で「でも」が混ざったら〈混ざった〉を押してやり直し。
+    </p>
+    <div class="timer17">
+      <div class="t17-bar" id="t17Bar"><span></span><span></span><span></span><span></span></div>
+      <div class="t17-num" id="t17Num">0<small>秒</small></div>
+      <div class="row-btns">
+        <button class="btn primary" id="t17Start">はじめる</button>
+        <button class="btn ghost" id="t17Mix">混ざった</button>
+      </div>
+      <p class="hint">ネガティブな思考にも同じ増幅が働くとされます。だから「混ざった」は失敗ではなく、正しく気づけたということ。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">口ぐせ — ありがとう500回</h2>
+      <span class="school-tag" data-school="jp">小池浩</span>
+    </div>
+    <p class="card-lead">宇宙は発した言葉をただ増幅する場所で、善悪の判断はない。だからネガティブな口ぐせも「オーダー」として通ってしまう。</p>
+    <div class="arig">
+      <div class="arig-num"><b id="arigNum">0</b> / 500</div>
+      <div class="arig-bar"><span id="arigFill"></span></div>
+      <div class="row-btns">
+        <button class="btn primary" id="arig1">ありがとう +1</button>
+        <button class="btn ghost" id="arig10">+10</button>
+        <button class="btn ghost" id="arig50">+50</button>
+      </div>
+    </div>
+    <div class="swap-work">
+      <label class="block-label">うっかり言ってしまったネガティブな口ぐせ</label>
+      <div class="add-row">
+        <input type="text" id="swapInput" placeholder="例：どうせ私なんて">
+        <button class="btn primary" id="swapBtn">オーダー訂正</button>
+      </div>
+      <div class="swap-reply" id="swapReply"></div>
+      <ul class="chip-list" id="swapList"></ul>
+    </div>
+  </div>
+
+</section>
+
+<!-- ==================== 手放す ==================== -->
+<section class="panel" id="panel-release">
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">手放しチェック</h2>
+      <span class="school-tag" data-school="jp">Honami系</span>
+    </div>
+    <p class="card-lead">
+      「絶対に叶えたい」という執着は「まだ叶っていない＝欠乏」の波動を出すとされます。
+      でも執着は強力で、理性で手放そうとするほど強まるジレンマがある。だから<b>測るだけ</b>にします。
+    </p>
+    <blockquote class="vow">結婚が叶わなくても、私は幸せです。</blockquote>
+    <p class="card-lead">声に出して唱えて、それでも穏やかでいられたか。</p>
+    <label class="calm-label">穏やかさ
+      <input type="range" id="calmRange" min="0" max="10" step="1" value="5">
+      <output id="calmOut">5</output> / 10
+    </label>
+    <button class="btn primary" id="calmSave">記録する</button>
+    <div class="calm-chart" id="calmChart"></div>
+    <p class="hint">7以上が3回そろうと、ステージ4（先取り行動）へ進む目安です。低い日があっても悪いことではありません。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">結婚への隠れたブロック</h2>
+      <span class="school-tag" data-school="murphy">内観</span>
+    </div>
+    <p class="card-lead">
+      ブロックは「親や先生に怒られた」「失敗した」等の記憶から作られ、潜在意識の奥に固定観念として封印されているとされます。
+      解除の基本は<b>気づくこと</b>。「早く外したい」と焦ると潜在意識が抵抗するので、ゆっくり自然に。
+    </p>
+    <div class="blocks" id="blocks"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">物理的な手放し</h2>
+      <span class="school-tag" data-school="jp">断捨離</span>
+    </div>
+    <p class="card-lead">1年以上使っていない物を捨て、ワクワクする物だけ残す。エネルギーの循環という理屈ですが、単純に「もう一人分の空き」が生まれます。</p>
+    <div class="declutter">
+      <div class="dc-num"><b id="dcNum">0</b> 個 手放した（今日）</div>
+      <button class="btn primary" id="dcBtn">1つ手放した</button>
+      <div class="dc-total" id="dcTotal"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">自分単体の未来を見る</h2>
+      <span class="school-tag" data-school="board">別の領域</span>
+    </div>
+    <p class="card-lead">特定の誰かに焦点を当てすぎるとエネルギーが滞るとされます。相手を一度頭から追い出し、<b>自分単体としてどんな未来が欲しいか</b>だけを書きます。</p>
+    <textarea id="soloText" rows="3" placeholder="相手のことは一旦置いて。私は、どんな毎日を過ごしている？"></textarea>
+    <button class="btn ghost" id="soloSave">書き留める</button>
+  </div>
+
+</section>
+
+<!-- ==================== 動く ==================== -->
+<section class="panel" id="panel-move">
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">先取り行動</h2>
+      <span class="school-tag" data-school="real">ステージ4</span>
+    </div>
+    <p class="card-lead">
+      「すでに結婚が決まった人の行動」を先取りする。指輪は購入から手元に届くまで1〜2か月（オーダーメイドは2〜3か月）かかるので、
+      欲しいタイミングより前に動くのはブライダルの実務としても普通のことです。＝「なる」の恋愛版。
+    </p>
+    <div class="pre-grid" id="preGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">48時間ルール</h2>
+      <span class="school-tag" data-school="jp">Honami</span>
+    </div>
+    <p class="card-lead">思い立ったら48時間以内に行動する。多くの実践者が「小さくても行動する人がうまくいく」と口をそろえます。イメージだけで止まる人が最も多い失敗。</p>
+    <div class="add-row">
+      <input type="text" id="actInput" placeholder="今日やった現実の一歩（小さくていい）">
+      <button class="btn primary" id="actAdd">記録</button>
+    </div>
+    <ul class="act-list" id="actList"></ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">婚活・アプリとの併用</h2>
+      <span class="school-tag" data-school="real">現実的アプローチ</span>
+    </div>
+    <p class="card-lead">
+      作法の核は「<b>行動はするが結果に執着しない</b>」。婚活を「戦い」や「焦り」でやると不安の波動を出すため、
+      今の生活に満足し自分を愛している充足の波動で臨むと、同じく満たされた相手が現れるとされます。
+    </p>
+    <ul class="rule-list">
+      <li>会う前から「この人かも」と結果を握りしめない。会うのはただの<b>出会いの場を増やす</b>行為。</li>
+      <li>断られた／進まなかったを「私の価値」に接続しない。出来事の橋は思いがけない経路を通る。</li>
+      <li>内面ワーク（SATS・アファメーション）と、現実の母数を増やす作業は<b>両輪</b>。どちらか片方では止まる。</li>
+      <li>疲れたら休む。義務感でやる婚活は、そのまま焦りの波動になる。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">「なる」— 立ち位置を移す</h2>
+      <span class="school-tag" data-school="board">701式</span>
+    </div>
+    <p class="card-lead">
+      願望を「これから叶える」のではなく、なりたい私を決めた瞬間に「既にそうなった私」へ立ち位置を移す。
+      全メソッドの終着点とされ、「<b>メソッドは叶えるためにやるな</b>（まだ叶っていない前提になるから）」という逆説が語られます。
+    </p>
+    <ul class="rule-list">
+      <li>今日の立ち居振る舞いを1つ変える。「結婚した私」なら、この場面でどうする？</li>
+      <li>言葉づかい・姿勢・買うもの・断り方。未来の目標ではなく<b>当たり前</b>として。</li>
+      <li>ここまで来たら、このアプリを開く回数はむしろ減っていい。</li>
+    </ul>
+  </div>
+
+</section>
+
+<!-- ==================== 記録 ==================== -->
+<section class="panel" id="panel-log">
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">未来日記</h2>
+      <span class="school-tag" data-school="neville">終わりに生きる</span>
+    </div>
+    <p class="card-lead">すでに叶った前提で日記を書く。「〇〇と結婚しました」と過去形・完了形で。日付は未来のものでも構いません。</p>
+    <textarea id="diaryText" rows="3" placeholder="例：入籍しました。区役所の帰りに、二人でうどんを食べました。"></textarea>
+    <div class="row-btns">
+      <button class="btn primary" id="diaryAdd">書き込む</button>
+      <span class="hint" id="diaryHint"></span>
+    </div>
+    <ul class="diary-list" id="diaryList"></ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">好転反応メモ</h2>
+      <span class="school-tag" data-school="jp">日本語圏の概念</span>
+    </div>
+    <p class="card-lead">
+      願いが叶う前に一時的に体調不良・情緒不安定・現実の悪化が起きる現象を「好転反応」と呼ぶ説明があります（復縁ジャンルでは5日前後が目安）。
+      ただしこれは<b>実践者コミュニティ内の説明概念</b>。数週間以上続くときは、この枠組みから離れてください。
+    </p>
+    <textarea id="koutenText" rows="2" placeholder="今日、うまくいかなかったこと・しんどかったこと"></textarea>
+    <button class="btn ghost" id="koutenSave">記録する</button>
+    <div id="koutenBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2 class="card-title">実践のカレンダー</h2>
+    </div>
+    <p class="card-lead">濃いほどその日たくさん実践した日。<b>空白があっても大丈夫</b> ─ 義務感でやる実践は焦りの波動になります。</p>
+    <div class="heat" id="heat"></div>
+    <div class="mini-stats" id="miniStats"></div>
+    <div class="row-btns">
+      <button class="btn ghost" id="exportBtn">データ書き出し</button>
+      <button class="btn ghost" id="importBtn">読み込み</button>
+      <button class="btn danger" id="resetBtn">全消去</button>
+      <input type="file" id="importFile" accept="application/json" hidden>
+    </div>
+    <p class="hint">記録はこの端末のブラウザ（localStorage）にだけ保存されます。どこにも送信されません。</p>
+  </div>
+
+</section>
+
+<!-- ==================== 流派 ==================== -->
+<section class="panel" id="panel-school">
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">5つの系譜</h2></div>
+    <p class="card-lead">
+      土台の世界観は「思考・感情には波動（周波数）があり、同じ波動の現実が引き合う」。
+      波動の発生源とされるのが潜在意識で、氷山モデル（水面上の顕在意識と、9割以上を占める水面下の潜在意識）で説明されます。
+      実践者コミュニティ内では、以下は矛盾しつつ併用されています。
+    </p>
+    <div class="schools" id="schools"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">言葉の整理</h2></div>
+    <ul class="rule-list">
+      <li><b>引き寄せの法則</b>（Law of Attraction）＝同じ波動が引き合うという「法則」そのもの。</li>
+      <li><b>顕現／マニフェステーション</b>＝願望を現実化させる行為・プロセス全般。近年TikTok等で369メソッドとともに広がった語。</li>
+      <li><b>アファメーション</b>＝肯定的な自己宣言を繰り返す「手法」の一つ。潜在意識書き換えの道具。</li>
+      <li><b>潜在意識書き換え</b>＝セルフイメージ・信念を作り変える上位概念。アファメーション・イメージング・自愛はすべてこのための手段。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">日本語圏の主要な書き手</h2></div>
+    <div class="authors" id="authors"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">用語辞典</h2></div>
+    <div class="glossary" id="glossary"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">特定の相手 vs 相手を特定しない</h2></div>
+    <p class="card-lead">最大の論争点。このアプリは既定で<b>相手を特定しない</b>設定です（それが今の状況に合っているため）。両論を置いておきます。</p>
+    <div class="two-col debate">
+      <div>
+        <h3 class="sub">否定派</h3>
+        <p>「あの人に〜してほしい」という他人への願望・操作はできない。相手にも自由意志があり曲げられない。だから「〇〇にプロポーズしてほしい」ではなく「〇〇が結婚したくなるような魅力的な私になる」と<b>主語を自分に変えて</b>願うべき。特定の人を引き寄せようとするのは束縛と同じで、相手は潜在意識を通して居心地の悪さを感じ反発する、という理屈も語られる。</p>
+      </div>
+      <div>
+        <h3 class="sub">肯定派</h3>
+        <p>特定の相手がいればこそ引き寄せは強力に働く。「一人は寂しい」程度の人より「あの人と幸せな家庭を築きたい」人の方が思いは強い。潜在意識で特定の相手との恋愛成就は可能だと、自身の実験で結論づける実践者もいる。</p>
+      </div>
+    </div>
+    <p class="card-lead"><b>折衷案</b>：相手の自由意志を尊重し、「この人に〇〇してほしい」ではなく「互いに幸せな関係」というエネルギーに焦点を当てる。特定の人だけに焦点を当てすぎるとエネルギーが滞るので、まず自分の内面の充実を優先する ─ これが広く共有されています。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2 class="card-title">失敗パターン</h2></div>
+    <div class="two-col">
+      <div>
+        <h3 class="sub">うまくいかない主因</h3>
+        <ul class="rule-list">
+          <li>欠乏感から願う（「ない」を前提に願うと「ない」現実を引き寄せる）</li>
+          <li>執着が強すぎる／焦り</li>
+          <li>疑い ─ 望みと疑いの両方の波動を同時に出して停滞する</li>
+          <li>他人軸・承認欲求（「一人は寂しい」「年だから」）</li>
+          <li>否定形の願い／ネガティブ語</li>
+          <li>願うだけで行動しない ─ イメージだけで止まる人が最も多い失敗</li>
+          <li>他人の心を操作しようとする</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="sub">やってはいけないこと</h3>
+        <ul class="rule-list">
+          <li>願望を「これでもか」と念じて執着を強める</li>
+          <li>ネガティブ感情を無理に抑圧する（かえって本音が見えなくなる）。むしろ<b>感じきる・許す</b></li>
+          <li>完璧を求めて動かない、結果を急ぐ、他人と比較する</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card caveat-card">
+    <div class="card-head"><h2 class="card-title">留意点</h2></div>
+    <ul class="rule-list" id="caveats"></ul>
+  </div>
+
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <p>電撃婚ノート — 引き寄せの法則 徹底ガイドをちゃんぽんした実践帳。記録は端末内のみ。</p>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/checks.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

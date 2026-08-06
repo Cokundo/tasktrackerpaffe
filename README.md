@@ -171,3 +171,10 @@ node tools/make-assets.js # assets/raw → assets/parts
 - XPの伸び方を変えたい → `js/data.js` の `BASE_XP` / `xpToNext()` / `streakBonus()`
 - パフェの盛り付けを変えたい → `js/parfait.js` の `drawContents()` / `drawTop()`
   （どの素材をどのレベルで出すかが並んでいます）
+
+---
+
+## おまけ：同じリポジトリに入っている別アプリ
+
+- 💍 **[電撃婚ノート](hikiyose/README.md)**（`hikiyose/index.html`）
+  引き寄せの法則をちゃんぽんした結婚引き寄せの実践帳。パフェアプリとは独立していて、保存データも別です。
