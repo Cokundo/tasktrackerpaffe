@@ -240,6 +240,7 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
   background: linear-gradient(180deg, var(--rose-soft), #fff);
   border: 1px solid var(--rose); border-radius: 14px; padding: 18px; text-align: center;
 }
+.dc-rings { display: block; width: 62px; height: auto; margin: 0 auto 6px; color: var(--gold); }
 .dc-date { margin: 0; font-size: 22px; font-weight: 700; color: var(--rose); letter-spacing: .04em; }
 .dc-line { margin: 2px 0 6px; font-size: 15px; color: var(--plum); }
 .dc-sub { margin: 0; font-size: 12px; color: var(--ink-soft); }
@@ -322,6 +323,29 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
 .fixed-at { font-size: 12px; color: var(--rose); margin-left: 10px; }
 
 /* ---------- SATS ---------- */
+
+/* 場面カード（線画はすべてインラインSVG。外部画像を読まない） */
+.scene-pick {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px; margin: 10px 0 12px;
+}
+.scene {
+  border: 1px solid var(--line); border-radius: 14px; background: #fff; cursor: pointer;
+  padding: 8px 6px 6px; font-family: inherit; color: var(--rose); transition: .15s;
+}
+.scene:hover { border-color: var(--rose); transform: translateY(-2px); }
+.scene.is-on { background: var(--rose-soft); border-color: var(--rose); }
+.scene-title { display: block; font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+.scene.is-on .scene-title { color: var(--plum); font-weight: 700; }
+.scene-art { display: block; width: 100%; height: auto; }
+.scene-art.in-dark { max-width: 190px; margin: 14px auto 0; color: #e7b9cc; opacity: .9; }
+
+.sats-still {
+  display: flex; gap: 16px; align-items: center;
+  background: var(--gold-soft); border-radius: 14px; padding: 14px 18px; color: var(--rose);
+}
+.sats-still .scene-art { width: 110px; flex: 0 0 auto; }
+.sats-still p { margin: 0; font-size: 14px; color: var(--plum); }
 
 .sats-run { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
 .chk { font-size: 12.5px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
@@ -742,6 +766,8 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
       うとうと状態では批判的意識が働かず、暗示がそのまま届く（穏やかな自己催眠）。
     </p>
     <label class="block-label">今夜入る場面（叶ったあとの、ありふれた日常の一場面）</label>
+    <p class="hint">選ぶと下の文が入れ替わります。そのまま使っても、自分の言葉に書き直しても構いません。</p>
+    <div class="scene-pick" id="scenePick"></div>
     <textarea id="satsScene" rows="2" placeholder="例：夜、私の隣で寝息が聞こえている。布団が少し重い。"></textarea>
     <p class="hint" id="satsHint"></p>
     <div class="sats-run">
@@ -1362,6 +1388,114 @@ const CAVEATS = [
   '高額なセッション・講座・情報商材への依存や、現実的な行動・専門的支援（カウンセリング等）の放棄には注意。',
   '「好転反応」と称して数週間以上、現実の悪化や体調不良が続くときは、引き寄せの枠組みから一度離れて医療・専門家にかかること。'
 ];
+
+</script>
+<script>
+/* =========================================================
+   scenes.js — SATSで入る「叶ったあとの、ありふれた日常」の場面
+
+   絵はすべてインラインSVGの線画。外部の画像を読まないので、
+   通信なし・1枚HTMLのままで動く。currentColor で描いているので、
+   明るいカードの上でも、SATSの暗い画面の上でも同じ絵が使える。
+
+   選ぶ場面をあえて地味にしてあるのは作法の都合。
+   プロポーズ・結婚式・号泣は「叶った瞬間の歓喜」で、
+   ネヴィル系ではよくある失敗とされる。狙うのは静けさのほう。
+   ========================================================= */
+
+const SCENES = [
+  {
+    key: 'mugs',
+    title: '朝のマグが二つ',
+    text: '朝、台所にマグが二つ出ている。片方からまだ湯気が立っている。',
+    svg: `
+      <path d="M6 70H114"/>
+      <rect x="26" y="40" width="27" height="27" rx="4"/>
+      <path d="M53 46c9 3 9 12 0 15"/>
+      <rect x="66" y="46" width="22" height="21" rx="4"/>
+      <path d="M88 51c7 2 7 9 0 11"/>
+      <path d="M34 34c5-5 0-9 2-13"/>
+      <path d="M45 32c5-5 0-9 2-13"/>
+      <path d="M74 40c4-4 0-7 2-10"/>`
+  },
+  {
+    key: 'brush',
+    title: '歯ブラシが二本',
+    text: '洗面所のコップに、歯ブラシが二本ささっている。',
+    svg: `
+      <path d="M44 44h32l-4 28H48z"/>
+      <path d="M6 76H114"/>
+      <path d="M55 46 47 18"/>
+      <rect x="41" y="8" width="8" height="13" rx="4" transform="rotate(-16 45 14)"/>
+      <path d="M66 46 74 20"/>
+      <rect x="70" y="10" width="8" height="13" rx="4" transform="rotate(16 74 16)"/>
+      <path d="M30 22h14"/>`
+  },
+  {
+    key: 'keys',
+    title: '玄関の鍵が二つ',
+    text: '玄関に鍵が二つ下がっている。どちらもこの家の鍵。',
+    svg: `
+      <path d="M14 16h92"/>
+      <path d="M14 16v6M106 16v6"/>
+      <g transform="translate(0 4)">
+        <path d="M44 22v-6"/>
+        <circle cx="44" cy="30" r="8"/>
+        <circle cx="44" cy="30" r="3"/>
+        <path d="M44 38v26"/>
+        <path d="M44 54h7M44 61h6"/>
+      </g>
+      <g transform="translate(0 4)">
+        <path d="M78 22v-6"/>
+        <circle cx="78" cy="28" r="7"/>
+        <circle cx="78" cy="28" r="2.5"/>
+        <path d="M78 35v21"/>
+        <path d="M78 47h6M78 53h5"/>
+      </g>`
+  },
+  {
+    key: 'laundry',
+    title: '二人分の洗濯物',
+    text: 'ベランダに二人分の洗濯物が揺れている。日向の匂いがする。',
+    svg: `
+      <path d="M4 16c36 10 76 10 112 0"/>
+      <path d="M32 25 22 33l6 7 4-3v23h20V37l4 3 6-7-10-8z"/>
+      <path d="M32 25c6 4 14 4 20 0"/>
+      <path d="M76 27 68 34l5 6 3-2v19h16V38l3 2 5-6-7-7z"/>
+      <path d="M76 27c5 3 12 3 16 0"/>
+      <path d="M34 21v5M50 21v5M78 23v5M90 23v5"/>`
+  },
+  {
+    key: 'table',
+    title: '夕飯の皿が二枚',
+    text: '夕飯の皿が二枚。向かいで箸が動く音がする。',
+    svg: `
+      <path d="M4 70H116"/>
+      <ellipse cx="42" cy="50" rx="24" ry="9"/>
+      <ellipse cx="42" cy="50" rx="15" ry="5"/>
+      <ellipse cx="88" cy="56" rx="17" ry="7"/>
+      <ellipse cx="88" cy="56" rx="10" ry="4"/>
+      <path d="M70 36 84 30M71 40 85 34"/>
+      <path d="M22 30h14l-2 14H24z"/>`
+  },
+  {
+    key: 'futon',
+    title: '隣の寝息',
+    text: '夜、隣で寝息が聞こえる。布団が少し重い。',
+    svg: `
+      <path d="M12 54c28-9 68-9 96 0v16H12z"/>
+      <path d="M12 70v6M108 70v6"/>
+      <rect x="24" y="40" width="28" height="14" rx="6"/>
+      <rect x="64" y="40" width="28" height="14" rx="6"/>
+      <path d="M100 10a11 11 0 1 0 9 14 9 9 0 1 1-9-14z"/>`
+  }
+];
+
+/* 「決めた」欄に置く二つの指輪 */
+const RINGS_SVG = `
+  <circle cx="26" cy="22" r="13"/>
+  <circle cx="44" cy="22" r="13"/>
+  <path d="M22 9l4-6h4l4 6"/>`;
 
 </script>
 <script>
@@ -2055,6 +2189,8 @@ function renderProfile() {
 
   box.innerHTML = `
     <div class="decided-in">
+      <svg class="dc-rings" viewBox="0 0 70 40" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round">${RINGS_SVG}</svg>
       <p class="dc-date">${jpDate(w)}</p>
       <p class="dc-line">${esc(name)}は、この日に入籍している。</p>
       <p class="dc-sub">${left > 0 ? `あと ${left} 日` : left === 0 ? '今日です' : `${-left} 日前に過ぎました（新しい日付を決めてください）`}
@@ -2199,11 +2335,38 @@ function renderAff() {
 
 let satsTimer = null;
 
+/* 今の場面に対応する絵（自分で書き直していたら、いちばん近いものを探す） */
+function currentScene() {
+  const t = (S.satsScene || '').trim();
+  if (!t) return null;
+  return SCENES.find(s => s.text === t) ||
+    SCENES.find(s => t.includes(s.title.replace(/^(朝の|夜の)/, '').slice(0, 3))) || null;
+}
+
+function sceneArt(svg, cls) {
+  return `<svg class="scene-art ${cls || ''}" viewBox="0 0 120 84" fill="none"
+    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svg}</svg>`;
+}
+
 function renderSats() {
-  $('satsScene').value = S.satsScene || '';
+  if ($('satsScene').value !== (S.satsScene || '')) $('satsScene').value = S.satsScene || '';
+  const cur = currentScene();
+  $('scenePick').innerHTML = SCENES.map(s => `
+    <button class="scene ${cur && cur.key === s.key ? 'is-on' : ''}" data-scene="${s.key}">
+      ${sceneArt(s.svg)}
+      <span class="scene-title">${s.title}</span>
+    </button>`).join('');
+
   const r = Checks.satsScene(S.satsScene);
   $('satsHint').innerHTML = `<span class="${r.ok ? 'ok' : 'ng'}">${esc(r.msg)}</span>`;
   $('satsDone').checked = !!Store.today().sats;
+
+  // 誘導していないときは、選んだ場面の絵を静かに出しておく
+  if (!satsTimer) {
+    $('satsStage').innerHTML = cur
+      ? `<div class="sats-still">${sceneArt(cur.svg)}<p>${esc(S.satsScene)}</p></div>`
+      : '';
+  }
 }
 
 function startSats() {
@@ -2211,13 +2374,15 @@ function startSats() {
   $('satsStart').hidden = true;
   $('satsStop').hidden = false;
 
+  const scene = currentScene();
   const draw = () => {
     const s = SATS_STEPS[i];
     $('satsStage').innerHTML = `
       <div class="sats-now">
         <p class="sats-step">${s.title}</p>
         <p class="sats-body">${s.body}</p>
-        ${i === 2 && S.satsScene ? `<p class="sats-scene">${esc(S.satsScene)}</p>` : ''}
+        ${i >= 2 && scene ? sceneArt(scene.svg, 'in-dark') : ''}
+        ${i >= 2 && S.satsScene ? `<p class="sats-scene">${esc(S.satsScene)}</p>` : ''}
         <p class="sats-left">${left}</p>
         <div class="sats-bar"><span style="width:${100 * (1 - left / s.sec)}%"></span></div>
         <p class="sats-of">${i + 1} / ${SATS_STEPS.length}</p>
@@ -2233,8 +2398,14 @@ function startSats() {
         stopSats();
         Store.today().sats = true;
         save();
-        $('satsStage').innerHTML = '<div class="sats-now done"><p class="sats-step">おやすみなさい</p><p class="sats-body">静けさのまま、そこで眠ってください。日中の内的会話（メンタル・ダイエット）は、この夜の作業を守るためにあります。</p></div>';
+        // renderAll() が先。renderSats() が satsStage を描き直すので、
+        // 締めの画面はそのあとに置く（順番を逆にすると一瞬で消える）
         renderAll();
+        $('satsStage').innerHTML = `<div class="sats-now done">
+          <p class="sats-step">おやすみなさい</p>
+          ${scene ? sceneArt(scene.svg, 'in-dark') : ''}
+          <p class="sats-body">静けさのまま、そこで眠ってください。日中の内的会話（メンタル・ダイエット）は、この夜の作業を守るためにあります。</p>
+        </div>`;
         return;
       }
       left = SATS_STEPS[i].sec;
@@ -2720,6 +2891,14 @@ function initEvents() {
   });
 
   /* --- SATS --- */
+  $('scenePick').addEventListener('click', e => {
+    const b = e.target.closest('[data-scene]');
+    if (!b) return;
+    const s = SCENES.find(x => x.key === b.dataset.scene);
+    S.satsScene = s.text;
+    save(); renderSats();
+    toast('静けさのある場面です。この質感のまま眠ってください。');
+  });
   $('satsScene').addEventListener('input', e => { S.satsScene = e.target.value; save(); renderSats(); });
   $('satsStart').addEventListener('click', startSats);
   $('satsStop').addEventListener('click', () => { stopSats(); $('satsStage').innerHTML = ''; });

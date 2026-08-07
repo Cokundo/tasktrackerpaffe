@@ -219,6 +219,8 @@ function renderProfile() {
 
   box.innerHTML = `
     <div class="decided-in">
+      <svg class="dc-rings" viewBox="0 0 70 40" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round">${RINGS_SVG}</svg>
       <p class="dc-date">${jpDate(w)}</p>
       <p class="dc-line">${esc(name)}は、この日に入籍している。</p>
       <p class="dc-sub">${left > 0 ? `あと ${left} 日` : left === 0 ? '今日です' : `${-left} 日前に過ぎました（新しい日付を決めてください）`}
@@ -363,11 +365,38 @@ function renderAff() {
 
 let satsTimer = null;
 
+/* 今の場面に対応する絵（自分で書き直していたら、いちばん近いものを探す） */
+function currentScene() {
+  const t = (S.satsScene || '').trim();
+  if (!t) return null;
+  return SCENES.find(s => s.text === t) ||
+    SCENES.find(s => t.includes(s.title.replace(/^(朝の|夜の)/, '').slice(0, 3))) || null;
+}
+
+function sceneArt(svg, cls) {
+  return `<svg class="scene-art ${cls || ''}" viewBox="0 0 120 84" fill="none"
+    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svg}</svg>`;
+}
+
 function renderSats() {
-  $('satsScene').value = S.satsScene || '';
+  if ($('satsScene').value !== (S.satsScene || '')) $('satsScene').value = S.satsScene || '';
+  const cur = currentScene();
+  $('scenePick').innerHTML = SCENES.map(s => `
+    <button class="scene ${cur && cur.key === s.key ? 'is-on' : ''}" data-scene="${s.key}">
+      ${sceneArt(s.svg)}
+      <span class="scene-title">${s.title}</span>
+    </button>`).join('');
+
   const r = Checks.satsScene(S.satsScene);
   $('satsHint').innerHTML = `<span class="${r.ok ? 'ok' : 'ng'}">${esc(r.msg)}</span>`;
   $('satsDone').checked = !!Store.today().sats;
+
+  // 誘導していないときは、選んだ場面の絵を静かに出しておく
+  if (!satsTimer) {
+    $('satsStage').innerHTML = cur
+      ? `<div class="sats-still">${sceneArt(cur.svg)}<p>${esc(S.satsScene)}</p></div>`
+      : '';
+  }
 }
 
 function startSats() {
@@ -375,13 +404,15 @@ function startSats() {
   $('satsStart').hidden = true;
   $('satsStop').hidden = false;
 
+  const scene = currentScene();
   const draw = () => {
     const s = SATS_STEPS[i];
     $('satsStage').innerHTML = `
       <div class="sats-now">
         <p class="sats-step">${s.title}</p>
         <p class="sats-body">${s.body}</p>
-        ${i === 2 && S.satsScene ? `<p class="sats-scene">${esc(S.satsScene)}</p>` : ''}
+        ${i >= 2 && scene ? sceneArt(scene.svg, 'in-dark') : ''}
+        ${i >= 2 && S.satsScene ? `<p class="sats-scene">${esc(S.satsScene)}</p>` : ''}
         <p class="sats-left">${left}</p>
         <div class="sats-bar"><span style="width:${100 * (1 - left / s.sec)}%"></span></div>
         <p class="sats-of">${i + 1} / ${SATS_STEPS.length}</p>
@@ -397,8 +428,14 @@ function startSats() {
         stopSats();
         Store.today().sats = true;
         save();
-        $('satsStage').innerHTML = '<div class="sats-now done"><p class="sats-step">おやすみなさい</p><p class="sats-body">静けさのまま、そこで眠ってください。日中の内的会話（メンタル・ダイエット）は、この夜の作業を守るためにあります。</p></div>';
+        // renderAll() が先。renderSats() が satsStage を描き直すので、
+        // 締めの画面はそのあとに置く（順番を逆にすると一瞬で消える）
         renderAll();
+        $('satsStage').innerHTML = `<div class="sats-now done">
+          <p class="sats-step">おやすみなさい</p>
+          ${scene ? sceneArt(scene.svg, 'in-dark') : ''}
+          <p class="sats-body">静けさのまま、そこで眠ってください。日中の内的会話（メンタル・ダイエット）は、この夜の作業を守るためにあります。</p>
+        </div>`;
         return;
       }
       left = SATS_STEPS[i].sec;
@@ -884,6 +921,14 @@ function initEvents() {
   });
 
   /* --- SATS --- */
+  $('scenePick').addEventListener('click', e => {
+    const b = e.target.closest('[data-scene]');
+    if (!b) return;
+    const s = SCENES.find(x => x.key === b.dataset.scene);
+    S.satsScene = s.text;
+    save(); renderSats();
+    toast('静けさのある場面です。この質感のまま眠ってください。');
+  });
   $('satsScene').addEventListener('input', e => { S.satsScene = e.target.value; save(); renderSats(); });
   $('satsStart').addEventListener('click', startSats);
   $('satsStop').addEventListener('click', () => { stopSats(); $('satsStage').innerHTML = ''; });

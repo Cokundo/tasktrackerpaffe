@@ -233,6 +233,7 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
   background: linear-gradient(180deg, var(--rose-soft), #fff);
   border: 1px solid var(--rose); border-radius: 14px; padding: 18px; text-align: center;
 }
+.dc-rings { display: block; width: 62px; height: auto; margin: 0 auto 6px; color: var(--gold); }
 .dc-date { margin: 0; font-size: 22px; font-weight: 700; color: var(--rose); letter-spacing: .04em; }
 .dc-line { margin: 2px 0 6px; font-size: 15px; color: var(--plum); }
 .dc-sub { margin: 0; font-size: 12px; color: var(--ink-soft); }
@@ -315,6 +316,29 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
 .fixed-at { font-size: 12px; color: var(--rose); margin-left: 10px; }
 
 /* ---------- SATS ---------- */
+
+/* 場面カード（線画はすべてインラインSVG。外部画像を読まない） */
+.scene-pick {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px; margin: 10px 0 12px;
+}
+.scene {
+  border: 1px solid var(--line); border-radius: 14px; background: #fff; cursor: pointer;
+  padding: 8px 6px 6px; font-family: inherit; color: var(--rose); transition: .15s;
+}
+.scene:hover { border-color: var(--rose); transform: translateY(-2px); }
+.scene.is-on { background: var(--rose-soft); border-color: var(--rose); }
+.scene-title { display: block; font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+.scene.is-on .scene-title { color: var(--plum); font-weight: 700; }
+.scene-art { display: block; width: 100%; height: auto; }
+.scene-art.in-dark { max-width: 190px; margin: 14px auto 0; color: #e7b9cc; opacity: .9; }
+
+.sats-still {
+  display: flex; gap: 16px; align-items: center;
+  background: var(--gold-soft); border-radius: 14px; padding: 14px 18px; color: var(--rose);
+}
+.sats-still .scene-art { width: 110px; flex: 0 0 auto; }
+.sats-still p { margin: 0; font-size: 14px; color: var(--plum); }
 
 .sats-run { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
 .chk { font-size: 12.5px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
