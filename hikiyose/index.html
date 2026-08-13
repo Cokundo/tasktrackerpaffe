@@ -444,6 +444,36 @@
     <div id="koutenBox"></div>
   </div>
 
+  <div class="card carry-card">
+    <div class="card-head">
+      <h2 class="card-title">スマホとPCで引き継ぐ</h2>
+    </div>
+    <p class="card-lead">
+      記録はこの端末のブラウザの中にしかありません。別の端末に移すには、<b>引き継ぎコード</b>を1本の文字列にして運びます。
+      LINEのKeepメモ・自分宛のメール・メモアプリ、どれでも構いません。
+    </p>
+
+    <h3 class="sub">① この端末から出す</h3>
+    <div class="row-btns">
+      <button class="btn primary" id="codeMake">引き継ぎコードを作る</button>
+      <button class="btn ghost" id="codeCopy" hidden>コピー</button>
+      <span class="hint" id="codeInfo"></span>
+    </div>
+    <textarea id="codeOut" rows="4" readonly hidden></textarea>
+
+    <h3 class="sub">② もう一方の端末で入れる</h3>
+    <textarea id="codeIn" rows="4" placeholder="ここに引き継ぎコードを貼り付け"></textarea>
+    <div class="row-btns">
+      <button class="btn primary" id="codeMerge">合体させる</button>
+      <button class="btn ghost" id="codeReplace">まるごと置き換え</button>
+    </div>
+    <p class="hint" id="codeMsg">
+      <b>合体</b>は、両方の端末についている記録を1つにまとめます。同じ日の回数は多いほうを、チェックは片方でも付いていれば付いたまま残します。
+      ぶつかった文章だけ、あとから触った端末のほうを採ります。ふだんはこちらで大丈夫です。
+    </p>
+    <p class="hint" id="carryState"></p>
+  </div>
+
   <div class="card">
     <div class="card-head">
       <h2 class="card-title">実践のカレンダー</h2>
@@ -457,7 +487,7 @@
       <button class="btn danger" id="resetBtn">全消去</button>
       <input type="file" id="importFile" accept="application/json" hidden>
     </div>
-    <p class="hint">記録はこの端末のブラウザ（localStorage）にだけ保存されます。どこにも送信されません。</p>
+    <p class="hint">記録はこの端末のブラウザ（localStorage）にだけ保存されます。どこにも送信されません。ファイルで運べる相手なら、こちらのほうが確実です。</p>
   </div>
 
 </section>
@@ -554,6 +584,7 @@
 
 <script src="js/data.js"></script>
 <script src="js/scenes.js"></script>
+<script src="js/transfer.js"></script>
 <script src="js/store.js"></script>
 <script src="js/checks.js"></script>
 <script src="js/app.js"></script>

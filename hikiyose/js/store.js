@@ -94,7 +94,8 @@ const Store = {
       solo: [],          // {id, at, text}  自分単体の未来
       release: [],       // {at, calm}  手放しチェック
       swap: [],          // {id, at, from}
-      days: {}
+      days: {},
+      updatedAt: 0       // 最後に保存した時刻（引き継ぎの新旧判定に使う）
     };
   },
 
@@ -118,6 +119,7 @@ const Store = {
         s.release = Array.isArray(p.release) ? p.release : [];
         s.swap = Array.isArray(p.swap) ? p.swap : [];
         s.days = p.days && typeof p.days === 'object' ? p.days : {};
+        s.updatedAt = Number(p.updatedAt) || 0;
       }
     } catch (e) {
       console.warn('保存データを読めませんでした。新規に開始します。', e);
@@ -128,6 +130,8 @@ const Store = {
 
   save() {
     try {
+      // 引き継ぎのとき「どちらが新しい端末か」を決めるのに使う
+      this.state.updatedAt = Date.now();
       localStorage.setItem(HIKI_KEY, JSON.stringify(this.state));
     } catch (e) {
       console.warn('保存できませんでした。', e);
@@ -320,11 +324,113 @@ const Store = {
     return JSON.stringify(this.state, null, 2);
   },
 
-  importJSON(text) {
-    const p = JSON.parse(text);
+  replaceWith(p) {
     if (!p || typeof p !== 'object') throw new Error('形式が違います');
     localStorage.setItem(HIKI_KEY, JSON.stringify(p));
     this.load();
+  },
+
+  importJSON(text) {
+    this.replaceWith(JSON.parse(text));
+  },
+
+  /* ---------- 合体（マージ） ----------
+     スマホとPCの両方で記録がついている前提で、消さずに1つにまとめる。
+     回数は多いほう、チェックは片方でも付いていれば付いたまま、
+     文章は空でないほう。両方に中身があってぶつかったときだけ、
+     updatedAt が新しい端末の側を採る。 */
+  mergeFrom(o) {
+    if (!o || typeof o !== 'object') throw new Error('形式が違います');
+    const s = this.state;
+    const theirs = (Number(o.updatedAt) || 0) > (Number(s.updatedAt) || 0);
+    const stat = { days: 0, list: 0, diary: 0, solo: 0, swap: 0, release: 0 };
+
+    const pickStr = (a, b) => (!a ? (b || '') : (!b ? a : (theirs ? b : a)));
+    const pickNum = (a, b) => Math.max(Number(a) || 0, Number(b) || 0);
+    const union = (a, b) => {
+      const out = Array.isArray(a) ? a.slice() : [];
+      for (const x of (Array.isArray(b) ? b : [])) if (!out.includes(x)) out.push(x);
+      return out;
+    };
+
+    /* 日ごとの記録 */
+    for (const [k, od] of Object.entries(o.days || {})) {
+      if (!od || typeof od !== 'object') continue;
+      const before = JSON.stringify(this.state.days[k] || null);
+      const d = this.day(k);
+      d.mood = (d.mood && od.mood) ? (theirs ? od.mood : d.mood) : (d.mood || od.mood || 0);
+      for (const j of ['love', 'perfect', 'best', 'allow']) d.jiai[j] = pickNum(d.jiai[j], (od.jiai || {})[j]);
+      for (const m of ['am', 'noon', 'pm']) d.m369[m] = pickNum(d.m369[m], (od.m369 || {})[m]);
+      d.m55 = pickNum(d.m55, od.m55);
+      d.sec68 = pickNum(d.sec68, od.sec68);
+      d.arigatou = pickNum(d.arigatou, od.arigatou);
+      d.declutter = pickNum(d.declutter, od.declutter);
+      d.sats = d.sats || !!od.sats;
+      d.notice = union(d.notice, od.notice);
+      d.acted = union(d.acted, od.acted);
+      for (let i = 0; i < 3; i++) {
+        d.good[i] = pickStr(d.good[i], (od.good || [])[i]);
+        d.thanks[i] = pickStr(d.thanks[i], (od.thanks || [])[i]);
+      }
+      d.kouten = pickStr(d.kouten, od.kouten);
+      if (before !== JSON.stringify(d)) stat.days++;
+    }
+
+    /* idで持っているもの（重複しないので、そのまま足す） */
+    const byId = (mine, their) => {
+      const have = new Set(mine.map(x => x && x.id));
+      let n = 0;
+      for (const x of (Array.isArray(their) ? their : [])) {
+        if (x && x.id && !have.has(x.id)) { mine.push(x); have.add(x.id); n++; }
+      }
+      return n;
+    };
+    stat.list = byId(s.list, o.list);
+    stat.diary = byId(s.diary, o.diary);
+    stat.solo = byId(s.solo, o.solo);
+    stat.swap = byId(s.swap, o.swap);
+
+    /* 手放しチェック（1日1件） */
+    for (const r of (Array.isArray(o.release) ? o.release : [])) {
+      if (!r || !r.at) continue;
+      const ex = s.release.find(x => x.at === r.at);
+      if (!ex) { s.release.push(r); stat.release++; }
+      else if (theirs && ex.calm !== r.calm) { ex.calm = r.calm; stat.release++; }
+    }
+    s.release.sort((a, b) => (a.at < b.at ? -1 : 1));
+
+    /* チェック類（片方でも付いていれば付いたまま） */
+    const mergeMap = (mine, their, doneKey) => {
+      for (const [k, v] of Object.entries(their || {})) {
+        if (!v || typeof v !== 'object') continue;
+        const cur = mine[k] || {};
+        const next = Object.assign({}, cur);
+        next[doneKey] = !!(cur[doneKey] || v[doneKey]);
+        next.at = cur.at || v.at || '';
+        if (cur.memo !== undefined || v.memo !== undefined) next.memo = pickStr(cur.memo, v.memo);
+        mine[k] = next;
+      }
+    };
+    mergeMap(s.blocks, o.blocks, 'noticed');
+    mergeMap(s.road, o.road, 'done');
+    mergeMap(s.pre, o.pre, 'done');
+
+    /* 1つしか持てないもの */
+    const op = o.profile || {};
+    for (const k of ['nickname', 'weddingDate', 'metDate', 'decidedAt', 'targetMode']) {
+      s.profile[k] = pickStr(s.profile[k], op[k]);
+    }
+    if (op.blitzDays && (theirs || !s.profile.blitzDays)) s.profile.blitzDays = op.blitzDays;
+
+    const oa = o.affirmation || {};
+    if (oa.text && (theirs || !s.affirmation.text)) s.affirmation = Object.assign({}, s.affirmation, oa);
+    const oo = o.order || {};
+    if (oo.text && (theirs || !s.order.text)) s.order = Object.assign({}, s.order, oo);
+    s.satsScene = pickStr(s.satsScene, o.satsScene);
+
+    s.updatedAt = Math.max(Number(s.updatedAt) || 0, Number(o.updatedAt) || 0);
+    this.save();
+    return stat;
   },
 
   clear() {

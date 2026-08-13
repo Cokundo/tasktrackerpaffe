@@ -689,6 +689,14 @@ function renderKouten() {
     <ul class="kouten-list">${hits.slice(-6).reverse().map(k => `<li><span>${jpShort(parseKey(k))}</span>${esc(S.days[k].kouten)}</li>`).join('')}</ul>`;
 }
 
+function renderCarryState() {
+  const t = S.updatedAt ? new Date(S.updatedAt) : null;
+  const days = Object.keys(S.days).length;
+  $('carryState').textContent = t
+    ? `この端末の最終更新：${jpDate(t)} ${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')} ／ 記録${days}日ぶん`
+    : 'この端末にはまだ記録がありません。';
+}
+
 function renderHeat() {
   const days = 91;
   const cells = [];
@@ -776,6 +784,7 @@ function renderAll() {
   renderActs();
   renderDiary();
   renderKouten();
+  renderCarryState();
   renderHeat();
 }
 
@@ -1058,6 +1067,77 @@ function initEvents() {
     save(); renderAll();
   });
 
+  /* --- 引き継ぎコード --- */
+  $('codeMake').addEventListener('click', async () => {
+    try {
+      const code = await Transfer.encode(S);
+      const out = $('codeOut');
+      out.hidden = false;
+      out.value = code;
+      $('codeCopy').hidden = false;
+      const days = Object.keys(S.days).length;
+      $('codeInfo').textContent = `${code.length.toLocaleString()}文字 ／ ${days}日ぶん`;
+      out.focus(); out.setSelectionRange(0, 0);
+    } catch (err) {
+      toast('コードを作れませんでした');
+      console.warn(err);
+    }
+  });
+
+  $('codeCopy').addEventListener('click', async () => {
+    const out = $('codeOut');
+    try {
+      await navigator.clipboard.writeText(out.value);
+      toast('コピーしました。Keepメモや自分宛のメールに貼ってください。');
+    } catch (err) {
+      // クリップボードが使えない環境（file:// のSafariなど）向けの逃げ道
+      out.select();
+      out.setSelectionRange(0, out.value.length);
+      const ok = document.execCommand && document.execCommand('copy');
+      toast(ok ? 'コピーしました' : '選択したので、長押しでコピーしてください');
+    }
+  });
+
+  const applyCode = async (mode) => {
+    const raw = $('codeIn').value;
+    if (!raw.trim()) { toast('コードを貼り付けてください'); return; }
+    let obj;
+    try {
+      obj = await Transfer.decode(raw);
+    } catch (err) {
+      toast('コードを読めませんでした。全部貼れているか確認してください。');
+      console.warn(err);
+      return;
+    }
+    try {
+      if (mode === 'replace') {
+        if (!confirm('この端末の記録を消して、貼り付けたほうで置き換えます。よろしいですか？')) return;
+        Store.replaceWith(obj);
+        S = Store.state;
+        toast('置き換えました');
+      } else {
+        const st = Store.mergeFrom(obj);
+        S = Store.state;
+        const parts = [];
+        if (st.days) parts.push(`記録${st.days}日ぶん`);
+        if (st.list) parts.push(`リスト${st.list}項目`);
+        if (st.diary) parts.push(`未来日記${st.diary}本`);
+        if (st.release) parts.push(`手放し${st.release}件`);
+        if (st.solo) parts.push(`自分単体${st.solo}件`);
+        if (st.swap) parts.push(`口ぐせ${st.swap}件`);
+        toast(parts.length ? parts.join('・') + ' を取り込みました' : '新しく足すものはありませんでした');
+      }
+      $('codeIn').value = '';
+      renderAll();
+      renderCarryState();
+    } catch (err) {
+      toast('取り込めませんでした');
+      console.warn(err);
+    }
+  };
+  $('codeMerge').addEventListener('click', () => applyCode('merge'));
+  $('codeReplace').addEventListener('click', () => applyCode('replace'));
+
   /* --- 書き出し／読み込み／消去 --- */
   $('exportBtn').addEventListener('click', () => {
     const blob = new Blob([Store.exportJSON()], { type: 'application/json' });
@@ -1074,10 +1154,20 @@ function initEvents() {
     const r = new FileReader();
     r.onload = () => {
       try {
-        Store.importJSON(r.result);
-        S = Store.state;
+        const obj = JSON.parse(r.result);
+        // ファイルからでも、消さずに合体できるようにしておく
+        const merge = confirm('この端末の記録と合体させますか？\n\nOK＝合体（どちらの記録も残ります）\nキャンセル＝まるごと置き換え');
+        if (merge) {
+          Store.mergeFrom(obj);
+          S = Store.state;
+          toast('合体させました');
+        } else {
+          Store.replaceWith(obj);
+          S = Store.state;
+          toast('置き換えました');
+        }
         renderAll();
-        toast('読み込みました');
+        renderCarryState();
       } catch (err) {
         toast('読み込めませんでした');
       }

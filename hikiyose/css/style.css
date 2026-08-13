@@ -484,6 +484,15 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
 .kouten-list li { display: flex; gap: 10px; padding: 4px 0; color: var(--ink-soft); }
 .kouten-list span { color: var(--rose); }
 
+/* 引き継ぎ */
+.carry-card { border-color: rgba(201,107,132,.35); }
+.carry-card .sub { margin-top: 16px; }
+#codeOut, #codeIn {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px; line-height: 1.5; word-break: break-all; margin-top: 8px;
+}
+#codeOut { background: #faf4f6; color: var(--ink-soft); }
+
 .heat {
   display: grid; grid-template-rows: repeat(7, 14px); grid-auto-flow: column;
   gap: 4px; margin: 12px 0; justify-content: start; overflow-x: auto;

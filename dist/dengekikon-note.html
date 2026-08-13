@@ -491,6 +491,15 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
 .kouten-list li { display: flex; gap: 10px; padding: 4px 0; color: var(--ink-soft); }
 .kouten-list span { color: var(--rose); }
 
+/* 引き継ぎ */
+.carry-card { border-color: rgba(201,107,132,.35); }
+.carry-card .sub { margin-top: 16px; }
+#codeOut, #codeIn {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px; line-height: 1.5; word-break: break-all; margin-top: 8px;
+}
+#codeOut { background: #faf4f6; color: var(--ink-soft); }
+
 .heat {
   display: grid; grid-template-rows: repeat(7, 14px); grid-auto-flow: column;
   gap: 4px; margin: 12px 0; justify-content: start; overflow-x: auto;
@@ -1003,6 +1012,36 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
     <div id="koutenBox"></div>
   </div>
 
+  <div class="card carry-card">
+    <div class="card-head">
+      <h2 class="card-title">スマホとPCで引き継ぐ</h2>
+    </div>
+    <p class="card-lead">
+      記録はこの端末のブラウザの中にしかありません。別の端末に移すには、<b>引き継ぎコード</b>を1本の文字列にして運びます。
+      LINEのKeepメモ・自分宛のメール・メモアプリ、どれでも構いません。
+    </p>
+
+    <h3 class="sub">① この端末から出す</h3>
+    <div class="row-btns">
+      <button class="btn primary" id="codeMake">引き継ぎコードを作る</button>
+      <button class="btn ghost" id="codeCopy" hidden>コピー</button>
+      <span class="hint" id="codeInfo"></span>
+    </div>
+    <textarea id="codeOut" rows="4" readonly hidden></textarea>
+
+    <h3 class="sub">② もう一方の端末で入れる</h3>
+    <textarea id="codeIn" rows="4" placeholder="ここに引き継ぎコードを貼り付け"></textarea>
+    <div class="row-btns">
+      <button class="btn primary" id="codeMerge">合体させる</button>
+      <button class="btn ghost" id="codeReplace">まるごと置き換え</button>
+    </div>
+    <p class="hint" id="codeMsg">
+      <b>合体</b>は、両方の端末についている記録を1つにまとめます。同じ日の回数は多いほうを、チェックは片方でも付いていれば付いたまま残します。
+      ぶつかった文章だけ、あとから触った端末のほうを採ります。ふだんはこちらで大丈夫です。
+    </p>
+    <p class="hint" id="carryState"></p>
+  </div>
+
   <div class="card">
     <div class="card-head">
       <h2 class="card-title">実践のカレンダー</h2>
@@ -1016,7 +1055,7 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
       <button class="btn danger" id="resetBtn">全消去</button>
       <input type="file" id="importFile" accept="application/json" hidden>
     </div>
-    <p class="hint">記録はこの端末のブラウザ（localStorage）にだけ保存されます。どこにも送信されません。</p>
+    <p class="hint">記録はこの端末のブラウザ（localStorage）にだけ保存されます。どこにも送信されません。ファイルで運べる相手なら、こちらのほうが確実です。</p>
   </div>
 
 </section>
@@ -1500,6 +1539,72 @@ const RINGS_SVG = `
 </script>
 <script>
 /* =========================================================
+   transfer.js — 端末をまたいで記録を持ち運ぶ
+
+   記録は端末のブラウザにしか入っていないので、
+   PCで書いたものをスマホで見るには、自分で運ぶしかない。
+   ここでは記録を1本の文字列（引き継ぎコード）にする。
+   LINEのKeepメモや自分宛のメールに貼って、
+   もう一方の端末で貼り付ければ入る。
+
+   HKY1: gzipで縮めたもの（たいてい元の1/5以下）
+   HKY0: 縮められないブラウザ用（そのままbase64）
+   ========================================================= */
+
+const Transfer = {
+
+  b64(u8) {
+    let s = '';
+    const CH = 0x8000;
+    for (let i = 0; i < u8.length; i += CH) {
+      s += String.fromCharCode.apply(null, u8.subarray(i, i + CH));
+    }
+    return btoa(s);
+  },
+
+  unb64(str) {
+    const bin = atob(str);
+    const u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return u8;
+  },
+
+  async encode(obj) {
+    const bytes = new TextEncoder().encode(JSON.stringify(obj));
+    if (typeof CompressionStream === 'function') {
+      const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));
+      const buf = new Uint8Array(await new Response(stream).arrayBuffer());
+      return 'HKY1:' + this.b64(buf);
+    }
+    return 'HKY0:' + this.b64(bytes);
+  },
+
+  async decode(code) {
+    const t = String(code || '').trim();
+    if (!t) throw new Error('コードが空です');
+
+    // メールやトーク画面で改行が入ることがあるので、空白は落としてから読む
+    const packed = t.replace(/\s+/g, '');
+
+    if (packed.startsWith('HKY1:')) {
+      if (typeof DecompressionStream !== 'function') {
+        throw new Error('このブラウザでは縮めたコードを開けません。もう一方の端末で「縮めずに作る」を使ってください。');
+      }
+      const u8 = this.unb64(packed.slice(5));
+      const stream = new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return JSON.parse(await new Response(stream).text());
+    }
+    if (packed.startsWith('HKY0:')) {
+      return JSON.parse(new TextDecoder().decode(this.unb64(packed.slice(5))));
+    }
+    // 書き出したJSONファイルの中身をそのまま貼られた場合も受ける
+    return JSON.parse(t);
+  }
+};
+
+</script>
+<script>
+/* =========================================================
    store.js — 保存と日付、そして「今どのステージか」の判定
    記録はすべて localStorage。通信は一切しない。
    ========================================================= */
@@ -1595,7 +1700,8 @@ const Store = {
       solo: [],          // {id, at, text}  自分単体の未来
       release: [],       // {at, calm}  手放しチェック
       swap: [],          // {id, at, from}
-      days: {}
+      days: {},
+      updatedAt: 0       // 最後に保存した時刻（引き継ぎの新旧判定に使う）
     };
   },
 
@@ -1619,6 +1725,7 @@ const Store = {
         s.release = Array.isArray(p.release) ? p.release : [];
         s.swap = Array.isArray(p.swap) ? p.swap : [];
         s.days = p.days && typeof p.days === 'object' ? p.days : {};
+        s.updatedAt = Number(p.updatedAt) || 0;
       }
     } catch (e) {
       console.warn('保存データを読めませんでした。新規に開始します。', e);
@@ -1629,6 +1736,8 @@ const Store = {
 
   save() {
     try {
+      // 引き継ぎのとき「どちらが新しい端末か」を決めるのに使う
+      this.state.updatedAt = Date.now();
       localStorage.setItem(HIKI_KEY, JSON.stringify(this.state));
     } catch (e) {
       console.warn('保存できませんでした。', e);
@@ -1821,11 +1930,113 @@ const Store = {
     return JSON.stringify(this.state, null, 2);
   },
 
-  importJSON(text) {
-    const p = JSON.parse(text);
+  replaceWith(p) {
     if (!p || typeof p !== 'object') throw new Error('形式が違います');
     localStorage.setItem(HIKI_KEY, JSON.stringify(p));
     this.load();
+  },
+
+  importJSON(text) {
+    this.replaceWith(JSON.parse(text));
+  },
+
+  /* ---------- 合体（マージ） ----------
+     スマホとPCの両方で記録がついている前提で、消さずに1つにまとめる。
+     回数は多いほう、チェックは片方でも付いていれば付いたまま、
+     文章は空でないほう。両方に中身があってぶつかったときだけ、
+     updatedAt が新しい端末の側を採る。 */
+  mergeFrom(o) {
+    if (!o || typeof o !== 'object') throw new Error('形式が違います');
+    const s = this.state;
+    const theirs = (Number(o.updatedAt) || 0) > (Number(s.updatedAt) || 0);
+    const stat = { days: 0, list: 0, diary: 0, solo: 0, swap: 0, release: 0 };
+
+    const pickStr = (a, b) => (!a ? (b || '') : (!b ? a : (theirs ? b : a)));
+    const pickNum = (a, b) => Math.max(Number(a) || 0, Number(b) || 0);
+    const union = (a, b) => {
+      const out = Array.isArray(a) ? a.slice() : [];
+      for (const x of (Array.isArray(b) ? b : [])) if (!out.includes(x)) out.push(x);
+      return out;
+    };
+
+    /* 日ごとの記録 */
+    for (const [k, od] of Object.entries(o.days || {})) {
+      if (!od || typeof od !== 'object') continue;
+      const before = JSON.stringify(this.state.days[k] || null);
+      const d = this.day(k);
+      d.mood = (d.mood && od.mood) ? (theirs ? od.mood : d.mood) : (d.mood || od.mood || 0);
+      for (const j of ['love', 'perfect', 'best', 'allow']) d.jiai[j] = pickNum(d.jiai[j], (od.jiai || {})[j]);
+      for (const m of ['am', 'noon', 'pm']) d.m369[m] = pickNum(d.m369[m], (od.m369 || {})[m]);
+      d.m55 = pickNum(d.m55, od.m55);
+      d.sec68 = pickNum(d.sec68, od.sec68);
+      d.arigatou = pickNum(d.arigatou, od.arigatou);
+      d.declutter = pickNum(d.declutter, od.declutter);
+      d.sats = d.sats || !!od.sats;
+      d.notice = union(d.notice, od.notice);
+      d.acted = union(d.acted, od.acted);
+      for (let i = 0; i < 3; i++) {
+        d.good[i] = pickStr(d.good[i], (od.good || [])[i]);
+        d.thanks[i] = pickStr(d.thanks[i], (od.thanks || [])[i]);
+      }
+      d.kouten = pickStr(d.kouten, od.kouten);
+      if (before !== JSON.stringify(d)) stat.days++;
+    }
+
+    /* idで持っているもの（重複しないので、そのまま足す） */
+    const byId = (mine, their) => {
+      const have = new Set(mine.map(x => x && x.id));
+      let n = 0;
+      for (const x of (Array.isArray(their) ? their : [])) {
+        if (x && x.id && !have.has(x.id)) { mine.push(x); have.add(x.id); n++; }
+      }
+      return n;
+    };
+    stat.list = byId(s.list, o.list);
+    stat.diary = byId(s.diary, o.diary);
+    stat.solo = byId(s.solo, o.solo);
+    stat.swap = byId(s.swap, o.swap);
+
+    /* 手放しチェック（1日1件） */
+    for (const r of (Array.isArray(o.release) ? o.release : [])) {
+      if (!r || !r.at) continue;
+      const ex = s.release.find(x => x.at === r.at);
+      if (!ex) { s.release.push(r); stat.release++; }
+      else if (theirs && ex.calm !== r.calm) { ex.calm = r.calm; stat.release++; }
+    }
+    s.release.sort((a, b) => (a.at < b.at ? -1 : 1));
+
+    /* チェック類（片方でも付いていれば付いたまま） */
+    const mergeMap = (mine, their, doneKey) => {
+      for (const [k, v] of Object.entries(their || {})) {
+        if (!v || typeof v !== 'object') continue;
+        const cur = mine[k] || {};
+        const next = Object.assign({}, cur);
+        next[doneKey] = !!(cur[doneKey] || v[doneKey]);
+        next.at = cur.at || v.at || '';
+        if (cur.memo !== undefined || v.memo !== undefined) next.memo = pickStr(cur.memo, v.memo);
+        mine[k] = next;
+      }
+    };
+    mergeMap(s.blocks, o.blocks, 'noticed');
+    mergeMap(s.road, o.road, 'done');
+    mergeMap(s.pre, o.pre, 'done');
+
+    /* 1つしか持てないもの */
+    const op = o.profile || {};
+    for (const k of ['nickname', 'weddingDate', 'metDate', 'decidedAt', 'targetMode']) {
+      s.profile[k] = pickStr(s.profile[k], op[k]);
+    }
+    if (op.blitzDays && (theirs || !s.profile.blitzDays)) s.profile.blitzDays = op.blitzDays;
+
+    const oa = o.affirmation || {};
+    if (oa.text && (theirs || !s.affirmation.text)) s.affirmation = Object.assign({}, s.affirmation, oa);
+    const oo = o.order || {};
+    if (oo.text && (theirs || !s.order.text)) s.order = Object.assign({}, s.order, oo);
+    s.satsScene = pickStr(s.satsScene, o.satsScene);
+
+    s.updatedAt = Math.max(Number(s.updatedAt) || 0, Number(o.updatedAt) || 0);
+    this.save();
+    return stat;
   },
 
   clear() {
@@ -2659,6 +2870,14 @@ function renderKouten() {
     <ul class="kouten-list">${hits.slice(-6).reverse().map(k => `<li><span>${jpShort(parseKey(k))}</span>${esc(S.days[k].kouten)}</li>`).join('')}</ul>`;
 }
 
+function renderCarryState() {
+  const t = S.updatedAt ? new Date(S.updatedAt) : null;
+  const days = Object.keys(S.days).length;
+  $('carryState').textContent = t
+    ? `この端末の最終更新：${jpDate(t)} ${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')} ／ 記録${days}日ぶん`
+    : 'この端末にはまだ記録がありません。';
+}
+
 function renderHeat() {
   const days = 91;
   const cells = [];
@@ -2746,6 +2965,7 @@ function renderAll() {
   renderActs();
   renderDiary();
   renderKouten();
+  renderCarryState();
   renderHeat();
 }
 
@@ -3028,6 +3248,77 @@ function initEvents() {
     save(); renderAll();
   });
 
+  /* --- 引き継ぎコード --- */
+  $('codeMake').addEventListener('click', async () => {
+    try {
+      const code = await Transfer.encode(S);
+      const out = $('codeOut');
+      out.hidden = false;
+      out.value = code;
+      $('codeCopy').hidden = false;
+      const days = Object.keys(S.days).length;
+      $('codeInfo').textContent = `${code.length.toLocaleString()}文字 ／ ${days}日ぶん`;
+      out.focus(); out.setSelectionRange(0, 0);
+    } catch (err) {
+      toast('コードを作れませんでした');
+      console.warn(err);
+    }
+  });
+
+  $('codeCopy').addEventListener('click', async () => {
+    const out = $('codeOut');
+    try {
+      await navigator.clipboard.writeText(out.value);
+      toast('コピーしました。Keepメモや自分宛のメールに貼ってください。');
+    } catch (err) {
+      // クリップボードが使えない環境（file:// のSafariなど）向けの逃げ道
+      out.select();
+      out.setSelectionRange(0, out.value.length);
+      const ok = document.execCommand && document.execCommand('copy');
+      toast(ok ? 'コピーしました' : '選択したので、長押しでコピーしてください');
+    }
+  });
+
+  const applyCode = async (mode) => {
+    const raw = $('codeIn').value;
+    if (!raw.trim()) { toast('コードを貼り付けてください'); return; }
+    let obj;
+    try {
+      obj = await Transfer.decode(raw);
+    } catch (err) {
+      toast('コードを読めませんでした。全部貼れているか確認してください。');
+      console.warn(err);
+      return;
+    }
+    try {
+      if (mode === 'replace') {
+        if (!confirm('この端末の記録を消して、貼り付けたほうで置き換えます。よろしいですか？')) return;
+        Store.replaceWith(obj);
+        S = Store.state;
+        toast('置き換えました');
+      } else {
+        const st = Store.mergeFrom(obj);
+        S = Store.state;
+        const parts = [];
+        if (st.days) parts.push(`記録${st.days}日ぶん`);
+        if (st.list) parts.push(`リスト${st.list}項目`);
+        if (st.diary) parts.push(`未来日記${st.diary}本`);
+        if (st.release) parts.push(`手放し${st.release}件`);
+        if (st.solo) parts.push(`自分単体${st.solo}件`);
+        if (st.swap) parts.push(`口ぐせ${st.swap}件`);
+        toast(parts.length ? parts.join('・') + ' を取り込みました' : '新しく足すものはありませんでした');
+      }
+      $('codeIn').value = '';
+      renderAll();
+      renderCarryState();
+    } catch (err) {
+      toast('取り込めませんでした');
+      console.warn(err);
+    }
+  };
+  $('codeMerge').addEventListener('click', () => applyCode('merge'));
+  $('codeReplace').addEventListener('click', () => applyCode('replace'));
+
   /* --- 書き出し／読み込み／消去 --- */
   $('exportBtn').addEventListener('click', () => {
     const blob = new Blob([Store.exportJSON()], { type: 'application/json' });
@@ -3044,10 +3335,20 @@ function initEvents() {
     const r = new FileReader();
     r.onload = () => {
       try {
-        Store.importJSON(r.result);
-        S = Store.state;
+        const obj = JSON.parse(r.result);
+        // ファイルからでも、消さずに合体できるようにしておく
+        const merge = confirm('この端末の記録と合体させますか？\n\nOK＝合体（どちらの記録も残ります）\nキャンセル＝まるごと置き換え');
+        if (merge) {
+          Store.mergeFrom(obj);
+          S = Store.state;
+          toast('合体させました');
+        } else {
+          Store.replaceWith(obj);
+          S = Store.state;
+          toast('置き換えました');
+        }
         renderAll();
-        toast('読み込みました');
+        renderCarryState();
       } catch (err) {
         toast('読み込めませんでした');
       }
