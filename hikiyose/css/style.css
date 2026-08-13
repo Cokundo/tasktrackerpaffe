@@ -333,6 +333,24 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--rose-soft);
 .scene-art { display: block; width: 100%; height: auto; }
 .scene-art.in-dark { max-width: 190px; margin: 14px auto 0; color: #e7b9cc; opacity: .9; }
 
+.scene-mine .scene-art { color: var(--ink-soft); opacity: .5; }
+.scene-mine.is-on .scene-art { color: var(--rose); opacity: 1; }
+.scene-thumb {
+  display: block; width: 100%; aspect-ratio: 120 / 84;
+  object-fit: cover; border-radius: 8px;
+}
+.photo-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.photo-row .hint { margin: 0; }
+.scene-photo {
+  display: block; width: 100%; max-width: 320px; margin: 0 auto;
+  border-radius: 12px; object-fit: cover;
+}
+.scene-photo.in-dark {
+  max-width: 260px; margin: 14px auto 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+.sats-still .scene-photo { width: 130px; flex: 0 0 auto; margin: 0; }
+
 .sats-still {
   display: flex; gap: 16px; align-items: center;
   background: var(--gold-soft); border-radius: 14px; padding: 14px 18px; color: var(--rose);

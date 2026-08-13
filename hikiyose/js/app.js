@@ -378,23 +378,54 @@ function sceneArt(svg, cls) {
     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svg}</svg>`;
 }
 
+/* いま出すべき絵（自分の写真か、線画か）。なければ空文字 */
+function sceneVisual(cls) {
+  const photo = Photo.get();
+  if (S.usePhoto && photo) {
+    return `<img class="scene-photo ${cls || ''}" src="${photo}" alt="">`;
+  }
+  const cur = currentScene();
+  return cur ? sceneArt(cur.svg, cls) : '';
+}
+
 function renderSats() {
   if ($('satsScene').value !== (S.satsScene || '')) $('satsScene').value = S.satsScene || '';
+  const photo = Photo.get();
   const cur = currentScene();
+  const onPhoto = S.usePhoto && !!photo;
+
   $('scenePick').innerHTML = SCENES.map(s => `
-    <button class="scene ${cur && cur.key === s.key ? 'is-on' : ''}" data-scene="${s.key}">
+    <button class="scene ${!onPhoto && cur && cur.key === s.key ? 'is-on' : ''}" data-scene="${s.key}">
       ${sceneArt(s.svg)}
       <span class="scene-title">${s.title}</span>
-    </button>`).join('');
+    </button>`).join('') + `
+    <button class="scene scene-mine ${onPhoto ? 'is-on' : ''}" data-photo="pick">
+      ${photo
+        ? `<img class="scene-thumb" src="${photo}" alt="">`
+        : `<svg class="scene-art" viewBox="0 0 120 84" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+             <rect x="20" y="20" width="80" height="52" rx="6"/>
+             <circle cx="42" cy="38" r="6"/>
+             <path d="M24 66l22-20 16 14 12-9 22 15"/>
+           </svg>`}
+      <span class="scene-title">${photo ? '自分の写真' : '写真を入れる'}</span>
+    </button>`;
+
+  $('photoRow').innerHTML = photo
+    ? `<button class="btn tiny ghost" data-photo="pick">写真を変える</button>
+       <button class="btn tiny ghost" data-photo="clear">写真を外す</button>
+       <span class="hint">約${Photo.sizeKB(photo)}KB。写真はこの端末だけに残ります（引き継ぎコードには入りません）。</span>`
+    : `<span class="hint">線画で足りないときは、自分の写真を1枚だけ入れられます。端末の中で縮めて保存するだけで、どこにも送りません。</span>`;
 
   const r = Checks.satsScene(S.satsScene);
   $('satsHint').innerHTML = `<span class="${r.ok ? 'ok' : 'ng'}">${esc(r.msg)}</span>`;
   $('satsDone').checked = !!Store.today().sats;
 
-  // 誘導していないときは、選んだ場面の絵を静かに出しておく
+  // 誘導していないときは、選んだ場面を静かに出しておく
   if (!satsTimer) {
-    $('satsStage').innerHTML = cur
-      ? `<div class="sats-still">${sceneArt(cur.svg)}<p>${esc(S.satsScene)}</p></div>`
+    const art = sceneVisual();
+    $('satsStage').innerHTML = (art || S.satsScene)
+      ? `<div class="sats-still">${art}<p>${esc(S.satsScene)}</p></div>`
       : '';
   }
 }
@@ -404,14 +435,14 @@ function startSats() {
   $('satsStart').hidden = true;
   $('satsStop').hidden = false;
 
-  const scene = currentScene();
+  const visual = sceneVisual('in-dark');
   const draw = () => {
     const s = SATS_STEPS[i];
     $('satsStage').innerHTML = `
       <div class="sats-now">
         <p class="sats-step">${s.title}</p>
         <p class="sats-body">${s.body}</p>
-        ${i >= 2 && scene ? sceneArt(scene.svg, 'in-dark') : ''}
+        ${i >= 2 ? visual : ''}
         ${i >= 2 && S.satsScene ? `<p class="sats-scene">${esc(S.satsScene)}</p>` : ''}
         <p class="sats-left">${left}</p>
         <div class="sats-bar"><span style="width:${100 * (1 - left / s.sec)}%"></span></div>
@@ -433,7 +464,7 @@ function startSats() {
         renderAll();
         $('satsStage').innerHTML = `<div class="sats-now done">
           <p class="sats-step">おやすみなさい</p>
-          ${scene ? sceneArt(scene.svg, 'in-dark') : ''}
+          ${visual}
           <p class="sats-body">静けさのまま、そこで眠ってください。日中の内的会話（メンタル・ダイエット）は、この夜の作業を守るためにあります。</p>
         </div>`;
         return;
@@ -931,12 +962,55 @@ function initEvents() {
 
   /* --- SATS --- */
   $('scenePick').addEventListener('click', e => {
+    if (e.target.closest('[data-photo]')) return;   // 写真カードは下で受ける
     const b = e.target.closest('[data-scene]');
     if (!b) return;
     const s = SCENES.find(x => x.key === b.dataset.scene);
     S.satsScene = s.text;
+    S.usePhoto = false;
     save(); renderSats();
     toast('静けさのある場面です。この質感のまま眠ってください。');
+  });
+
+  /* 自分の写真 */
+  const onPhotoBtn = e => {
+    const b = e.target.closest('[data-photo]');
+    if (!b) return;
+    if (b.dataset.photo === 'clear') {
+      if (!confirm('この端末から写真を消します。よろしいですか？')) return;
+      Photo.clear();
+      S.usePhoto = false;
+      save(); renderSats();
+      toast('写真を外しました');
+      return;
+    }
+    if (Photo.get() && !S.usePhoto) {
+      // すでに入っている写真を、選び直しただけのとき
+      S.usePhoto = true;
+      save(); renderSats();
+      toast('この写真の中に入ります。場面の文も書いておくと効きます。');
+      return;
+    }
+    $('photoFile').click();
+  };
+  $('scenePick').addEventListener('click', onPhotoBtn);
+  $('photoRow').addEventListener('click', onPhotoBtn);
+
+  $('photoFile').addEventListener('change', async e => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    try {
+      const data = await Photo.fromFile(f);
+      Photo.set(data);
+      S.usePhoto = true;
+      save(); renderSats();
+      toast('入りました。声・匂い・手ざわりを一つ、文に足しておいてください。');
+    } catch (err) {
+      const quota = err && /quota|exceeded/i.test(err.name + err.message);
+      toast(quota ? '写真が大きすぎて保存できませんでした。小さめの写真で試してください。' : (err.message || '写真を読めませんでした'));
+      console.warn(err);
+    }
   });
   $('satsScene').addEventListener('input', e => { S.satsScene = e.target.value; save(); renderSats(); });
   $('satsStart').addEventListener('click', startSats);

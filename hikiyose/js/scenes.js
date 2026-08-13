@@ -12,6 +12,37 @@
 
 const SCENES = [
   {
+    key: 'table',
+    title: '夕方の卓',
+    text: '夕方、家の卓に花が一輪。湯呑みが二つ。隣で笑いながら、しょうもない話をしている。',
+    svg: `
+      <g transform="rotate(6 34 58)">
+        <circle cx="34" cy="35" r="6.5"/>
+        <path d="M20 58c0-9 6-15 14-15s14 6 14 15"/>
+      </g>
+      <g transform="rotate(-6 86 58)">
+        <circle cx="86" cy="35" r="6.5"/>
+        <path d="M72 58c0-9 6-15 14-15s14 6 14 15"/>
+      </g>
+      <path d="M60 54V41"/>
+      <g transform="translate(60 36)">
+        <ellipse cy="-4.2" rx="2.2" ry="3.4"/>
+        <ellipse cy="-4.2" rx="2.2" ry="3.4" transform="rotate(72)"/>
+        <ellipse cy="-4.2" rx="2.2" ry="3.4" transform="rotate(144)"/>
+        <ellipse cy="-4.2" rx="2.2" ry="3.4" transform="rotate(216)"/>
+        <ellipse cy="-4.2" rx="2.2" ry="3.4" transform="rotate(288)"/>
+        <circle r="1.6"/>
+      </g>
+      <ellipse cx="60" cy="68" rx="44" ry="8"/>
+      <path d="M60 76v5M50 82h20"/>
+      <path d="M57.5 54h5l-1 16h-3z"/>
+      <ellipse cx="60" cy="54" rx="2.5" ry="1"/>
+      <path d="M36 61h10l-1.5 8h-7z"/>
+      <ellipse cx="41" cy="61" rx="5" ry="1.6"/>
+      <path d="M74 61h10l-1.5 8h-7z"/>
+      <ellipse cx="79" cy="61" rx="5" ry="1.6"/>`
+  },
+  {
     key: 'mugs',
     title: '朝のマグが二つ',
     text: '朝、台所にマグが二つ出ている。片方からまだ湯気が立っている。',

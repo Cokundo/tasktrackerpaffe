@@ -86,6 +86,7 @@ const Store = {
       affirmation: { text: '', discomfort: 5, fixedAt: '' },
       order: { text: '', startedAt: '', lastDay: '', streak: 0, checkAt: '' }, // 55×5のワンオーダー
       satsScene: '',
+      usePhoto: false,   // SATSの絵に、線画ではなく自分の写真を使う
       list: [],          // {id, cat, text, at}
       blocks: {},        // key -> {noticed, memo, at}
       road: {},          // ROADMAPのkey -> {done, at}
@@ -110,6 +111,7 @@ const Store = {
         Object.assign(s.affirmation, p.affirmation || {});
         Object.assign(s.order, p.order || {});
         s.satsScene = p.satsScene || '';
+        s.usePhoto = !!p.usePhoto;
         s.list = Array.isArray(p.list) ? p.list : [];
         s.blocks = p.blocks && typeof p.blocks === 'object' ? p.blocks : {};
         s.road = p.road && typeof p.road === 'object' ? p.road : {};
