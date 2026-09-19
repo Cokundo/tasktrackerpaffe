@@ -770,9 +770,9 @@ body {
         <p class="matcha-state" id="matchaState">なみなみ</p>
         <p class="matcha-msg" id="matchaMsg"></p>
         <ul class="matcha-rules">
-          <li>1日まるごとサボると <b>−1メモリ</b></li>
-          <li>7日サボると <b>空</b>になる</li>
-          <li>皆勤（7項目すべて）<b>2日</b>で <b>+1メモリ</b></li>
+          <li>1日休むだけなら <b>減らない</b></li>
+          <li>2日以上続けて休むと <b>−1メモリ</b>ずつ</li>
+          <li><b>3項目</b>やれた日は <b>+1メモリ</b></li>
         </ul>
         <div class="matcha-log" id="matchaLog"></div>
       </div>
@@ -1089,12 +1089,14 @@ function nextStage(key, level) {
 
 /* ---------- 抹茶ラテ（毎日の継続メモリ） ----------
    ・7メモリから始まる
-   ・1日まるごとサボる（どの項目も手付かず）と 1メモリ減る → 7日で空
-   ・「皆勤」＝その日7項目すべて達成。皆勤2日で 1メモリ回復
-   （皆勤の判定をゆるめたいときは PERFECT_NEEDED を下げる）           */
+   ・サボった日（どの項目も手付かず）が続くと 1メモリずつ減る
+     ただし連続して休んだ最初の GRACE_DAYS 日ぶんは減らない（休んでいい日）
+   ・「達成の日」＝その日 PERFECT_NEEDED 項目以上。
+     PERFECT_FOR_HEAL 日ぶんで 1メモリ回復                            */
 const MATCHA_MAX = 7;
-const PERFECT_NEEDED = 7;      // 皆勤とみなす達成項目数
-const PERFECT_FOR_HEAL = 2;    // 1メモリ回復に必要な皆勤日数
+const PERFECT_NEEDED = 3;      // 「達成の日」とみなす項目数
+const PERFECT_FOR_HEAL = 1;    // 1メモリ回復に必要な達成日数
+const GRACE_DAYS = 1;          // 連続で休んでも減らない日数
 
 const MAX_LEVEL = 20;
 const BASE_XP = 10;      // 1日達成あたりの基礎XP
@@ -1424,8 +1426,8 @@ function computeLevels(xp) {
 
 /**
  * 抹茶ラテの残りメモリを、記録の最初の日から今日まで1日ずつたどって求める。
- *   ・まるごとサボった日（0項目）… 1メモリ減る／皆勤の貯めはリセット
- *   ・皆勤の日（7項目すべて）  … 2日で1メモリ回復
+ *   ・サボった日（0項目）… 連続 GRACE_DAYS 日までは減らない。それを超えた日から1メモリ減る
+ *   ・達成の日（PERFECT_NEEDED 項目以上）… PERFECT_FOR_HEAL 日ぶんで1メモリ回復
  *   ・今日はまだ終わっていないので、サボり判定はしない
  */
 function matchaState(log) {
@@ -1433,7 +1435,8 @@ function matchaState(log) {
   const keys = sortedLogKeys(log);
   const state = {
     level: MATCHA_MAX,
-    pending: 0,        // 回復までに貯まった皆勤日数
+    pending: 0,        // 回復までに貯まった達成日数
+    graceLeft: GRACE_DAYS,  // 今日休んでも減らずに済む残り日数
     lost: 0,           // これまでに失ったメモリ
     gained: 0,         // これまでに取り戻したメモリ
     todayCount: (log[today] || []).length,
@@ -1445,6 +1448,7 @@ function matchaState(log) {
 
   let level = MATCHA_MAX;
   let pending = 0;
+  let skipRun = 0;                  // 連続でサボった日数
   let d = parseKey(keys[0]);
 
   while (dateKey(d) <= today) {
@@ -1452,14 +1456,20 @@ function matchaState(log) {
     const n = (log[k] || []).length;
     if (n === 0) {
       if (k !== today) {            // 今日のサボりは日付が変わってから確定
-        if (level > 0) { level--; state.lost++; }
-        pending = 0;
+        skipRun++;
+        if (skipRun > GRACE_DAYS) { // 休んでいい日ぶんを使い切ってから減る
+          if (level > 0) { level--; state.lost++; }
+          pending = 0;
+        }
       }
-    } else if (n >= PERFECT_NEEDED) {
-      pending++;
-      if (pending >= PERFECT_FOR_HEAL) {
-        pending = 0;
-        if (level < MATCHA_MAX) { level++; state.gained++; }
+    } else {
+      skipRun = 0;
+      if (n >= PERFECT_NEEDED) {
+        pending++;
+        if (pending >= PERFECT_FOR_HEAL) {
+          pending = 0;
+          if (level < MATCHA_MAX) { level++; state.gained++; }
+        }
       }
     }
     d = addDays(d, 1);
@@ -1467,6 +1477,7 @@ function matchaState(log) {
 
   state.level = level;
   state.pending = pending;
+  state.graceLeft = Math.max(0, GRACE_DAYS - skipRun);
   state.empty = level <= 0;
   return state;
 }
@@ -2472,11 +2483,11 @@ const App = {
 
     const stat = STATS.find(s => s.key === statKey);
     if (this.matcha.level > matchaBefore) {
-      this.toast(`🍵 皆勤2日達成！ 抹茶ラテが1メモリ回復（${this.matcha.level}/${MATCHA_MAX}）`);
+      this.toast(`🍵 抹茶ラテが1メモリ回復（${this.matcha.level}/${MATCHA_MAX}）`);
       return;
     }
     if (this.matcha.todayPerfect && !perfectBefore) {
-      this.toast('🍵 今日は皆勤！ あと1日皆勤で抹茶ラテが1メモリ回復');
+      this.toast('🍵 今日はもう十分。抹茶ラテは満たされました');
       return;
     }
     if (after > before) {
@@ -2707,21 +2718,21 @@ const App = {
     if (!s.started) {
       msg = 'まだ記録がありません。今日ひとつ達成すれば、この抹茶ラテは減りません。';
     } else if (s.todayCount === 0) {
-      msg = s.level > 0
-        ? `今日はまだ0項目。このまま日付が変わると −1メモリ（残り ${s.level - 1}）。`
-        : '今日はまだ0項目。もう空なので、これ以上は減りません。';
+      if (s.level <= 0) msg = '今日はまだ0項目。もう空なので、これ以上は減りません。';
+      else if (s.graceLeft > 0) msg = `今日はまだ0項目。でも休んでいい日が残っているので、減りません。`;
+      else msg = `今日はまだ0項目。このまま日付が変わると −1メモリ（残り ${s.level - 1}）。`;
     } else if (s.todayPerfect) {
-      if (s.level >= MATCHA_MAX) msg = '今日も皆勤。抹茶ラテは満タンです。';
-      else if (s.pending === 1) msg = '今日は皆勤！ あと1日皆勤で +1メモリ。';
-      else msg = '皆勤2日ぶんが貯まり、+1メモリ回復しました。';
+      if (s.level >= MATCHA_MAX) msg = '今日も十分。抹茶ラテは満タンです。';
+      else if (s.pending > 0) msg = `達成の日が ${s.pending}/${PERFECT_FOR_HEAL} 日ぶん貯まりました。`;
+      else msg = '今日は十分やれました。+1メモリ回復。';
     } else {
-      msg = `今日は ${s.todayCount} 項目。今日の減りは止まりました。皆勤まであと ${PERFECT_NEEDED - s.todayCount} 項目。`;
+      msg = `今日は ${s.todayCount} 項目。今日の減りは止まりました。`;
     }
     document.getElementById('matchaMsg').textContent = msg;
 
     document.getElementById('matchaLog').textContent =
       `これまで −${s.lost} メモリ／+${s.gained} メモリ回復` +
-      (s.pending ? `　皆勤の貯め ${s.pending}/${PERFECT_FOR_HEAL}` : '');
+      (s.pending ? `　達成の貯め ${s.pending}/${PERFECT_FOR_HEAL}` : '');
   },
 
   renderHeatmap(log, xp) {

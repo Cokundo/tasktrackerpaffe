@@ -229,8 +229,8 @@ function computeLevels(xp) {
 
 /**
  * 抹茶ラテの残りメモリを、記録の最初の日から今日まで1日ずつたどって求める。
- *   ・まるごとサボった日（0項目）… 1メモリ減る／皆勤の貯めはリセット
- *   ・皆勤の日（7項目すべて）  … 2日で1メモリ回復
+ *   ・サボった日（0項目）… 連続 GRACE_DAYS 日までは減らない。それを超えた日から1メモリ減る
+ *   ・達成の日（PERFECT_NEEDED 項目以上）… PERFECT_FOR_HEAL 日ぶんで1メモリ回復
  *   ・今日はまだ終わっていないので、サボり判定はしない
  */
 function matchaState(log) {
@@ -238,7 +238,8 @@ function matchaState(log) {
   const keys = sortedLogKeys(log);
   const state = {
     level: MATCHA_MAX,
-    pending: 0,        // 回復までに貯まった皆勤日数
+    pending: 0,        // 回復までに貯まった達成日数
+    graceLeft: GRACE_DAYS,  // 今日休んでも減らずに済む残り日数
     lost: 0,           // これまでに失ったメモリ
     gained: 0,         // これまでに取り戻したメモリ
     todayCount: (log[today] || []).length,
@@ -250,6 +251,7 @@ function matchaState(log) {
 
   let level = MATCHA_MAX;
   let pending = 0;
+  let skipRun = 0;                  // 連続でサボった日数
   let d = parseKey(keys[0]);
 
   while (dateKey(d) <= today) {
@@ -257,14 +259,20 @@ function matchaState(log) {
     const n = (log[k] || []).length;
     if (n === 0) {
       if (k !== today) {            // 今日のサボりは日付が変わってから確定
-        if (level > 0) { level--; state.lost++; }
-        pending = 0;
+        skipRun++;
+        if (skipRun > GRACE_DAYS) { // 休んでいい日ぶんを使い切ってから減る
+          if (level > 0) { level--; state.lost++; }
+          pending = 0;
+        }
       }
-    } else if (n >= PERFECT_NEEDED) {
-      pending++;
-      if (pending >= PERFECT_FOR_HEAL) {
-        pending = 0;
-        if (level < MATCHA_MAX) { level++; state.gained++; }
+    } else {
+      skipRun = 0;
+      if (n >= PERFECT_NEEDED) {
+        pending++;
+        if (pending >= PERFECT_FOR_HEAL) {
+          pending = 0;
+          if (level < MATCHA_MAX) { level++; state.gained++; }
+        }
       }
     }
     d = addDays(d, 1);
@@ -272,6 +280,7 @@ function matchaState(log) {
 
   state.level = level;
   state.pending = pending;
+  state.graceLeft = Math.max(0, GRACE_DAYS - skipRun);
   state.empty = level <= 0;
   return state;
 }
