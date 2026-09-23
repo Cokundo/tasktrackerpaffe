@@ -213,14 +213,13 @@ function nextStage(key, level) {
 
 /* ---------- 抹茶ラテ（毎日の継続メモリ） ----------
    ・7メモリから始まる
-   ・サボった日（どの項目も手付かず）が続くと 1メモリずつ減る
-     ただし連続して休んだ最初の GRACE_DAYS 日ぶんは減らない（休んでいい日）
+   ・1日まるごとサボる（どの項目も手付かず）と 1メモリ減る → 7日で空
    ・「達成の日」＝その日 PERFECT_NEEDED 項目以上。
      PERFECT_FOR_HEAL 日ぶんで 1メモリ回復                            */
 const MATCHA_MAX = 7;
 const PERFECT_NEEDED = 3;      // 「達成の日」とみなす項目数
 const PERFECT_FOR_HEAL = 1;    // 1メモリ回復に必要な達成日数
-const GRACE_DAYS = 1;          // 連続で休んでも減らない日数
+const GRACE_DAYS = 0;          // 連続で休んでも減らない日数（0＝猶予なし）
 
 const MAX_LEVEL = 20;
 const BASE_XP = 10;      // 1日達成あたりの基礎XP
