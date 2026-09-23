@@ -218,7 +218,7 @@ function nextStage(key, level) {
      PERFECT_FOR_HEAL 日ぶんで 1メモリ回復                            */
 const MATCHA_MAX = 7;
 const PERFECT_NEEDED = 3;      // 「達成の日」とみなす項目数
-const PERFECT_FOR_HEAL = 1;    // 1メモリ回復に必要な達成日数
+const PERFECT_FOR_HEAL = 2;    // 1メモリ回復に必要な達成日数
 const GRACE_DAYS = 0;          // 連続で休んでも減らない日数（0＝猶予なし）
 
 const MAX_LEVEL = 20;

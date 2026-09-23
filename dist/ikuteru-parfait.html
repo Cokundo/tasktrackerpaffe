@@ -772,7 +772,7 @@ body {
         <ul class="matcha-rules">
           <li>1日まるごとサボると <b>−1メモリ</b></li>
           <li>7日サボると <b>空</b>になる</li>
-          <li><b>3項目</b>やれた日は <b>+1メモリ</b></li>
+          <li><b>3項目</b>やれた日が <b>2日</b>で <b>+1メモリ</b></li>
         </ul>
         <div class="matcha-log" id="matchaLog"></div>
       </div>
@@ -1094,7 +1094,7 @@ function nextStage(key, level) {
      PERFECT_FOR_HEAL 日ぶんで 1メモリ回復                            */
 const MATCHA_MAX = 7;
 const PERFECT_NEEDED = 3;      // 「達成の日」とみなす項目数
-const PERFECT_FOR_HEAL = 1;    // 1メモリ回復に必要な達成日数
+const PERFECT_FOR_HEAL = 2;    // 1メモリ回復に必要な達成日数
 const GRACE_DAYS = 0;          // 連続で休んでも減らない日数（0＝猶予なし）
 
 const MAX_LEVEL = 20;
