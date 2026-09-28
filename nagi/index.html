@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1c1f33">
+<title>凪</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">
+    <span class="brand-mark">凪</span>
+    <div>
+      <h1>凪 <span class="brand-sub">nagi</span></h1>
+      <p class="today" id="today"></p>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab is-on" data-panel="wave">波</button>
+    <button class="tab" data-panel="box">箱</button>
+    <button class="tab" data-panel="morning">朝</button>
+    <button class="tab" data-panel="log">記録</button>
+    <button class="tab" data-panel="guard">守る</button>
+    <button class="tab" data-panel="settings">設定</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ================= 波 ================= -->
+  <section class="panel is-on" id="panel-wave">
+    <div id="morningBanner"></div>
+
+    <!-- 待機 -->
+    <div class="step" id="stepIdle">
+      <button class="big-btn" id="btnCome">
+        <span class="big-btn-main">今、来てる</span>
+        <span class="big-btn-sub">押したら、10分だけ一緒にいる</span>
+      </button>
+      <p class="quiet center" id="idleCount"></p>
+    </div>
+
+    <!-- 状態を選ぶ -->
+    <div class="step" id="stepPick" hidden>
+      <h2>いま、どんな感じ？</h2>
+      <div class="state-grid" id="stateGrid"></div>
+      <label class="field">
+        <span>波の強さ <b id="beforeVal">3</b> / 5</span>
+        <input type="range" min="1" max="5" value="3" id="beforeRange">
+      </label>
+      <div class="row">
+        <button class="btn ghost" id="btnPickCancel">やっぱりいい</button>
+        <button class="btn primary" id="btnStart" disabled>10分はじめる</button>
+      </div>
+    </div>
+
+    <!-- 波の最中 -->
+    <div class="step" id="stepRide" hidden>
+      <div class="sea">
+        <div class="sea-water" id="seaWater"></div>
+        <div class="sea-time" id="seaTime">10:00</div>
+      </div>
+      <p class="center quiet" id="rideState"></p>
+      <div class="card escape">
+        <p class="label">代わりに、これだけやってみる</p>
+        <p class="escape-text" id="escapeText"></p>
+        <button class="btn small ghost" id="btnOtherEscape">別の案</button>
+      </div>
+      <div class="card" id="rideBox" hidden>
+        <p class="label">出し切り箱（3行でええ。完成させへん）</p>
+        <textarea id="rideBoxText" rows="3" placeholder="・どんな展開&#10;・どんな台詞&#10;・どこが刺さるか"></textarea>
+        <button class="btn small" id="btnRideBoxSeal">封をする</button>
+        <p class="quiet" id="rideBoxDone"></p>
+      </div>
+      <p class="center quiet small-text">波はピークを越えると、勝手に引いていく。</p>
+      <div class="row">
+        <button class="btn ghost" id="btnEndEarly">もう落ち着いた</button>
+      </div>
+    </div>
+
+    <!-- 波のあと -->
+    <div class="step" id="stepAfter" hidden>
+      <h2>波、どうなった？</h2>
+      <label class="field">
+        <span>いまの強さ <b id="afterVal">2</b> / 5</span>
+        <input type="range" min="1" max="5" value="2" id="afterRange">
+      </label>
+      <div class="row">
+        <button class="btn primary" id="btnCrossed">越えた</button>
+        <button class="btn ghost" id="btnRode">今回は流れた</button>
+      </div>
+      <label class="field">
+        <span>ひとことメモ（なくてもええ）</span>
+        <input type="text" id="afterMemo" maxlength="120" placeholder="何がきっかけやったか、など">
+      </label>
+    </div>
+
+    <!-- 締めの一言 -->
+    <div class="step" id="stepDone" hidden>
+      <p class="done-words" id="doneWords"></p>
+      <div class="row">
+        <button class="btn" id="btnDoneBack">戻る</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 出し切り箱 ================= -->
+  <section class="panel" id="panel-box">
+    <div class="card">
+      <h2>出し切り箱</h2>
+      <p class="quiet">浮かんだものを、ここに封じる。AIには渡さへん。書き留めた時点で、頭は「保存済み」と思って手放しやすくなる。</p>
+      <textarea id="boxText" rows="4" placeholder="3行まででええ"></textarea>
+      <button class="btn primary" id="btnBoxSeal">封をする</button>
+    </div>
+    <div id="boxList"></div>
+  </section>
+
+  <!-- ================= 朝アンカー ================= -->
+  <section class="panel" id="panel-morning">
+    <div class="card">
+      <h2>朝アンカー</h2>
+      <p class="quiet">虚無の朝は、始まる前に断つ。前の晩に、最初の2時間だけ決めておく。</p>
+      <div class="seg" id="morningDay"></div>
+      <label class="field"><span>起きたら最初にすること</span>
+        <input type="text" id="mFirst" placeholder="例：顔を洗って着替える"></label>
+      <div class="row2">
+        <label class="field"><span>家を出る時刻</span><input type="time" id="mLeave"></label>
+        <label class="field"><span>行き先</span><input type="text" id="mPlace" placeholder="例：図書館、カフェ"></label>
+      </div>
+      <label class="field"><span>午前中の小さいこと（3つまで）</span>
+        <input type="text" class="mSmall" placeholder="1つ目">
+        <input type="text" class="mSmall" placeholder="2つ目">
+        <input type="text" class="mSmall" placeholder="3つ目"></label>
+      <button class="btn primary" id="btnMorningSave">決めた</button>
+      <p class="quiet" id="morningSaved"></p>
+    </div>
+  </section>
+
+  <!-- ================= 記録 ================= -->
+  <section class="panel" id="panel-log">
+    <div class="seg" id="logRange">
+      <button data-days="7" class="is-on">7日</button>
+      <button data-days="30">30日</button>
+      <button data-days="90">90日</button>
+    </div>
+    <div class="stats" id="logStats"></div>
+    <div class="card"><h3>見えてきたこと</h3><ul class="insights" id="logInsights"></ul></div>
+    <div class="card"><h3>きっかけ</h3><div id="logByState"></div></div>
+    <div class="card"><h3>時間帯</h3><div id="logBySlot"></div></div>
+    <div class="card"><h3>曜日</h3><div id="logByDay"></div></div>
+    <div class="card"><h3>効いた代わりの行動</h3><div id="logEscapes"></div></div>
+    <div class="card"><h3>最近の波</h3><div id="logList"></div></div>
+  </section>
+
+  <!-- ================= 守る ================= -->
+  <section class="panel" id="panel-guard">
+    <div class="card hero">
+      <p class="label">買わずに守れた金額</p>
+      <p class="hero-num" id="guardTotal">¥0</p>
+      <div class="row2">
+        <input type="text" id="gWhat" placeholder="何を">
+        <input type="number" id="gAmount" placeholder="金額" min="0" inputmode="numeric">
+      </div>
+      <button class="btn primary" id="btnGuardAdd">守れた</button>
+    </div>
+
+    <div class="card">
+      <h3>24時間保留箱</h3>
+      <p class="quiet">課金したくなったら、まずここに入れる。24時間たつまで「買う」は押せへん。</p>
+      <div class="row2">
+        <input type="text" id="hWhat" placeholder="何を">
+        <input type="number" id="hAmount" placeholder="金額" min="0" inputmode="numeric">
+      </div>
+      <button class="btn" id="btnHoldAdd">保留する</button>
+      <div id="holdList"></div>
+    </div>
+
+    <div class="card">
+      <h3>守りたいお金</h3>
+      <div class="row2">
+        <input type="text" id="goalName" placeholder="例：車の点検">
+        <input type="number" id="goalAmount" placeholder="目標額" min="0" inputmode="numeric">
+      </div>
+      <button class="btn" id="btnGoalAdd">追加</button>
+      <div id="goalList"></div>
+    </div>
+
+    <div class="card">
+      <h3>鍵を自分以外に預ける</h3>
+      <p class="quiet">自分で作った鍵は、自分で外せてしまう。外側に預けた鍵の方が強い。</p>
+      <div id="lockList"></div>
+    </div>
+  </section>
+
+  <!-- ================= 設定 ================= -->
+  <section class="panel" id="panel-settings">
+    <div class="card">
+      <h3>代わりの行動</h3>
+      <p class="quiet">状態ごとに、1行1つ。波の最中に1つずつ出てくる。</p>
+      <div id="escapeEditor"></div>
+      <button class="btn primary" id="btnEscapeSave">保存</button>
+      <p class="quiet" id="escapeSaved"></p>
+    </div>
+    <div class="card">
+      <h3>記録の持ち出し</h3>
+      <p class="quiet">記録はこの端末の中だけにある。どこにも送られへん。機種変更のときは書き出して持っていく。</p>
+      <div class="row">
+        <button class="btn" id="btnExport">書き出す</button>
+        <label class="btn">読み込む<input type="file" id="fileImport" accept="application/json" hidden></label>
+      </div>
+      <button class="btn danger small" id="btnReset">すべて消す</button>
+    </div>
+  </section>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
