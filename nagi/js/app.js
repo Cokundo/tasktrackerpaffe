@@ -694,13 +694,27 @@ function bind() {
    起動
    ========================================================= */
 
+function storageWorks() {
+  try {
+    localStorage.setItem('nagi-probe', '1');
+    localStorage.removeItem('nagi-probe');
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 function boot() {
   Store.load();
   $('today').textContent = jpDate(new Date());
   buildStateGrid();
   bind();
   renderWave();
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  if (!storageWorks()) {
+    $('morningBanner').insertAdjacentHTML('beforebegin',
+      '<div class="banner">この開き方やと記録が保存されへんみたい。Chromeなど普通のブラウザで開き直してみて。</div>');
+  }
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 }

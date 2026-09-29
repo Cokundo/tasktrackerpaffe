@@ -178,5 +178,5 @@ node tools/make-assets.js # assets/raw → assets/parts
 
 - 💍 **[電撃婚ノート](hikiyose/README.md)**（`hikiyose/index.html`）
   引き寄せの法則をちゃんぽんした結婚引き寄せの実践帳。パフェアプリとは独立していて、保存データも別です。
-- 🌊 **[凪](nagi/README.md)**（`nagi/index.html`）
+- 🌊 **[凪](nagi/README.md)**（`nagi/index.html`、1枚版は `dist/nagi.html`）
   衝動の波が来たときの10分間を一緒に過ごすアプリ。パフェアプリとは独立していて、保存データも別です。
