@@ -1,7 +1,7 @@
 /* 凪 — オフラインでも開けるようにするだけのサービスワーカー。
    先にネットワークを見て、つながらないときだけ手元の控えを使う。 */
 
-const CACHE = 'nagi-v1';
+const CACHE = 'nagi-v2';
 const FILES = ['./', 'index.html', 'css/style.css', 'js/data.js', 'js/store.js', 'js/app.js', 'icon.svg', 'manifest.webmanifest'];
 
 self.addEventListener('install', e => {

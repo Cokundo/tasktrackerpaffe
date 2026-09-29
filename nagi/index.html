@@ -25,6 +25,7 @@
     <button class="tab" data-panel="box">箱</button>
     <button class="tab" data-panel="morning">朝</button>
     <button class="tab" data-panel="log">記録</button>
+    <button class="tab" data-panel="treasure">褒美</button>
     <button class="tab" data-panel="guard">守る</button>
     <button class="tab" data-panel="settings">設定</button>
   </nav>
@@ -101,6 +102,7 @@
 
     <!-- 締めの一言 -->
     <div class="step" id="stepDone" hidden>
+      <div id="doneReward"></div>
       <p class="done-words" id="doneWords"></p>
       <div class="row">
         <button class="btn" id="btnDoneBack">戻る</button>
@@ -154,6 +156,38 @@
     <div class="card"><h3>曜日</h3><div id="logByDay"></div></div>
     <div class="card"><h3>効いた代わりの行動</h3><div id="logEscapes"></div></div>
     <div class="card"><h3>最近の波</h3><div id="logList"></div></div>
+  </section>
+
+  <!-- ================= 褒美 ================= -->
+  <section class="panel" id="panel-treasure">
+    <div class="card hero">
+      <p class="label">ご褒美ポイント</p>
+      <p class="hero-num lav" id="ptNow">0</p>
+      <p class="quiet" id="ptEarned"></p>
+    </div>
+
+    <div class="card">
+      <h3>ご褒美と交換する</h3>
+      <p class="quiet">しのいだ分だけ、現実でちゃんと甘やかす。課金やAIのクレジットは入れへんこと。</p>
+      <div id="rewardList"></div>
+      <div class="row2">
+        <input type="text" id="rwName" placeholder="ご褒美">
+        <input type="number" id="rwCost" placeholder="ポイント" min="1" inputmode="numeric">
+      </div>
+      <button class="btn small" id="btnRewardAdd">追加</button>
+    </div>
+
+    <div class="card">
+      <h3>色の標本箱 <span class="quiet" id="colorCount"></span></h3>
+      <p class="quiet">波を越えるたびに、伝統色が1枚増える。まれな色もある。</p>
+      <div class="swatches" id="colorGrid"></div>
+      <div id="colorDetail"></div>
+    </div>
+
+    <div class="card" id="redeemedCard" hidden>
+      <h3>受け取ったご褒美</h3>
+      <div id="redeemedList"></div>
+    </div>
   </section>
 
   <!-- ================= 守る ================= -->

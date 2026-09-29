@@ -57,7 +57,12 @@ const Store = {
       guarded: [],      // {id, at, amount, what}  買わずに守れた金額
       hold: [],         // {id, at, what, amount, decided: '' | 'skip' | 'buy'}  24時間保留
       locks: {},        // LOCKSのkey -> true
-      active: null      // 進行中の波 {at, state, before, escape}。アプリを閉じても続きから
+      active: null,     // 進行中の波 {at, state, before, escape}。アプリを閉じても続きから
+      colors: {},       // COLORSのkey -> 引いた回数
+      points: 0,        // ご褒美ポイントの残高
+      earned: 0,        // これまでに貯めたポイントの合計
+      rewards: DEFAULT_REWARDS.map(r => ({ id: uid(), ...r })),
+      redeemed: []      // {id, at, name, cost}
     };
   },
 
@@ -68,10 +73,13 @@ const Store = {
       if (!raw) return;
       const p = JSON.parse(raw);
       const s = this.state;
-      for (const k of ['waves', 'box', 'goals', 'guarded', 'hold']) {
+      for (const k of ['waves', 'box', 'goals', 'guarded', 'hold', 'rewards', 'redeemed']) {
         if (Array.isArray(p[k])) s[k] = p[k];
       }
-      for (const k of ['mornings', 'locks']) {
+      for (const k of ['points', 'earned']) {
+        if (Number.isFinite(p[k])) s[k] = p[k];
+      }
+      for (const k of ['mornings', 'locks', 'colors']) {
         if (p[k] && typeof p[k] === 'object') s[k] = p[k];
       }
       if (p.active && typeof p.active === 'object') s.active = p.active;
@@ -104,6 +112,26 @@ const Store = {
     }
     localStorage.setItem(NAGI_KEY, JSON.stringify(p));
     this.load();
+  },
+
+  /* 伝統色を1枚引く。まれなものほど出にくい */
+  drawColor() {
+    let r = Math.random() * 100;
+    let rarity = 1;
+    for (const k of [3, 2, 1]) {
+      if (r < RARITY_ODDS[k]) { rarity = k; break; }
+      r -= RARITY_ODDS[k];
+    }
+    const pool = COLORS.filter(c => c.rarity === rarity);
+    const c = pool[Math.floor(Math.random() * pool.length)];
+    const isNew = !this.state.colors[c.key];
+    this.state.colors[c.key] = (this.state.colors[c.key] || 0) + 1;
+    return { color: c, isNew };
+  },
+
+  addPoints(n) {
+    this.state.points += n;
+    this.state.earned += n;
   },
 
   /* 直近 n 日の波 */

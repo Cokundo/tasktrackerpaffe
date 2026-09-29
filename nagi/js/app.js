@@ -31,6 +31,7 @@ function showPanel(name) {
   if (name === 'box') renderBox();
   if (name === 'morning') renderMorning();
   if (name === 'log') renderLog();
+  if (name === 'treasure') renderTreasure();
   if (name === 'guard') renderGuard();
   if (name === 'settings') renderSettings();
 }
@@ -59,9 +60,10 @@ function renderWave() {
   if ($('stepDone').hidden && $('stepPick').hidden) showStep('stepIdle');
   const todays = S().waves.filter(w => dateKey(new Date(w.at)) === todayKey());
   const crossed = todays.filter(w => !w.rode).length;
-  $('idleCount').textContent = todays.length
-    ? `今日の波 ${todays.length}回・越えた ${crossed}回`
-    : '';
+  const colors = Object.keys(S().colors).length;
+  $('idleCount').textContent = (todays.length
+    ? `今日の波 ${todays.length}回・越えた ${crossed}回　`
+    : '') + `${S().points}pt・${colors}/${COLORS.length}色`;
 }
 
 function renderMorningBanner() {
@@ -162,6 +164,14 @@ function enterAfter() {
 function finishWave(rode) {
   const a = S().active;
   if (!a) return showStep('stepIdle');
+  // しのいだら、その場でご褒美。流れても押せた分だけは返す
+  let pts = PRESS_POINTS;
+  let drawn = null;
+  if (!rode) {
+    drawn = Store.drawColor();
+    pts = crossPoints(a.before) + (drawn.isNew ? 0 : DUP_BONUS);
+  }
+  Store.addPoints(pts);
   S().waves.push({
     id: uid(),
     at: a.at,
@@ -170,12 +180,72 @@ function finishWave(rode) {
     after: Number($('afterRange').value),
     rode,
     escape: a.escape,
-    memo: $('afterMemo').value.trim()
+    memo: $('afterMemo').value.trim(),
+    color: drawn ? drawn.color.key : '',
+    points: pts
   });
   S().active = null;
   Store.save();
+  $('doneReward').innerHTML = drawn ? revealHtml(drawn, pts) : `
+    <div class="press-reward reveal"><span class="pill pt">押せた分 +${pts}pt</span></div>`;
   $('doneWords').textContent = pick(rode ? AFTER_WORDS_NG : AFTER_WORDS_OK);
   showStep('stepDone');
+}
+
+function revealHtml({ color: c, isNew }, pts) {
+  const owned = Object.keys(S().colors).length;
+  return `<div class="reveal" style="--glow:${c.hex}88">
+    <div class="reveal-swatch" style="background:${c.hex}"></div>
+    <p class="reveal-name">${esc(c.name)}</p>
+    <p class="reveal-yomi">${esc(c.yomi)}　${c.hex}</p>
+    <p class="reveal-words">${esc(c.words)}</p>
+    <div class="reveal-tags">
+      ${isNew ? '<span class="pill new">はじめての色</span>' : `<span class="pill">重ね塗り +${DUP_BONUS}</span>`}
+      ${RARITY_LABEL[c.rarity] ? `<span class="pill ${c.rarity === 3 ? 'rare' : ''}">${RARITY_LABEL[c.rarity]}</span>` : ''}
+      <span class="pill pt">+${pts}pt</span>
+      <span class="pill">${owned} / ${COLORS.length}色</span>
+    </div>
+  </div>`;
+}
+
+/* =========================================================
+   褒美
+   ========================================================= */
+
+let pickedColor = '';
+
+function renderTreasure() {
+  $('ptNow').textContent = S().points;
+  $('ptEarned').textContent = `これまでに貯めた合計 ${S().earned}pt`;
+
+  $('rewardList').innerHTML = S().rewards.map(r => {
+    const ok = S().points >= r.cost;
+    const pct = Math.min(100, S().points / r.cost * 100);
+    return `<div class="item">
+      <div class="item-head"><span>${esc(r.name)}</span><span class="quiet">${r.cost}pt</span></div>
+      <div class="progress"><i style="width:${pct}%"></i></div>
+      <div class="box-actions">
+        <button class="btn small ${ok ? 'primary' : ''}" data-rw-get="${r.id}" ${ok ? '' : 'disabled'}>${ok ? '受け取る' : `あと${r.cost - S().points}pt`}</button>
+        <button class="btn small ghost" data-rw-del="${r.id}">消す</button>
+      </div></div>`;
+  }).join('');
+
+  const owned = S().colors;
+  $('colorCount').textContent = `${Object.keys(owned).length} / ${COLORS.length}`;
+  const sorted = [...COLORS].sort((a, b) => b.rarity - a.rarity);
+  $('colorGrid').innerHTML = sorted.map(c => owned[c.key]
+    ? `<button class="swatch rare${c.rarity}" style="background:${c.hex}" data-color="${c.key}" aria-label="${esc(c.name)}"></button>`
+    : `<span class="swatch locked ${c.rarity === 3 ? 'rare3' : ''}"></span>`).join('');
+  const c = COLORS.find(c => c.key === pickedColor && owned[c.key]);
+  $('colorDetail').innerHTML = c ? `<div class="color-detail"><i style="background:${c.hex}"></i>
+    <div><b>${esc(c.name)}</b> <span class="quiet">${esc(c.yomi)}・${owned[c.key]}回</span><br>${esc(c.words)}</div></div>` : '';
+
+  const red = [...S().redeemed].reverse().slice(0, 20);
+  $('redeemedCard').hidden = !red.length;
+  $('redeemedList').innerHTML = red.map(r => {
+    const d = new Date(r.at);
+    return `<div class="log-row"><span>${esc(r.name)}</span><span class="quiet">${jpDate(d)}</span></div>`;
+  }).join('');
 }
 
 function sealBox(text) {
@@ -491,6 +561,34 @@ function bind() {
       S().waves = S().waves.filter(w => w.id !== x.dataset.waveDel);
       Store.save(); renderLog();
     }
+  });
+
+  // 褒美
+  $('rewardList').addEventListener('click', e => {
+    const g = e.target.closest('[data-rw-get]');
+    const x = e.target.closest('[data-rw-del]');
+    if (g) {
+      const r = S().rewards.find(r => r.id === g.dataset.rwGet);
+      if (r && S().points >= r.cost && confirm(`「${r.name}」を受け取る？（${r.cost}pt）`)) {
+        S().points -= r.cost;
+        S().redeemed.push({ id: uid(), at: Date.now(), name: r.name, cost: r.cost });
+        alert('受け取って。ちゃんと味わうんよ。');
+      }
+    }
+    if (x && confirm('このご褒美を消す？')) S().rewards = S().rewards.filter(r => r.id !== x.dataset.rwDel);
+    Store.save(); renderTreasure();
+  });
+  $('btnRewardAdd').onclick = () => {
+    const name = $('rwName').value.trim();
+    const cost = num($('rwCost').value);
+    if (!name || !cost) return;
+    S().rewards.push({ id: uid(), name, cost });
+    $('rwName').value = ''; $('rwCost').value = '';
+    Store.save(); renderTreasure();
+  };
+  $('colorGrid').addEventListener('click', e => {
+    const b = e.target.closest('[data-color]');
+    if (b) { pickedColor = b.dataset.color; renderTreasure(); }
   });
 
   // 守る
